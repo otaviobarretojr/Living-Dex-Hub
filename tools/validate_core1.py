@@ -1,6 +1,5 @@
 from pathlib import Path
 import json
-import re
 
 ROOT = Path(__file__).resolve().parents[1]
 HTML = ROOT / "app" / "src" / "main" / "assets" / "index.html"
@@ -30,7 +29,7 @@ checks = {
     "specimen_storage": "specimenInstances" in html and "function addSpecimenInstance" in html,
     "form_dex": "function ensureFormDex" in html and "function renderFormDex" in html,
     "runtime_smoke": "async function runRuntimeSmokeTest" in html,
-    "reopen_harness": "data.reopenPass" in html and "livingdex-ci-reopen" in html,
+    "reopen_harness": "dataset.reopenPass" in html and "livingdex-ci-reopen" in html,
     "mobile_pass": "Core 1.0 — mobile usability pass" in html,
     "apk_markers": "OFFLINE_POKEMON_ASSET_COUNT=1025" in html and "ANDROID_BUILD_READY=true" in html,
 }
