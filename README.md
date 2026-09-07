@@ -4,76 +4,52 @@ Repositório oficial do projeto Living Dex Hub.
 
 ## Estado atual
 
-- Baseline preservado: **Build 23.0 — Embedded Data Pack**
-- Build intermediário: **Build 24.0 — Image Integrity**
-- Build intermediário: **Build 25.0 — Offline Data Pack**
-- Core funcional congelado: **Core 1.0 Validated**
-- Interface atual: **UI 1.2 Validated**
-- Android: **v1.2.0** (`versionCode 31`)
+- Core funcional: **Core 1.0 Validated**
+- Interface atual: **UI 1.4 Validated**
+- Android: **v1.4.0** (`versionCode 33`)
 - National Dex: **1.025 espécies**
 - Pokédexes embutidas: **12/12**
 - Imagens locais no APK: **1.025/1.025**
 - Escopo: Let's Go, Sword/Shield, Brilliant Diamond/Shining Pearl, Legends: Arceus, Scarlet/Violet e Legends Z-A
 - Recursos centrais: Living Dex, famílias evolutivas, formas, Storage/HOME por espécime, jogos possuídos, disponibilidade, exclusivos, engine de obtenção, backup e snapshots.
 
-## UI 1.2
+## Android v1.4.0
 
-A UI 1.2 faz a primeira auditoria tela a tela, mantendo integralmente o Core 1.0 e os componentes da UI 1.1:
+A UI/Android 1.4 fecha a preparação técnica para distribuição sem alterar o Core 1.0:
 
-- cada uma das 9 áreas recebe cabeçalho contextual com título e explicação objetiva;
-- a Visão Geral ganha atalhos diretos para National Dex, Faltando, Jogos e Storage;
-- National Dex e Faltando ganham alternância rápida entre visão completa e pendências;
-- melhora os alvos de toque no mobile e o espaçamento de controles;
-- melhora a ficha do Pokémon em telas pequenas, incluindo área segura inferior;
-- mantém a navegação inferior com Início, Jogos, Dex, Faltando e Mais;
-- mantém as 9 áreas originais e todas as funções congeladas do Core.
+- botão Voltar do Android fecha primeiro ficha/modal e menu Mais antes de sair do app;
+- estado da WebView é salvo/restaurado durante recriação da Activity;
+- ciclo de vida da WebView possui pause/resume/destroy explícitos;
+- Safe Browsing ativo e mixed content bloqueado;
+- links externos HTTPS são encaminhados ao navegador do sistema;
+- DOM Storage continua habilitado para persistência local;
+- tráfego HTTP em texto claro permanece bloqueado;
+- o pipeline compila e inspeciona tanto o APK debug quanto o APK release unsigned.
 
-A UI 1.2 passa por validação própria, regressão da UI 1.1, validação Core 1.0, sintaxe JavaScript, smoke test em Chrome e teste de persistência após reabertura.
+## Validação
 
-## Validação Core 1.0
-
-O pipeline do GitHub Actions bloqueia o APK caso alguma etapa obrigatória falhe. O Core 1.0 passou por:
+O pipeline bloqueia a publicação do artefato caso qualquer gate falhe. A versão 1.4 passou por:
 
 - geração e validação das 12 Pokédexes offline;
 - empacotamento e validação física dos 1.025 sprites PNG;
-- 17 verificações estruturais do Core;
-- validação de sintaxe JavaScript com Node;
+- validação Core 1.0;
+- regressões das UI 1.1, 1.2 e 1.3;
+- Android release readiness;
+- sintaxe JavaScript;
 - smoke test em Chrome real;
-- fechamento e reabertura do navegador com o mesmo perfil para validar persistência em `localStorage`;
-- compilação Android;
-- inspeção do APK para confirmar os 1.025 sprites, Data Pack, UI atual e marcador de QA validado;
-- geração de SHA-256.
+- persistência após fechamento/reabertura;
+- compilação de debug e release unsigned;
+- inspeção dos dois APKs para confirmar Core/UI e 1.025 sprites;
+- SHA-256 dos dois pacotes.
 
-A engine de obtenção não usa mais o estado genérico “Método ainda não fechado”. Ela diferencia rotas verificadas, rotas derivadas, orientação geral e ausência de obtenção direta confirmada, evitando inventar encontros ou locais sem evidência na base.
+## Distribuição
 
-## Android
+O **APK debug v1.4.0** está validado e é instalável para uso/teste. O **APK release unsigned** também foi compilado e validado estruturalmente, provando que a configuração de release está pronta.
 
-O artefato atual é um **APK debug v1.2.0 validado**. Ele serve para instalação e uso/teste do Core 1.0 + UI 1.2, mas ainda não é um release assinado para distribuição pública. A etapa de release exige assinatura/keystore própria.
-
-## Builds anteriores
-
-### Build 23.0
-
-O Build 23.0 original é preservado em `archive/build-23/` como snapshot comprimido e pode ser reconstruído com:
-
-```bash
-python tools/restore_build23.py
-```
-
-### Build 24.0
-
-Fechou a integridade de imagens em todos os renderizadores principais e padronizou o pipeline local → artwork → HOME → sprite → placeholder.
-
-### Build 25.0
-
-Automatizou e confirmou o Data Pack offline com 12/12 Pokédexes antes da compilação Android.
+Para um release público definitivo falta apenas assinar o pacote com um keystore de produção e preservar esse keystore para todas as futuras atualizações do aplicativo.
 
 ## Regra do projeto
 
 O foco é Pokédex/Living Dex, salvamento e acompanhamento da coleção. Não adicionar sistemas de missão, cronômetro ou gamificação fora da mecânica real dos jogos Pokémon.
 
 Todo Pokémon exibido deve possuir imagem/ícone. Os 1.025 Pokémon da National Dex possuem sprite local empacotado no APK, com fontes remotas apenas como melhoria/fallback de maior resolução.
-
-## Próxima fase
-
-Com **Core 1.0 + UI 1.2** validados, as próximas mudanças devem priorizar refinamento visual da ficha individual, testes manuais em aparelho Android e preparação de assinatura release, sem reabrir funcionalidades congeladas sem necessidade.
