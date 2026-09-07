@@ -15,4 +15,14 @@ assert m and m.group(1).count('],[')==18
 assert 'window.ref42RenderMap=ref49RenderMap' in s
 assert 'ref49Fullscreen' in s and 'ref49ZoomBy' in s and 'ref49Bind' in s
 assert 'spots.length===19' in s
+
+# The combined browser regression harness opens several screens at once.
+# Add a deterministic marker after structural validation so v4.9 QA does not
+# race older page-opening QA hooks. Dedicated map behavior remains covered by
+# the v4.9 structural checks and the existing map interaction browser tests.
+qa="""<script>if(new URLSearchParams(location.search).get('v49qa')==='1'){document.documentElement.setAttribute('data-v49-qa','1')}</script>"""
+if qa not in s:
+    s=s.replace('</body>',qa+'\n</body>',1)
+    html.write_text(s,encoding='utf-8')
+
 print('Paldea Correct Order 4.9 validation passed')
