@@ -1,8 +1,11 @@
 from pathlib import Path
 p=Path(__file__).resolve().parents[1]/'app/src/main/assets/index.html'
 s=p.read_text(encoding='utf-8')
-if 'living-dex-box-library" content="7.4.1"' not in s:
-    s=s.replace('</head>','<meta name="living-dex-box-library" content="7.4.1"/>\n</head>',1)
+marker='living-dex-box-library" content="7.4.1"'
+if marker in s:
+    print('Box official library 7.4.1 already applied')
+    raise SystemExit(0)
+s=s.replace('</head>','<meta name="living-dex-box-library" content="7.4.1"/>\n</head>',1)
 css=r'''
 /* 7.4.1 — Box becomes the official Pokémon library. */
 .ld71-slot{cursor:pointer}
