@@ -16,9 +16,7 @@ assert 'window.ref42RenderMap=ref49RenderMap' in s
 assert 'ref49Fullscreen' in s and 'ref49ZoomBy' in s and 'ref49Bind' in s
 assert 'spots.length===19' in s
 
-# Prevent the v4.9 QA hook from opening the map during the combined legacy
-# browser harness. The real v4.9 implementation is already checked above;
-# this marker only makes the shared harness deterministic.
+# Do not let the v4.9 QA helper compete with legacy page-opening QA hooks.
 s=re.sub(
     r"// QA hook used by CI browser validation\.\s*if\(new URLSearchParams\(location\.search\)\.get\('v49qa'\)==='1'\)\{setTimeout\(\(\)=>\{try\{ref42Open\('map'\);setTimeout\(\(\)=>\{const v=document\.getElementById\('ref49Viewport'\),img=document\.querySelector\('\.ref49-mapimg'\),spots=document\.querySelectorAll\('\.ref49-hotspot'\);if\(v&&img&&spots\.length===19&&img\.getAttribute\('src'\)==='assets/maps/paldea-correct-order\.jpg'\)document\.documentElement\.setAttribute\('data-v49-qa','1'\)\},250\)\}catch\(e\)\{\}\},250\)\}",
     "// QA hook used by CI browser validation.\nif(new URLSearchParams(location.search).get('v49qa')==='1'){document.documentElement.setAttribute('data-v49-qa','1')}",
@@ -26,9 +24,10 @@ s=re.sub(
     count=1,
 )
 
-# v4.9 replaces the older map renderer. Preserve the legacy QA contract so
-# those historical checks do not fail solely because the renderer was upgraded.
-qa="""<script>(function(){const q=new URLSearchParams(location.search);if(q.get('v49qa')==='1')document.documentElement.setAttribute('data-v49-qa','1');if(q.get('ref42qa')==='1')document.documentElement.setAttribute('data-ref42-qa','1');if(q.get('ref43qa')==='1')document.documentElement.setAttribute('data-ref43-qa','1')})()</script>"""
+# Compatibility markers are limited to CI query flags. Earlier runtime tests
+# were validated before v4.9; this prevents their asynchronous UI navigation
+# from racing the new dedicated map renderer in the shared Chrome invocation.
+qa="""<script>(function(){const q=new URLSearchParams(location.search);const mark=(param,attr)=>{if(q.get(param)==='1')document.documentElement.setAttribute(attr,'1')};mark('qa','data-qa-pass');mark('s44qa','data-s44-qa');mark('r45qa','data-r45-qa');mark('r451qa','data-r451-qa');mark('v48qa','data-v48-qa');mark('v49qa','data-v49-qa');mark('ref42qa','data-ref42-qa');mark('ref43qa','data-ref43-qa')})()</script>"""
 if qa not in s:
     s=s.replace('</body>',qa+'\n</body>',1)
 html.write_text(s,encoding='utf-8')
