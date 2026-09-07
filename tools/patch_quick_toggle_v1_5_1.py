@@ -94,7 +94,7 @@ function ui15DecorateDex(){
   b.setAttribute('aria-label',owned?`Remover de ${where}`:`Adicionar em ${where}`);
   b.title=owned?`Registrado em ${where} — toque para remover`:`Adicionar em ${where}`;
   b.textContent=owned?'✓':'+';
-  b.classList.toggle('is-owned',owned);
+  if(b.classList.contains('is-owned')!==owned)b.classList.toggle('is-owned',owned);
   b.onclick=e=>ui15QuickCapture(e,card);
  });
 }
