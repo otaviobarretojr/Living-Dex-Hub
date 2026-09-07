@@ -62,14 +62,20 @@ jobs:
       - name: Package and validate 1025 Pokemon sprites
         run: python3 tools/sync_pokemon_assets.py
 
-      - name: Finalize Core 1.0 logic and mobile UI
+      - name: Finalize frozen Core 1.0
         run: python3 tools/finalize_core1.py
 
       - name: Update runtime QA for complete offline pack
         run: python3 tools/patch_core1_runtime_qa.py
 
+      - name: Apply UI 1.1 visual rework
+        run: python3 tools/rework_ui_v1.py
+
       - name: Static Core 1.0 validation
         run: python3 tools/validate_core1.py
+
+      - name: UI 1.1 validation
+        run: python3 tools/validate_ui_v1.py
 
       - name: Validate JavaScript syntax
         run: |
@@ -95,10 +101,12 @@ jobs:
             grep -A120 -B5 'id="qaResult"' /tmp/livingdex-qa.html || true
             exit 1
           fi
+          grep -q 'class="mobile-nav"' /tmp/livingdex-qa.html
           "$CHROME" --headless=new --no-sandbox --disable-gpu --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/livingdex-reopen.html
           grep -q 'data-reopen-pass="1"' /tmp/livingdex-reopen.html
           echo 'Browser QA: PASS'
           echo 'Persistence after browser reopen: PASS'
+          echo 'UI 1.1 DOM: PASS'
 
       - name: Seal CI validation marker
         run: |
@@ -111,6 +119,7 @@ jobs:
           p.write_text(s.replace(old,'const BUILD_QA_VALIDATED=true;',1))
           PY
           python3 tools/validate_core1.py
+          python3 tools/validate_ui_v1.py
 
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace
@@ -123,7 +132,9 @@ jobs:
           test "$COUNT" -eq 1025
           unzip -p "$APK" assets/index.html | grep -q 'BUILD_QA_VALIDATED=true'
           unzip -p "$APK" assets/index.html | grep -q 'za:hyperspace'
-          echo "APK payload validated: 1025 Pokemon sprites + Core 1.0 HTML"
+          unzip -p "$APK" assets/index.html | grep -q 'living-dex-ui" content="1.1"'
+          unzip -p "$APK" assets/index.html | grep -q 'class="mobile-nav"'
+          echo "APK payload validated: 1025 sprites + Core 1.0 + UI 1.1"
 
       - name: Generate SHA-256
         run: sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/app-debug.apk.sha256
@@ -131,7 +142,7 @@ jobs:
       - name: Upload validated APK
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-Core-1.0-Validated
+          name: LivingDexHub-Core-1.0-UI-1.1-Validated
           path: |
             app/build/outputs/apk/debug/app-debug.apk
             app/build/outputs/apk/debug/app-debug.apk.sha256
