@@ -7,6 +7,7 @@ Repositório oficial do projeto Living Dex Hub.
 - Core funcional: **Core 1.0 Validated**
 - Interface atual: **UI 1.4 Validated**
 - Android: **v1.4.0** (`versionCode 33`)
+- Release atual: **Production Signed — v2/v3 Validated**
 - National Dex: **1.025 espécies**
 - Pokédexes embutidas: **12/12**
 - Imagens locais no APK: **1.025/1.025**
@@ -24,29 +25,36 @@ A UI/Android 1.4 fecha a preparação técnica para distribuição sem alterar o
 - links externos HTTPS são encaminhados ao navegador do sistema;
 - DOM Storage continua habilitado para persistência local;
 - tráfego HTTP em texto claro permanece bloqueado;
-- o pipeline compila e inspeciona tanto o APK debug quanto o APK release unsigned.
+- pipeline compila debug, release de validação e release de produção assinado.
 
 ## Validação
 
-O pipeline bloqueia a publicação do artefato caso qualquer gate falhe. A versão 1.4 passou por:
+A versão 1.4 passou por:
 
-- geração e validação das 12 Pokédexes offline;
-- empacotamento e validação física dos 1.025 sprites PNG;
-- validação Core 1.0;
-- regressões das UI 1.1, 1.2 e 1.3;
-- Android release readiness;
+- 12/12 Pokédexes offline;
+- 1.025/1.025 sprites PNG locais;
+- Core 1.0: 17/17 verificações;
+- regressões UI 1.1: 13/13, UI 1.2: 12/12 e UI 1.3: 11/11;
+- Android release readiness: 11/11;
 - sintaxe JavaScript;
 - smoke test em Chrome real;
 - persistência após fechamento/reabertura;
-- compilação de debug e release unsigned;
-- inspeção dos dois APKs para confirmar Core/UI e 1.025 sprites;
-- SHA-256 dos dois pacotes.
+- compilação Android debug/release;
+- inspeção física do APK;
+- assinatura de produção verificada pelo `apksigner`.
 
-## Distribuição
+## Release oficial v1.4.0
 
-O **APK debug v1.4.0** está validado e é instalável para uso/teste. O **APK release unsigned** também foi compilado e validado estruturalmente, provando que a configuração de release está pronta.
+O APK de produção é assinado com o certificado definitivo do projeto e foi verificado com:
 
-Para um release público definitivo falta apenas assinar o pacote com um keystore de produção e preservar esse keystore para todas as futuras atualizações do aplicativo.
+- APK Signature Scheme v2: **true**;
+- APK Signature Scheme v3: **true**;
+- signatários: **1**;
+- algoritmo: **RSA 4096**;
+- certificado SHA-256: `6af5c07977a8c8cb419c598c4cf184b47c7fa61a1173d3d170ff6e32a5cb0f5e`;
+- APK SHA-256: `80718fd9394079d9d5af0f07a14f606993ee716cc5d227b9b90c8c6dfcb1d44e`.
+
+O `minSdk` é 26, portanto a assinatura v2/v3 cobre os dispositivos suportados pelo aplicativo. A mesma chave de produção deve ser preservada para futuras atualizações.
 
 ## Regra do projeto
 
