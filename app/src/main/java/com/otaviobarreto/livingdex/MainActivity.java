@@ -15,7 +15,7 @@ import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
     private WebView webView;
-    private static final int APP_BG = Color.rgb(7, 17, 31);
+    private static final int APP_BG = Color.rgb(247, 248, 251);
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -25,6 +25,9 @@ public class MainActivity extends Activity {
             getWindow().setNavigationBarContrastEnforced(false);
             getWindow().setStatusBarContrastEnforced(false);
         }
+        int flags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        getWindow().getDecorView().setSystemUiVisibility(flags);
 
         webView = new WebView(this);
         webView.setBackgroundColor(APP_BG);
