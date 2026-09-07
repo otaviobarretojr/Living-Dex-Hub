@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -15,6 +16,8 @@ import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
     private WebView webView;
+    private ValueCallback<Uri[]> filePathCallback;
+    private static final int FILE_CHOOSER_REQUEST = 5010;
     private static final int APP_BG = Color.rgb(247, 248, 251);
 
     @Override public void onCreate(Bundle state) {
@@ -48,7 +51,23 @@ public class MainActivity extends Activity {
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         settings.setSafeBrowsingEnabled(true);
 
-        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (filePathCallback != null) filePathCallback.onReceiveValue(null);
+                filePathCallback = callback;
+                try {
+                    Intent intent = params != null ? params.createIntent() : new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.setType("image/*");
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/png", "image/jpeg", "image/webp"});
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    startActivityForResult(intent, FILE_CHOOSER_REQUEST);
+                    return true;
+                } catch (Exception e) {
+                    filePathCallback = null;
+                    return false;
+                }
+            }
+        });
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
@@ -66,6 +85,19 @@ public class MainActivity extends Activity {
         if (state == null || webView.restoreState(state) == null) {
             webView.loadUrl("file:///android_asset/index.html");
         }
+    }
+
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == FILE_CHOOSER_REQUEST) {
+            Uri[] results = null;
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                results = new Uri[]{data.getData()};
+            }
+            if (filePathCallback != null) filePathCallback.onReceiveValue(results);
+            filePathCallback = null;
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override protected void onSaveInstanceState(Bundle outState) {
@@ -91,6 +123,10 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onDestroy() {
+        if (filePathCallback != null) {
+            filePathCallback.onReceiveValue(null);
+            filePathCallback = null;
+        }
         if (webView != null) {
             webView.stopLoading();
             webView.setWebChromeClient(null);
