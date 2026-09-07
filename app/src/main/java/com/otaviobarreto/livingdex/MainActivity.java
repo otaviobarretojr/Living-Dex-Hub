@@ -7,8 +7,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -21,31 +19,17 @@ public class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
-
         getWindow().setStatusBarColor(APP_BG);
         getWindow().setNavigationBarColor(APP_BG);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             getWindow().setNavigationBarContrastEnforced(false);
             getWindow().setStatusBarContrastEnforced(false);
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowInsetsController controller = getWindow().getInsetsController();
-            if (controller != null) {
-                controller.setSystemBarsAppearance(
-                    0,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS |
-                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-                );
-            }
-        } else {
-            getWindow().getDecorView().setSystemUiVisibility(0);
-        }
 
         webView = new WebView(this);
         webView.setBackgroundColor(APP_BG);
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         setContentView(webView);
-        installSafeInsets();
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -81,20 +65,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void installSafeInsets() {
-        if (webView == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return;
-        webView.setOnApplyWindowInsetsListener((view, insets) -> {
-            android.graphics.Insets bars = insets.getInsets(
-                WindowInsets.Type.statusBars() |
-                WindowInsets.Type.navigationBars() |
-                WindowInsets.Type.displayCutout()
-            );
-            view.setPadding(0, bars.top, 0, bars.bottom);
-            return insets;
-        });
-        webView.requestApplyInsets();
-    }
-
     @Override protected void onSaveInstanceState(Bundle outState) {
         if (webView != null) webView.saveState(outState);
         super.onSaveInstanceState(outState);
@@ -102,10 +72,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
-        if (webView != null) {
-            webView.onResume();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) webView.requestApplyInsets();
-        }
+        if (webView != null) webView.onResume();
     }
 
     @Override protected void onPause() {
