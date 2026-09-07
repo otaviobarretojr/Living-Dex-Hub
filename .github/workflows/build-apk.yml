@@ -52,7 +52,9 @@ jobs:
         run: python3 tools/patch_journey_v1_9_ceruledge.py
       - name: Apply offline Paldea Map 2.0
         run: python3 tools/rework_map_v2_0.py
-      - name: Validate Core, UI, Journey and Map
+      - name: Apply navigation audit 2.1
+        run: python3 tools/rework_navigation_v2_1.py
+      - name: Validate Core, UI, Journey, Map and Navigation
         run: |
           python3 tools/validate_core1.py
           python3 tools/validate_ui_v1.py
@@ -65,6 +67,7 @@ jobs:
           python3 tools/validate_journey_v1_8.py
           python3 tools/validate_journey_v1_9.py
           python3 tools/validate_map_v2_0.py
+          python3 tools/validate_navigation_v2_1.py
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -80,14 +83,15 @@ jobs:
           grep -q 'data-qa-pass="1"' /tmp/qa.html
           grep -q 'living-dex-smart-prep" content="1.9"' /tmp/qa.html
           grep -q 'living-dex-paldea-map" content="2.0"' /tmp/qa.html
+          grep -q 'living-dex-navigation" content="2.1"' /tmp/qa.html
           grep -q 'assets/maps/paldea-route.svg' /tmp/qa.html
           grep -q 'paldea-map-art' /tmp/qa.html
-          grep -q 'Preparação inteligente' /tmp/qa.html
-          grep -q 'Bitter Blade' /tmp/qa.html
+          grep -q 'home-journey-card' /tmp/qa.html
+          grep -q 'nav21OpenGameDex' /tmp/qa.html
           curl -fsS 'http://127.0.0.1:8000/assets/maps/paldea-route.svg' | grep -q 'Mapa estilizado de Paldea'
           timeout 20s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/reopen.html
           grep -q 'data-reopen-pass="1"' /tmp/reopen.html
-          grep -q 'living-dex-paldea-map" content="2.0"' /tmp/reopen.html
+          grep -q 'living-dex-navigation" content="2.1"' /tmp/reopen.html
       - name: Seal CI validation marker
         run: |
           python3 - <<'PY'
@@ -97,6 +101,7 @@ jobs:
           python3 tools/validate_core1.py
           python3 tools/validate_journey_v1_9.py
           python3 tools/validate_map_v2_0.py
+          python3 tools/validate_navigation_v2_1.py
       - name: Build debug and unsigned release APKs
         run: gradle :app:assembleDebug :app:assembleRelease --stacktrace
       - name: Verify APK payloads
@@ -106,8 +111,9 @@ jobs:
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             zipinfo -1 "$APK" | grep -q '^assets/assets/maps/paldea-route.svg$'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-paldea-map" content="2.0"'
-            unzip -p "$APK" assets/index.html|grep -q 'assets/maps/paldea-route.svg'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-navigation" content="2.1"'
+            unzip -p "$APK" assets/index.html|grep -q 'nav21OpenGameDex'
+            unzip -p "$APK" assets/index.html|grep -q 'home-journey-card'
           done
       - name: Prepare private production keystore
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
@@ -122,14 +128,14 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           zipinfo -1 app/build/outputs/apk/release/app-release.apk | grep -q '^assets/assets/maps/paldea-route.svg$'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-paldea-map" content="2.0"'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'assets/maps/paldea-route.svg'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-navigation" content="2.1"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'nav21OpenGameDex'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
-      - name: Upload production signed v2.0.0
+      - name: Upload production signed v2.1.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v2.0.0-Production-Signed
+          name: LivingDexHub-v2.1.0-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
