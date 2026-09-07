@@ -62,6 +62,8 @@ jobs:
           python3 tools/polish_menu_fonts_v4_1.py
           python3 tools/rework_dedicated_journey_pages_v4_2.py
           python3 tools/patch_ref42_runtime_qa.py
+          python3 tools/rework_map_interaction_v4_3.py
+          python3 tools/patch_ref43_runtime_qa.py
       - name: Validate static structure and regressions
         run: |
           python3 tools/validate_core1.py
@@ -75,11 +77,13 @@ jobs:
           python3 tools/validate_reference_v4.py
           python3 tools/validate_reference_structure_v4_1.py
           python3 tools/validate_dedicated_journey_v4_2.py
+          python3 tools/validate_map_v4_3.py
           grep -q 'living-dex-menu-fonts" content="4.1"' app/src/main/assets/index.html
           grep -q 'living-dex-dedicated-journey" content="4.2"' app/src/main/assets/index.html
+          grep -q 'living-dex-paldea-map" content="4.3"' app/src/main/assets/index.html
           grep -q 'ldhAndroidResumeAudio' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           ! grep -q 'installSafeInsets' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q "versionName '4.2.0'" app/build.gradle
+          grep -q "versionName '4.3.0'" app/build.gradle
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -94,10 +98,10 @@ jobs:
           grep -q 'data-qa-pass="1"' /tmp/qa.html
           timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-r42 --virtual-time-budget=11000 --dump-dom 'http://127.0.0.1:8000/index.html?ref42qa=1' >/tmp/r42.html
           grep -q 'data-ref42-qa="1"' /tmp/r42.html
-          grep -q 'id="ref42RoutePage"' /tmp/r42.html
-          grep -q 'id="ref42TeamPage"' /tmp/r42.html
-          grep -q 'id="ref42MapPage"' /tmp/r42.html
-          grep -q 'Mapa de Paldea' /tmp/r42.html
+          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-r43 --virtual-time-budget=11000 --dump-dom 'http://127.0.0.1:8000/index.html?ref43qa=1' >/tmp/r43.html
+          grep -q 'data-ref43-qa="1"' /tmp/r43.html
+          grep -q 'id="ref43Viewport"' /tmp/r43.html
+          grep -q 'Lv.15' /tmp/r43.html
       - name: Audio runtime QA
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8001 --directory app/src/main/assets >/tmp/http-audio.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
@@ -115,7 +119,8 @@ jobs:
         run: |
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-dedicated-journey" content="4.2"'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-paldea-map" content="4.3"'
+            unzip -p "$APK" assets/assets/maps/paldea-route.svg|grep -q 'LAGO CASSEROYA'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           done
       - name: Prepare private production keystore
@@ -131,11 +136,11 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
-      - name: Upload production signed v4.2.0
+      - name: Upload production signed v4.3.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v4.2.0-Production-Signed
+          name: LivingDexHub-v4.3.0-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
