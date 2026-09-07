@@ -5,12 +5,36 @@ Repositório oficial do projeto Living Dex Hub.
 ## Estado atual
 
 - Baseline preservado: **Build 23.0 — Embedded Data Pack**
-- Build de desenvolvimento atual: **Build 24.0 — Image Integrity**
-- National Dex: 1.025 espécies
-- Escopo atual: Let's Go, Sword/Shield, Brilliant Diamond/Shining Pearl, Legends: Arceus, Scarlet/Violet e Legends Z-A
-- Recursos centrais: Living Dex, famílias evolutivas, formas, Storage/HOME, jogos possuídos, disponibilidade, exclusivos e engine de obtenção.
+- Build intermediário: **Build 24.0 — Image Integrity**
+- Build intermediário: **Build 25.0 — Offline Data Pack**
+- Estado atual: **Core 1.0 Validated**
+- National Dex: **1.025 espécies**
+- Pokédexes embutidas: **12/12**
+- Imagens locais no APK: **1.025/1.025**
+- Escopo: Let's Go, Sword/Shield, Brilliant Diamond/Shining Pearl, Legends: Arceus, Scarlet/Violet e Legends Z-A
+- Recursos centrais: Living Dex, famílias evolutivas, formas, Storage/HOME por espécime, jogos possuídos, disponibilidade, exclusivos, engine de obtenção, backup e snapshots.
 
-## Builds
+## Validação Core 1.0
+
+O pipeline do GitHub Actions bloqueia o APK caso alguma etapa obrigatória falhe. O Core 1.0 passou por:
+
+- geração e validação das 12 Pokédexes offline;
+- empacotamento e validação física dos 1.025 sprites PNG;
+- 17 verificações estruturais do Core;
+- validação de sintaxe JavaScript com Node;
+- smoke test em Chrome real;
+- fechamento e reabertura do navegador com o mesmo perfil para validar persistência em `localStorage`;
+- compilação Android;
+- inspeção do APK para confirmar os 1.025 sprites, Data Pack e marcador de QA validado;
+- geração de SHA-256.
+
+A engine de obtenção não usa mais o estado genérico “Método ainda não fechado”. Ela diferencia rotas verificadas, rotas derivadas, orientação geral e ausência de obtenção direta confirmada, evitando inventar encontros ou locais sem evidência na base.
+
+## Android
+
+O artefato atual é um **APK debug de QA validado**. Ele serve para instalação e teste do Core 1.0, mas ainda não é um release assinado para distribuição pública. A etapa de release exige assinatura/keystore própria.
+
+## Builds anteriores
 
 ### Build 23.0
 
@@ -22,26 +46,18 @@ python tools/restore_build23.py
 
 ### Build 24.0
 
-O Build 24 fecha a primeira etapa da auditoria final: **integridade das imagens Pokémon em todas as telas**.
+Fechou a integridade de imagens em todos os renderizadores principais e padronizou o pipeline local → artwork → HOME → sprite → placeholder.
 
-Depois de restaurar o Build 23, gere o Build 24 com:
+### Build 25.0
 
-```bash
-python tools/build_build24.py
-```
-
-O gerador impede a criação do Build 24 se ainda encontrar imagens Pokémon usando diretamente `src="${ART}..."`, sem o pipeline de fallback.
+Automatizou e confirmou o Data Pack offline com 12/12 Pokédexes antes da compilação Android.
 
 ## Regra do projeto
 
 O foco é Pokédex/Living Dex, salvamento e acompanhamento da coleção. Não adicionar sistemas de missão, cronômetro ou gamificação fora da mecânica real dos jogos Pokémon.
 
-Todo Pokémon exibido deve possuir imagem/ícone com fallback. Para o APK final, os assets essenciais deverão ser empacotados localmente para funcionamento offline real.
+Todo Pokémon exibido deve possuir imagem/ícone. Os 1.025 Pokémon da National Dex possuem sprite local empacotado no APK, com fontes remotas apenas como melhoria/fallback de maior resolução.
 
-## Próximos bloqueadores do Core 1.0
+## Próxima fase
 
-1. Empacotar imagens Pokémon locais/offline.
-2. Executar e fechar a auditoria de obtenção dos 6 jogos.
-3. Resolver rotas relevantes que ainda retornam confiança parcial ou método não fechado.
-4. Validar persistência, backup/restauração e migração em teste real mobile.
-5. Só então congelar o Core 1.0 e iniciar o rework visual/estrutura Android/APK.
+Com o Core 1.0 validado, as próximas mudanças devem priorizar acabamento visual, experiência mobile, assinatura de release e testes manuais em aparelho Android, sem reabrir funcionalidades já congeladas sem necessidade.
