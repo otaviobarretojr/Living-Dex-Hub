@@ -55,6 +55,7 @@ jobs:
           python3 tools/fix_home_journey_v2_3_2.py
           python3 tools/cleanup_explanatory_copy_v2_4.py
           python3 tools/audio_always_on_v2_5.py
+          python3 tools/rework_visual_v3.py
       - name: Validate static structure and regressions
         run: |
           python3 tools/validate_core1.py
@@ -67,10 +68,12 @@ jobs:
           python3 tools/validate_home_journey_v2_3_2.py
           grep -q 'living-dex-clean-copy" content="2.4"' app/src/main/assets/index.html
           grep -q 'living-dex-audio-always-on" content="2.5"' app/src/main/assets/index.html
+          grep -q 'living-dex-visual-v3" content="3.0"' app/src/main/assets/index.html
+          grep -q 'v3AuditCleanup' app/src/main/assets/index.html
           grep -q 'ldhAndroidResumeAudio' app/src/main/assets/index.html
           grep -q 'ldhAndroidResumeAudio' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           ! grep -q 'installSafeInsets' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q "versionName '2.5.0'" app/build.gradle
+          grep -q "versionName '3.0.0'" app/build.gradle
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -83,22 +86,18 @@ jobs:
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
           timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
           grep -q 'data-qa-pass="1"' /tmp/qa.html
-          grep -q 'living-dex-clean-copy" content="2.4"' /tmp/qa.html
-          grep -q 'living-dex-audio-always-on" content="2.5"' /tmp/qa.html
+          grep -q 'living-dex-visual-v3" content="3.0"' /tmp/qa.html
           timeout 30s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-home --virtual-time-budget=8000 --dump-dom 'http://127.0.0.1:8000/index.html?homeqa=1' >/tmp/home.html
           grep -q 'data-home-qa="1"' /tmp/home.html
           grep -q 'Seu andamento em Paldea' /tmp/home.html
           grep -q 'Time recomendado' /tmp/home.html
-          grep -q '>Continuar jornada</button>' /tmp/home.html
+          timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-v3 --virtual-time-budget=6000 --dump-dom 'http://127.0.0.1:8000/index.html?v3qa=1' >/tmp/v3.html
+          grep -q 'data-v3-qa="1"' /tmp/v3.html
+          grep -q 'id="v3Appbar"' /tmp/v3.html
       - name: Audio runtime QA
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8001 --directory app/src/main/assets >/tmp/http-audio.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
           timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-audio2 --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8001/index.html?audio25qa=1' >/tmp/audio.html
-          echo '--- AUDIO 2.5 QA MARKERS ---'
-          grep -o 'data-audio25-qa="[^"]*"' /tmp/audio.html | head -1 || true
-          grep -o 'data-audio25-music="[^"]*"' /tmp/audio.html | head -1 || true
-          grep -o 'data-audio25-sfx="[^"]*"' /tmp/audio.html | head -1 || true
-          grep -o 'data-audio25-volume="[^"]*"' /tmp/audio.html | head -1 || true
           grep -q 'data-audio25-qa="1"' /tmp/audio.html
           grep -q 'data-audio25-music="true"' /tmp/audio.html
           grep -q 'data-audio25-sfx="true"' /tmp/audio.html
@@ -115,7 +114,7 @@ jobs:
         run: |
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-clean-copy" content="2.4"'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-visual-v3" content="3.0"'
             unzip -p "$APK" assets/index.html|grep -q 'living-dex-audio-always-on" content="2.5"'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           done
@@ -132,11 +131,11 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
-      - name: Upload production signed v2.5.0
+      - name: Upload production signed v3.0.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v2.5.0-Production-Signed
+          name: LivingDexHub-v3.0.0-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
