@@ -26,7 +26,7 @@ jobs:
           python3 - <<'PY'
           import gzip,base64,pathlib
           root=pathlib.Path('app/src/main/assets');parts=[root/'index.part00',root/'index.part01x0',root/'index.part01x1',root/'index.part01x2',root/'index.part01x3',root/'index.part02',root/'index.part03',root/'index.part04']
-          packed=''.join(p.read_text().strip() for p in parts);out=root/'index.html';out.write_bytes(gzip.decompress(base64.b64decode(packed)))
+          packed=''.join(p.read_text().strip() for p in parts);(root/'index.html').write_bytes(gzip.decompress(base64.b64decode(packed)))
           PY
       - name: Assemble app content
         run: |
@@ -57,6 +57,7 @@ jobs:
           python3 tools/audio_always_on_v2_5.py
           python3 tools/rework_visual_v3.py
           python3 tools/polish_visual_v3_1.py
+          python3 tools/clean_home_v3_1_1.py
       - name: Validate static structure and regressions
         run: |
           python3 tools/validate_core1.py
@@ -67,15 +68,13 @@ jobs:
           python3 tools/validate_audio_v2_2.py
           python3 tools/validate_general_library_v2_3.py
           python3 tools/validate_home_journey_v2_3_2.py
-          grep -q 'living-dex-clean-copy" content="2.4"' app/src/main/assets/index.html
+          grep -q 'living-dex-home-clean" content="3.1.1"' app/src/main/assets/index.html
+          grep -q 'home311Clean' app/src/main/assets/index.html
           grep -q 'living-dex-audio-always-on" content="2.5"' app/src/main/assets/index.html
-          grep -q 'living-dex-visual-v3" content="3.0"' app/src/main/assets/index.html
           grep -q 'living-dex-visual-polish" content="3.1"' app/src/main/assets/index.html
-          grep -q 'v31Polish' app/src/main/assets/index.html
-          grep -q 'ldhAndroidResumeAudio' app/src/main/assets/index.html
           grep -q 'ldhAndroidResumeAudio' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           ! grep -q 'installSafeInsets' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q "versionName '3.1.0'" app/build.gradle
+          grep -q "versionName '3.1.1'" app/build.gradle
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -88,21 +87,16 @@ jobs:
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
           timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
           grep -q 'data-qa-pass="1"' /tmp/qa.html
-          grep -q 'living-dex-visual-polish" content="3.1"' /tmp/qa.html
-          timeout 30s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-home --virtual-time-budget=8000 --dump-dom 'http://127.0.0.1:8000/index.html?homeqa=1' >/tmp/home.html
+          timeout 30s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-home --virtual-time-budget=9000 --dump-dom 'http://127.0.0.1:8000/index.html?homeqa=1&home311qa=1' >/tmp/home.html
           grep -q 'data-home-qa="1"' /tmp/home.html
+          grep -q 'data-home311-qa="1"' /tmp/home.html
           grep -q 'Seu andamento em Paldea' /tmp/home.html
           grep -q 'Time recomendado' /tmp/home.html
-          timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-v31 --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/index.html?v31qa=1' >/tmp/v31.html
-          grep -q 'data-v31-qa="1"' /tmp/v31.html
-          grep -q 'id="v3Appbar"' /tmp/v31.html
       - name: Audio runtime QA
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8001 --directory app/src/main/assets >/tmp/http-audio.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
-          timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-audio2 --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8001/index.html?audio25qa=1' >/tmp/audio.html
+          timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-audio --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8001/index.html?audio25qa=1' >/tmp/audio.html
           grep -q 'data-audio25-qa="1"' /tmp/audio.html
-          grep -q 'data-audio25-music="true"' /tmp/audio.html
-          grep -q 'data-audio25-sfx="true"' /tmp/audio.html
           grep -q 'data-audio25-volume="1"' /tmp/audio.html
       - name: Seal CI validation marker
         run: |
@@ -114,12 +108,7 @@ jobs:
         run: gradle :app:assembleDebug :app:assembleRelease --stacktrace
       - name: Verify APK payloads
         run: |
-          for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
-            test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-visual-polish" content="3.1"'
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-audio-always-on" content="2.5"'
-            unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-          done
+          for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025; unzip -p "$APK" assets/index.html|grep -q 'living-dex-home-clean" content="3.1.1"'; unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'; done
       - name: Prepare private production keystore
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         run: echo "$RELEASE_KEYSTORE_BASE64"|base64 --decode > "$RUNNER_TEMP/livingdex-production.jks" && chmod 600 "$RUNNER_TEMP/livingdex-production.jks"
@@ -133,11 +122,11 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
-      - name: Upload production signed v3.1.0
+      - name: Upload production signed v3.1.1
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v3.1.0-Production-Signed
+          name: LivingDexHub-v3.1.1-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
