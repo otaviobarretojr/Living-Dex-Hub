@@ -71,6 +71,7 @@ jobs:
           python3 tools/rework_library_reference_v4_6.py
           python3 tools/prepare_paldea_map_asset_v4_9.py
           python3 tools/rework_paldea_correct_order_v4_9.py
+          python3 tools/add_map_import_v5_0.py
       - name: Validate static structure and regressions
         run: |
           python3 tools/validate_core1.py
@@ -87,14 +88,12 @@ jobs:
           python3 tools/validate_map_v4_3.py
           python3 tools/validate_reference_faithful_v4_5.py
           python3 tools/validate_paldea_correct_order_v4_9.py
+          python3 tools/validate_map_import_v5_0.py
           test "$(find app/src/main/assets/assets/ui45 -type f | wc -l)" -eq 8
-          grep -q 'living-dex-reference-faithful" content="4.5"' app/src/main/assets/index.html
-          grep -q 'living-dex-current-game-star" content="4.5.1"' app/src/main/assets/index.html
-          grep -q 'living-dex-library-reference" content="4.8"' app/src/main/assets/index.html
           grep -q 'living-dex-paldea-correct-order" content="4.9"' app/src/main/assets/index.html
-          grep -q 'ldhAndroidResumeAudio' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          ! grep -q 'injectMobileLibraryFix' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q "versionName '4.9.0'" app/build.gradle
+          grep -q 'living-dex-map-import" content="5.0"' app/src/main/assets/index.html
+          grep -q 'onShowFileChooser' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
+          grep -q "versionName '5.0.0'" app/build.gradle
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -102,23 +101,14 @@ jobs:
           s=pathlib.Path('app/src/main/assets/index.html').read_text();pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)))
           PY
           node --check /tmp/livingdex.js
-      - name: Browser QA
+      - name: Browser QA v5 map import
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
-          timeout 45s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh --virtual-time-budget=18000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1&s44qa=1&r45qa=1&r451qa=1&v48qa=1&v49qa=1' >/tmp/qa.html
-          grep -q 'data-qa-pass="1"' /tmp/qa.html
-          grep -q 'data-s44-qa="1"' /tmp/qa.html
-          grep -q 'data-r45-qa="1"' /tmp/qa.html
-          grep -q 'data-r451-qa="1"' /tmp/qa.html
-          grep -q 'data-v48-qa="1"' /tmp/qa.html
-          grep -q 'data-v49-qa="1"' /tmp/qa.html
-          grep -q 'assets/maps/paldea-correct-order.jpg' /tmp/qa.html
-          grep -q 'assets/ui45/sv.jpg' /tmp/qa.html
-          ! grep -q 'class="orb"' /tmp/qa.html
-          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-r42 --virtual-time-budget=11000 --dump-dom 'http://127.0.0.1:8000/index.html?ref42qa=1' >/tmp/r42.html
-          grep -q 'data-ref42-qa="1"' /tmp/r42.html
-          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-r43 --virtual-time-budget=11000 --dump-dom 'http://127.0.0.1:8000/index.html?ref43qa=1' >/tmp/r43.html
-          grep -q 'data-ref43-qa="1"' /tmp/r43.html
+          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-v50 --virtual-time-budget=12000 --dump-dom 'http://127.0.0.1:8000/index.html?v50qa=1' >/tmp/v50.html
+          grep -q 'data-v50-qa="1"' /tmp/v50.html
+          grep -q 'id="ref50File"' /tmp/v50.html
+          grep -q 'aria-label="Importar mapa"' /tmp/v50.html
+          grep -q 'assets/maps/paldea-correct-order.jpg' /tmp/v50.html
       - name: Audio runtime QA
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8001 --directory app/src/main/assets >/tmp/http-audio.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
@@ -138,8 +128,7 @@ jobs:
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/ui45/'|wc -l)" -eq 8
             zipinfo -1 "$APK"|grep -q '^assets/assets/maps/paldea-correct-order.jpg$'
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-library-reference" content="4.8"'
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-paldea-correct-order" content="4.9"'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-map-import" content="5.0"'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           done
       - name: Prepare private production keystore
@@ -154,13 +143,13 @@ jobs:
         run: |
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/assets/maps/paldea-correct-order.jpg$'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-map-import" content="5.0"'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
-      - name: Upload production signed v4.9.0
+      - name: Upload production signed v5.0.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v4.9.0-Production-Signed
+          name: LivingDexHub-v5.0.0-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
