@@ -17,7 +17,7 @@ checks={
  'light-status-icons':'SYSTEM_UI_FLAG_LIGHT_STATUS_BAR' in java,
  'light-nav-icons':'SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR' in java,
  'audio-resume':'ldhAndroidResumeAudio' in java,
- 'version':'versionName \'4.1.0\'' in gradle and 'versionCode 53' in gradle,
+ 'version':'versionName \'4.2.0\'' in gradle and 'versionCode 54' in gradle,
  'no-old-windowinsets':'installSafeInsets' not in java and 'WindowInsets.Type.navigationBars' not in java,
 }
 for k,v in checks.items(): print(('PASS' if v else 'FAIL'),k)
