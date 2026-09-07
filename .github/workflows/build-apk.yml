@@ -33,7 +33,7 @@ jobs:
         with:
           gradle-version: '8.10.2'
 
-      - name: Restore app HTML
+      - name: Restore canonical app HTML
         run: |
           python3 - <<'PY'
           import gzip, base64, pathlib
@@ -56,37 +56,75 @@ jobs:
       - name: Build complete offline Pokédex Data Pack
         run: python3 tools/build_embedded_dex_pack.py
 
-      - name: Inject offline Data Pack into app HTML
+      - name: Inject all 12 Pokédexes into app
         run: python3 tools/inject_embedded_dex_pack.py
 
-      - name: Validate all 12 Pokédexes are embedded
+      - name: Package and validate 1025 Pokemon sprites
+        run: python3 tools/sync_pokemon_assets.py
+
+      - name: Finalize Core 1.0 logic and mobile UI
+        run: python3 tools/finalize_core1.py
+
+      - name: Static Core 1.0 validation
+        run: python3 tools/validate_core1.py
+
+      - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
-          import json, pathlib
-          p=json.loads(pathlib.Path('data/embedded-dex-pack.json').read_text())
-          expected={
-            'letsgo:kanto','swsh:galar','swsh:isle-of-armor','swsh:crown-tundra',
-            'bdsp:sinnoh','bdsp:national-bdsp','arceus:hisui',
-            'sv:paldea','sv:kitakami','sv:blueberry','za:lumiose','za:hyperspace'
-          }
-          got={k for k,v in p.get('dexes',{}).items() if v}
-          assert got == expected, f'Offline pack incomplete. Missing={sorted(expected-got)} Extra={sorted(got-expected)}'
-          print('Offline Data Pack validated: 12/12')
+          import pathlib,re
+          s=pathlib.Path('app/src/main/assets/index.html').read_text()
+          scripts=re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)
+          pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(scripts))
           PY
+          node --check /tmp/livingdex.js
+
+      - name: Browser QA and persistence reopen test
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME"
+          python3 -m http.server 8000 --directory app/src/main/assets >/tmp/livingdex-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=12000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/livingdex-qa.html
+          grep -q 'data-qa-pass="1"' /tmp/livingdex-qa.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=4000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/livingdex-reopen.html
+          grep -q 'data-reopen-pass="1"' /tmp/livingdex-reopen.html
+          echo 'Browser QA: PASS'
+          echo 'Persistence after browser reopen: PASS'
+
+      - name: Seal CI validation marker
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app/src/main/assets/index.html')
+          s=p.read_text()
+          old='const BUILD_QA_VALIDATED=false;'
+          assert old in s
+          p.write_text(s.replace(old,'const BUILD_QA_VALIDATED=true;',1))
+          PY
+          python3 tools/validate_core1.py
 
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace
 
-      - name: Verify APK exists
-        run: test -f app/build/outputs/apk/debug/app-debug.apk
+      - name: Verify APK payload
+        run: |
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          test -f "$APK"
+          COUNT=$(zipinfo -1 "$APK" | grep -E '^assets/assets/pokemon/[0-9]+\.png$' | wc -l)
+          test "$COUNT" -eq 1025
+          unzip -p "$APK" assets/index.html | grep -q 'BUILD_QA_VALIDATED=true'
+          unzip -p "$APK" assets/index.html | grep -q 'za:hyperspace'
+          echo "APK payload validated: 1025 Pokemon sprites + Core 1.0 HTML"
 
       - name: Generate SHA-256
         run: sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/app-debug.apk.sha256
 
-      - name: Upload APK
+      - name: Upload validated APK
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-APK
+          name: LivingDexHub-Core-1.0-Validated
           path: |
             app/build/outputs/apk/debug/app-debug.apk
             app/build/outputs/apk/debug/app-debug.apk.sha256
