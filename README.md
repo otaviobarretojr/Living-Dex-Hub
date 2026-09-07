@@ -7,12 +7,29 @@ Repositório oficial do projeto Living Dex Hub.
 - Baseline preservado: **Build 23.0 — Embedded Data Pack**
 - Build intermediário: **Build 24.0 — Image Integrity**
 - Build intermediário: **Build 25.0 — Offline Data Pack**
-- Estado atual: **Core 1.0 Validated**
+- Core funcional congelado: **Core 1.0 Validated**
+- Interface atual: **UI 1.1 Validated**
+- Android: **v1.1.0** (`versionCode 30`)
 - National Dex: **1.025 espécies**
 - Pokédexes embutidas: **12/12**
 - Imagens locais no APK: **1.025/1.025**
 - Escopo: Let's Go, Sword/Shield, Brilliant Diamond/Shining Pearl, Legends: Arceus, Scarlet/Violet e Legends Z-A
 - Recursos centrais: Living Dex, famílias evolutivas, formas, Storage/HOME por espécime, jogos possuídos, disponibilidade, exclusivos, engine de obtenção, backup e snapshots.
+
+## UI 1.1
+
+A UI 1.1 reorganiza a experiência sem alterar as regras congeladas do Core 1.0:
+
+- rework visual completo de superfícies, cards, botões, status, grids e hierarquia;
+- navegação mobile fixa com **Início, Jogos, Dex, Faltando e Mais**;
+- menu **Mais** com Famílias, Planejamento, Form Dex, Storage/HOME e Configurações;
+- desktop preserva as 9 áreas originais;
+- barra de busca/filtros passa a ficar acessível durante a rolagem no mobile;
+- grids se adaptam a 3 colunas em celulares e 2 colunas em telas menores;
+- paginação respeita a navegação inferior e safe area do Android;
+- ações menos importantes do cabeçalho são reduzidas no mobile para diminuir poluição visual.
+
+A suíte da UI possui **13/13 verificações estruturais** e também passa pelo smoke test funcional em Chrome e pelo teste de persistência após reabertura.
 
 ## Validação Core 1.0
 
@@ -25,14 +42,14 @@ O pipeline do GitHub Actions bloqueia o APK caso alguma etapa obrigatória falhe
 - smoke test em Chrome real;
 - fechamento e reabertura do navegador com o mesmo perfil para validar persistência em `localStorage`;
 - compilação Android;
-- inspeção do APK para confirmar os 1.025 sprites, Data Pack e marcador de QA validado;
+- inspeção do APK para confirmar os 1.025 sprites, Data Pack, UI 1.1 e marcador de QA validado;
 - geração de SHA-256.
 
 A engine de obtenção não usa mais o estado genérico “Método ainda não fechado”. Ela diferencia rotas verificadas, rotas derivadas, orientação geral e ausência de obtenção direta confirmada, evitando inventar encontros ou locais sem evidência na base.
 
 ## Android
 
-O artefato atual é um **APK debug de QA validado**. Ele serve para instalação e teste do Core 1.0, mas ainda não é um release assinado para distribuição pública. A etapa de release exige assinatura/keystore própria.
+O artefato atual é um **APK debug v1.1.0 validado**. Ele serve para instalação e uso/teste do Core 1.0 + UI 1.1, mas ainda não é um release assinado para distribuição pública. A etapa de release exige assinatura/keystore própria.
 
 ## Builds anteriores
 
@@ -60,4 +77,4 @@ Todo Pokémon exibido deve possuir imagem/ícone. Os 1.025 Pokémon da National 
 
 ## Próxima fase
 
-Com o Core 1.0 validado, as próximas mudanças devem priorizar acabamento visual, experiência mobile, assinatura de release e testes manuais em aparelho Android, sem reabrir funcionalidades já congeladas sem necessidade.
+Com **Core 1.0 + UI 1.1** validados, as próximas mudanças devem priorizar refinamento de telas específicas, qualidade visual das fichas, testes manuais em aparelho Android e preparação de assinatura release, sem reabrir funcionalidades congeladas sem necessidade.
