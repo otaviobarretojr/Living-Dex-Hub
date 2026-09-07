@@ -29,7 +29,6 @@ function ldh25Start(){
  const after=()=>{ldh25RestoreGains();if(!ldhLoopTimer){try{ldhScheduleStep();ldhLoopTimer=setInterval(ldhScheduleStep,720)}catch(e){}}};
  try{const r=ldhCtx.resume();if(r&&typeof r.then==='function')r.then(after).catch(()=>{});else after()}catch(e){after()}
 }
-// Replace legacy controls with fixed always-on behavior.
 window.ldhToggleMusic=function(){ldh25Start()};
 window.ldhToggleSfx=function(){ldh25Start()};
 window.ldhSetVolume=function(){ldh25Start()};
@@ -38,7 +37,6 @@ window.ldhPersistAudio=function(){ldh25NormalizeAudio()};
 window.ldhRenderAudioUI=function(){ldh25NormalizeAudio()};
 window.ldhInjectSettings=function(){ldh25NormalizeAudio()};
 window.ldhQuickButton=function(){ldh25NormalizeAudio()};
-const ldh25LegacyStart=window.ldhStartLoop;
 window.ldhStartLoop=function(){ldh25NormalizeAudio();ldhEnsureAudio();if(!ldhCtx)return;ldh25RestoreGains();if(ldhCtx.state==='suspended'){try{ldhCtx.resume()}catch(e){}}if(!ldhLoopTimer){ldhScheduleStep();ldhLoopTimer=setInterval(ldhScheduleStep,720)}};
 window.ldhStopLoop=function(){if(ldhLoopTimer){clearInterval(ldhLoopTimer);ldhLoopTimer=null}};
 window.ldhAndroidResumeAudio=ldh25Start;
@@ -46,7 +44,13 @@ window.addEventListener('pageshow',()=>{if(ldhStarted)ldh25Start()});
 window.addEventListener('focus',()=>{if(ldhStarted)ldh25Start()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ldhStarted)ldh25Start()});
 document.addEventListener('pointerdown',()=>{ldhStarted=true;ldh25Start()},{once:true,capture:true});
-setTimeout(ldh25NormalizeAudio,0);
+setTimeout(()=>{
+ ldh25NormalizeAudio();
+ if(new URLSearchParams(location.search).has('audio25qa')){
+  const ok=ldhAudioPrefs.music===true&&ldhAudioPrefs.sfx===true&&Number(ldhAudioPrefs.volume)===1&&!document.getElementById('ldhAudioQuick')&&!document.getElementById('ldhAudioSettings')&&typeof ldhAndroidResumeAudio==='function';
+  document.documentElement.dataset.audio25Qa=ok?'1':'0';
+ }
+},0);
 '''
 s=s.replace('</body>','<script>'+js+'</script>\n</body>',1)
 p.write_text(s,encoding='utf-8')
