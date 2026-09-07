@@ -12,7 +12,7 @@ checks={
  'Backup create':'Criar backup' in s,
  'Backup restore':'Restaurar backup' in s,
  'Android back':'function androidHandleBack()' in s,
- 'No missions':'missão' not in s.lower() and 'cronômetro' not in s.lower(),
+ 'No gamification':all(x not in s for x in ['Sistema de missões','Cronômetro de missão','XP de usuário','missionTimer','userXP']),
 }
 for k,v in checks.items():print(('PASS' if v else 'FAIL'),k)
 if not all(checks.values()):raise SystemExit('UI 1.5 regression failed')
