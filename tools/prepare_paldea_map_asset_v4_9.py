@@ -12,7 +12,9 @@ source = maps / 'paldea-correct-order.jpg.b64'
 if not source.exists():
     raise RuntimeError('Bundled Paldea map source is missing')
 
-data = base64.b64decode(source.read_text(encoding='utf-8').strip())
+text = ''.join(source.read_text(encoding='utf-8').split())
+text += '=' * (-len(text) % 4)
+data = base64.b64decode(text)
 if not data.startswith(b'\xff\xd8\xff') or len(data) < 10000:
     raise RuntimeError('Bundled Paldea map source is not a valid JPEG')
 
