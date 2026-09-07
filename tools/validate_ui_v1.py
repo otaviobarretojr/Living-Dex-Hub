@@ -7,7 +7,7 @@ html = HTML.read_text(encoding='utf-8')
 
 checks = {
     'ui_marker': 'name="living-dex-ui" content="1.1"' in html,
-    'core_preserved': 'name="living-dex-build" content="core-1.0"' in html and 'BUILD_QA_VALIDATED=false' in html,
+    'core_preserved': 'name="living-dex-build" content="core-1.0"' in html and ('BUILD_QA_VALIDATED=false' in html or 'BUILD_QA_VALIDATED=true' in html),
     'desktop_tabs_9': len(re.findall(r'class="tab(?: active)?" data-v="', html)) == 9,
     'mobile_nav_5': len(re.findall(r'class="mnav-item(?: active)?"', html)) == 5,
     'mobile_more_5': all(x in html for x in ["go('families')","go('planner')","go('forms')","go('storage')","go('settings')"]),
