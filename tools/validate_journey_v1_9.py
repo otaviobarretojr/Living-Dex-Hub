@@ -6,6 +6,7 @@ checks={
  'Smart prep renderer':'function svSmartPrep()' in s,
  'Collection-aware':'function svGameOwnedSmart' in s and "ui151GameOwned(x,'sv',version)" in s,
  'Version-aware slot':'function svResolveTeamId' in s and "violet" in s and 'return 937' in s,
+ 'Ceruledge build':"SV_BUILDS[937]" in s and 'Bitter Blade' in s and 'Swords Dance' in s,
  'Automatic phase':'function svPhaseForNext' in s,
  'Next objective analysis':'function svSmartPrepData' in s and 'svNextIndex()' in s,
  'Readiness':'PRONTIDÃO' in s,
