@@ -14,8 +14,8 @@ android {
         applicationId 'com.otaviobarreto.livingdex'
         minSdk 26
         targetSdk 35
-        versionCode 83
-        versionName '7.2.0'
+        versionCode 84
+        versionName '7.3.0'
     }
 
     if (hasReleaseSigning) {
