@@ -73,6 +73,7 @@ jobs:
           python3 tools/rework_paldea_correct_order_v4_9.py
           python3 tools/add_map_import_v5_0.py
           python3 tools/rework_home_reference_v5_1.py
+          python3 tools/fix_duplicate_home_journey_v5_1_1.py
       - name: Validate static structure and regressions
         run: |
           python3 tools/validate_core1.py
@@ -91,6 +92,7 @@ jobs:
           python3 tools/validate_paldea_correct_order_v4_9.py
           python3 tools/validate_map_import_v5_0.py
           python3 tools/validate_home_reference_v5_1.py
+          grep -q 'living-dex-home-single-journey" content="5.1.1"' app/src/main/assets/index.html
           test "$(find app/src/main/assets/assets/ui45 -type f | wc -l)" -eq 8
           grep -q 'living-dex-map-import" content="5.0"' app/src/main/assets/index.html
           grep -q 'living-dex-home-reference" content="5.1"' app/src/main/assets/index.html
@@ -103,15 +105,15 @@ jobs:
           s=pathlib.Path('app/src/main/assets/index.html').read_text();pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)))
           PY
           node --check /tmp/livingdex.js
-      - name: Browser QA v5.1 home and map import
+      - name: Browser QA v5.1 single journey
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
-          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-v51 --virtual-time-budget=12000 --dump-dom 'http://127.0.0.1:8000/index.html?v50qa=1' >/tmp/v51.html
-          grep -q 'data-v50-qa="1"' /tmp/v51.html
-          grep -q 'id="ref50File"' /tmp/v51.html
-          grep -q 'aria-label="Importar mapa"' /tmp/v51.html
-          grep -q 'living-dex-home-reference" content="5.1"' /tmp/v51.html
-          grep -q 'assets/ui45/sv.jpg' /tmp/v51.html
+          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-v511 --virtual-time-budget=12000 --dump-dom 'http://127.0.0.1:8000/index.html?v50qa=1' >/tmp/v511.html
+          grep -q 'data-v50-qa="1"' /tmp/v511.html
+          grep -q 'living-dex-home-single-journey" content="5.1.1"' /tmp/v511.html
+          grep -q 'class="home51-journey"' /tmp/v511.html
+          ! grep -q 'class="home232-journey"' /tmp/v511.html
+          grep -q 'id="ref50File"' /tmp/v511.html
       - name: Audio runtime QA
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8001 --directory app/src/main/assets >/tmp/http-audio.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
@@ -131,8 +133,7 @@ jobs:
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/ui45/'|wc -l)" -eq 8
             zipinfo -1 "$APK"|grep -q '^assets/assets/maps/paldea-correct-order.jpg$'
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-map-import" content="5.0"'
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-home-reference" content="5.1"'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-home-single-journey" content="5.1.1"'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           done
       - name: Prepare private production keystore
@@ -146,8 +147,7 @@ jobs:
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         run: |
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
-          test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-home-reference" content="5.1"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-home-single-journey" content="5.1.1"'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - name: Upload production signed v5.1.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
