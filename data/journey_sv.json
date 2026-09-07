@@ -1,0 +1,33 @@
+{
+  "game":"sv",
+  "title":"Pokémon Scarlet / Violet",
+  "sources":[
+    {"name":"Game8 Level Map","url":"https://game8.co/games/Pokemon-Scarlet-Violet/archives/394479"},
+    {"name":"Game8 Best Team","url":"https://game8.co/games/Pokemon-Scarlet-Violet/archives/393731"}
+  ],
+  "route":[
+    {"n":1,"name":"Ginásio de Cortondo — Katy","kind":"gym","level":15,"type":"Bug"},
+    {"n":2,"name":"Titã Stony Cliff — Klawf","kind":"titan","level":16,"type":"Rock"},
+    {"n":3,"name":"Ginásio de Artazon — Brassius","kind":"gym","level":17,"type":"Grass"},
+    {"n":4,"name":"Titã Open Sky — Bombirdier","kind":"titan","level":19,"type":"Flying"},
+    {"n":5,"name":"Team Star Dark — Giacomo","kind":"star","level":21,"type":"Dark"},
+    {"n":6,"name":"Ginásio de Levincia — Iono","kind":"gym","level":24,"type":"Electric"},
+    {"n":7,"name":"Team Star Fire — Mela","kind":"star","level":27,"type":"Fire"},
+    {"n":8,"name":"Titã Lurking Steel — Orthworm","kind":"titan","level":28,"type":"Steel"},
+    {"n":9,"name":"Ginásio de Cascarrafa — Kofu","kind":"gym","level":30,"type":"Water"},
+    {"n":10,"name":"Team Star Poison — Atticus","kind":"star","level":33,"type":"Poison"},
+    {"n":11,"name":"Ginásio de Medali — Larry","kind":"gym","level":36,"type":"Normal"},
+    {"n":12,"name":"Ginásio de Montenevera — Ryme","kind":"gym","level":42,"type":"Ghost"},
+    {"n":13,"name":"Titã Quaking Earth — Great Tusk / Iron Treads","kind":"titan","level":44,"type":"Ground"},
+    {"n":14,"name":"Ginásio de Alfornada — Tulip","kind":"gym","level":45,"type":"Psychic"},
+    {"n":15,"name":"Ginásio de Glaseado — Grusha","kind":"gym","level":48,"type":"Ice"},
+    {"n":16,"name":"Team Star Fairy — Ortega","kind":"star","level":51,"type":"Fairy"},
+    {"n":17,"name":"Titã False Dragon — Dondozo / Tatsugiri","kind":"titan","level":55,"type":"Dragon"},
+    {"n":18,"name":"Team Star Fighting — Eri","kind":"star","level":56,"type":"Fighting"}
+  ],
+  "teams":{
+    "sprigatito":{"early":[906,935,821,940,129,194],"mid":[907,936,822,941,130,980],"late":[908,936,823,941,130,980]},
+    "fuecoco":{"early":[909,821,940,129,194,928],"mid":[910,822,941,130,980,929],"late":[911,823,941,130,980,930]},
+    "quaxly":{"early":[912,935,821,940,194,928],"mid":[913,936,822,941,980,929],"late":[914,936,823,941,980,930]}
+  }
+}
