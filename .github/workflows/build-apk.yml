@@ -46,6 +46,8 @@ jobs:
         run: python3 tools/rework_journey_v1_7.py
       - name: Apply Journey 1.8
         run: python3 tools/rework_journey_v1_8.py
+      - name: Apply Journey 1.9 smart preparation
+        run: python3 tools/rework_journey_v1_9.py
       - name: Validate Core, UI and Journey
         run: |
           python3 tools/validate_core1.py
@@ -57,6 +59,7 @@ jobs:
           python3 tools/validate_ui_v1_6.py
           python3 tools/validate_journey_v1_7.py
           python3 tools/validate_journey_v1_8.py
+          python3 tools/validate_journey_v1_9.py
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -72,12 +75,14 @@ jobs:
           grep -q 'data-qa-pass="1"' /tmp/qa.html
           grep -q 'living-dex-journey" content="1.7"' /tmp/qa.html
           grep -q 'living-dex-journey-plus" content="1.8"' /tmp/qa.html
+          grep -q 'living-dex-smart-prep" content="1.9"' /tmp/qa.html
           grep -q 'game-progress-ring' /tmp/qa.html
           grep -q 'contextual quick add/remove by game + selected version' /tmp/qa.html
           grep -q 'Golpes recomendados' /tmp/qa.html
+          grep -q 'Preparação inteligente' /tmp/qa.html
           timeout 20s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/reopen.html
           grep -q 'data-reopen-pass="1"' /tmp/reopen.html
-          grep -q 'living-dex-journey-plus" content="1.8"' /tmp/reopen.html
+          grep -q 'living-dex-smart-prep" content="1.9"' /tmp/reopen.html
       - name: Seal CI validation marker
         run: |
           python3 - <<'PY'
@@ -87,6 +92,7 @@ jobs:
           python3 tools/validate_core1.py
           python3 tools/validate_journey_v1_7.py
           python3 tools/validate_journey_v1_8.py
+          python3 tools/validate_journey_v1_9.py
       - name: Build debug and unsigned release APKs
         run: gradle :app:assembleDebug :app:assembleRelease --stacktrace
       - name: Verify APK payloads
@@ -94,8 +100,9 @@ jobs:
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test -f "$APK"; test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-journey-plus" content="1.8"'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-smart-prep" content="1.9"'
             unzip -p "$APK" assets/index.html|grep -q 'SV_BUILDS'
+            unzip -p "$APK" assets/index.html|grep -q 'svSmartPrep'
           done
       - name: Prepare private production keystore
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
@@ -109,14 +116,14 @@ jobs:
         run: |
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-journey-plus" content="1.8"'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'SV_BUILDS'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-smart-prep" content="1.9"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'svSmartPrep'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
-      - name: Upload production signed v1.8.0
+      - name: Upload production signed v1.9.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v1.8.0-Production-Signed
+          name: LivingDexHub-v1.9.0-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
