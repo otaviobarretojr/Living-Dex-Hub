@@ -6,6 +6,8 @@ on:
     branches: [ main, master ]
     paths:
       - 'app/**'
+      - 'tools/**'
+      - 'data/**'
       - 'build.gradle'
       - 'settings.gradle'
       - '.github/workflows/build-apk.yml'
@@ -49,6 +51,27 @@ jobs:
           out.write_bytes(gzip.decompress(base64.b64decode(packed)))
           assert out.stat().st_size == 223467, f'Unexpected HTML size: {out.stat().st_size}'
           print('Restored', out, out.stat().st_size, 'bytes')
+          PY
+
+      - name: Build complete offline Pokédex Data Pack
+        run: python3 tools/build_embedded_dex_pack.py
+
+      - name: Inject offline Data Pack into app HTML
+        run: python3 tools/inject_embedded_dex_pack.py
+
+      - name: Validate all 12 Pokédexes are embedded
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          p=json.loads(pathlib.Path('data/embedded-dex-pack.json').read_text())
+          expected={
+            'letsgo:kanto','swsh:galar','swsh:isle-of-armor','swsh:crown-tundra',
+            'bdsp:sinnoh','bdsp:national-bdsp','arceus:hisui',
+            'sv:paldea','sv:kitakami','sv:blueberry','za:lumiose','za:hyperspace'
+          }
+          got={k for k,v in p.get('dexes',{}).items() if v}
+          assert got == expected, f'Offline pack incomplete. Missing={sorted(expected-got)} Extra={sorted(got-expected)}'
+          print('Offline Data Pack validated: 12/12')
           PY
 
       - name: Build debug APK
