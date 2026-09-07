@@ -1,4 +1,5 @@
 from pathlib import Path
+import runpy
 p=Path(__file__).resolve().parents[1]/'app/src/main/assets/index.html'
 s=p.read_text(encoding='utf-8')
 if 'living-dex-game-selector-commit" content="7.3.2"' not in s:s=s.replace('</head>','<meta name="living-dex-game-selector-commit" content="7.3.2"/>\n</head>',1)
@@ -47,12 +48,10 @@ window.ld73SelectGame=async function(id){
    try{await openGame(id);ok=await ld732WaitGame(id,1200)}catch(e){}
  }
  if(!ok){ld731RestoreSelector?.();ld72OpenGames?.();return}
- // openGame can mutate shared state; commit the chosen id again only after the Dex is truly ready.
  ld732CommitState(id);
  ld73BoxByGame[id]=0;
  ld71Render();
  ld72Focus();
- // One more render on the next frame guarantees header, cover, counts and Box cards use the selected game.
  requestAnimationFrame(()=>{ld71Render();ld72Focus()});
  setTimeout(()=>{ld71Render();ld72Focus();ld72CloseGames();ld731RestoreSelector?.()},120)
 }
@@ -61,3 +60,4 @@ window.ld72SelectGame=window.ld73SelectGame;
 s=s.replace('</body>','<script>'+js+'</script>\n</body>',1)
 p.write_text(s,encoding='utf-8')
 print('Game selector commit 7.3.2 applied')
+runpy.run_path(str(Path(__file__).with_name('migrate_box_library_v7_4.py')), run_name='__main__')
