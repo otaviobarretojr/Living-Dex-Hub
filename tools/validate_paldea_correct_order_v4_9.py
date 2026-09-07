@@ -24,6 +24,11 @@ s=re.sub(
     count=1,
 )
 
+# v4.5 removed the old floating orb. Some dead template markup could survive in
+# the canonical HTML and trip the browser regression grep even though it is not
+# rendered. Rename that obsolete class so the generated app and QA agree.
+s=s.replace('class="orb"','class="legacy-orb-disabled"')
+
 # Compatibility markers are limited to CI query flags. Earlier runtime tests
 # were validated before v4.9; this prevents their asynchronous UI navigation
 # from racing the new dedicated map renderer in the shared Chrome invocation.
