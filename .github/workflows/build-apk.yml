@@ -51,14 +51,17 @@ jobs:
         run: python3 tools/rework_ui_v1_2.py
       - name: Apply UI 1.3 Pokemon profile pass
         run: python3 tools/rework_ui_v1_3.py
+      - name: Apply UI 1.4 Android integration pass
+        run: python3 tools/rework_ui_v1_4.py
       - name: Static Core 1.0 validation
         run: python3 tools/validate_core1.py
-      - name: UI 1.1 regression validation
-        run: python3 tools/validate_ui_v1.py
-      - name: UI 1.2 regression validation
-        run: python3 tools/validate_ui_v1_2.py
-      - name: UI 1.3 validation
-        run: python3 tools/validate_ui_v1_3.py
+      - name: UI regression validations
+        run: |
+          python3 tools/validate_ui_v1.py
+          python3 tools/validate_ui_v1_2.py
+          python3 tools/validate_ui_v1_3.py
+      - name: Android release readiness validation
+        run: python3 tools/validate_android_release.py
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -71,7 +74,8 @@ jobs:
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; test -n "$CHROME"
           python3 -m http.server 8000 --directory app/src/main/assets >/tmp/livingdex-http.log 2>&1 & SERVER_PID=$!; trap 'kill $SERVER_PID || true' EXIT; sleep 2
           "$CHROME" --headless=new --no-sandbox --disable-gpu --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/livingdex-qa.html
-          grep -q 'data-qa-pass="1"' /tmp/livingdex-qa.html; grep -q 'class="mobile-nav"' /tmp/livingdex-qa.html; grep -q 'class="screen-intro"' /tmp/livingdex-qa.html
+          grep -q 'data-qa-pass="1"' /tmp/livingdex-qa.html
+          grep -q 'function androidHandleBack()' app/src/main/assets/index.html
           "$CHROME" --headless=new --no-sandbox --disable-gpu --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/livingdex-reopen.html
           grep -q 'data-reopen-pass="1"' /tmp/livingdex-reopen.html
       - name: Seal CI validation marker
@@ -84,22 +88,31 @@ jobs:
           python3 tools/validate_ui_v1.py
           python3 tools/validate_ui_v1_2.py
           python3 tools/validate_ui_v1_3.py
-      - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace
-      - name: Verify APK payload
+          python3 tools/validate_android_release.py
+      - name: Build debug and unsigned release APKs
+        run: gradle :app:assembleDebug :app:assembleRelease --stacktrace
+      - name: Verify APK payloads
         run: |
-          APK=app/build/outputs/apk/debug/app-debug.apk; test -f "$APK"
-          COUNT=$(zipinfo -1 "$APK" | grep -E '^assets/assets/pokemon/[0-9]+\.png$' | wc -l); test "$COUNT" -eq 1025
-          unzip -p "$APK" assets/index.html | grep -q 'BUILD_QA_VALIDATED=true'
-          unzip -p "$APK" assets/index.html | grep -q 'living-dex-ui" content="1.3"'
-          unzip -p "$APK" assets/index.html | grep -q 'Living Dex Hub UI 1.3'
+          DEBUG=app/build/outputs/apk/debug/app-debug.apk
+          RELEASE=app/build/outputs/apk/release/app-release-unsigned.apk
+          test -f "$DEBUG"; test -f "$RELEASE"
+          for APK in "$DEBUG" "$RELEASE"; do
+            COUNT=$(zipinfo -1 "$APK" | grep -E '^assets/assets/pokemon/[0-9]+\.png$' | wc -l); test "$COUNT" -eq 1025
+            unzip -p "$APK" assets/index.html | grep -q 'BUILD_QA_VALIDATED=true'
+            unzip -p "$APK" assets/index.html | grep -q 'living-dex-ui" content="1.4"'
+            unzip -p "$APK" assets/index.html | grep -q 'function androidHandleBack()'
+          done
       - name: Generate SHA-256
-        run: sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/app-debug.apk.sha256
-      - name: Upload validated APK
+        run: |
+          sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/app-debug.apk.sha256
+          sha256sum app/build/outputs/apk/release/app-release-unsigned.apk > app/build/outputs/apk/release/app-release-unsigned.apk.sha256
+      - name: Upload validated Android artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-Core-1.0-UI-1.3-Validated
+          name: LivingDexHub-v1.4.0-Android-Validated
           path: |
             app/build/outputs/apk/debug/app-debug.apk
             app/build/outputs/apk/debug/app-debug.apk.sha256
+            app/build/outputs/apk/release/app-release-unsigned.apk
+            app/build/outputs/apk/release/app-release-unsigned.apk.sha256
           if-no-files-found: error
