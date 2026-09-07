@@ -17,10 +17,10 @@ checks={
  'light-status-icons':'SYSTEM_UI_FLAG_LIGHT_STATUS_BAR' in java,
  'light-nav-icons':'SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR' in java,
  'audio-resume':'ldhAndroidResumeAudio' in java,
- 'version':'versionName \'4.0.0\'' in gradle and 'versionCode 52' in gradle,
+ 'version':'versionName \'4.1.0\'' in gradle and 'versionCode 53' in gradle,
  'no-old-windowinsets':'installSafeInsets' not in java and 'WindowInsets.Type.navigationBars' not in java,
 }
 for k,v in checks.items(): print(('PASS' if v else 'FAIL'),k)
 missing=[k for k,v in checks.items() if not v]
-if missing: raise SystemExit('Reference UI 4.0 validation failed: '+', '.join(missing))
-print(f'Reference UI 4.0 validated: {len(checks)}/{len(checks)}')
+if missing: raise SystemExit('Reference UI validation failed: '+', '.join(missing))
+print(f'Reference UI validated: {len(checks)}/{len(checks)}')
