@@ -93,6 +93,12 @@ jobs:
           curl -fsS 'http://127.0.0.1:8000/assets/maps/paldea-route.svg' | grep -q 'Mapa estilizado de Paldea'
           rm -rf /tmp/livingdex-navfix-profile
           timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-navfix-profile --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/index.html?navfixqa=1' >/tmp/navfix.html
+          echo '--- NAVFIX DIAGNOSTICS ---'
+          grep -o 'data-navfix-buttons="[^"]*"' /tmp/navfix.html | head -1 || true
+          grep -o 'data-navfix-action="[^"]*"' /tmp/navfix.html | head -1 || true
+          grep -o 'data-game-dex-open="[^"]*"' /tmp/navfix.html | head -1 || true
+          grep -o 'data-game-dex-view="[^"]*"' /tmp/navfix.html | head -1 || true
+          grep -o 'data-navfix-pass="[^"]*"' /tmp/navfix.html | head -1 || true
           grep -q 'data-navfix-pass="1"' /tmp/navfix.html
           grep -q 'data-game-dex-open="1"' /tmp/navfix.html
           timeout 20s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/reopen.html
