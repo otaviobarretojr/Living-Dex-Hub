@@ -54,11 +54,11 @@ function ui15ForwardBackup(rx){
  if(target){target.click();return} alert('A ação de backup original não foi localizada. Abra as opções de dados logo abaixo para concluir.');
 }
 function ui15Ensure(){ui15DecorateDex();ui15BackupGuide()}
-const UI15_OBSERVER=new MutationObserver(()=>ui15Ensure());
-setTimeout(()=>{ui15Ensure();UI15_OBSERVER.observe(document.body,{childList:true,subtree:true})},0);
+// Deterministic one-shot setup. Later renders are decorated by the v1.5.1 render hooks.
+setTimeout(ui15Ensure,0);
 '''
 if 'Living Dex Hub UI 1.5 — usability layer' not in html: html=html.replace('function androidHandleBack(){',js+'\nfunction androidHandleBack(){',1)
-required=['living-dex-ui" content="1.5','Living Dex Hub UI 1.5','function ui15QuickCapture','quick-catch','Criar backup','Restaurar backup','Core 1.0 • UI 1.5 • Offline']
+required=['living-dex-ui" content="1.5','Living Dex Hub UI 1.5','function ui15QuickCapture','quick-catch','Criar backup','Restaurar backup','Core 1.0 • UI 1.5 • Offline','setTimeout(ui15Ensure,0)']
 missing=[x for x in required if x not in html]
 if missing: raise SystemExit('UI 1.5 incompleta: '+str(missing))
 HTML.write_text(html,encoding='utf-8')
