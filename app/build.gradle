@@ -1,0 +1,22 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.otaviobarreto.livingdex'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.otaviobarreto.livingdex'
+        minSdk 26
+        targetSdk 35
+        versionCode 29
+        versionName '1.0.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {}
