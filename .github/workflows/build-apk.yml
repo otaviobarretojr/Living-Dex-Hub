@@ -69,6 +69,7 @@ jobs:
           python3 tools/rework_reference_faithful_v4_5.py
           python3 tools/polish_current_game_star_v4_5_1.py
           python3 tools/rework_library_reference_v4_6.py
+          python3 tools/prepare_paldea_map_asset_v4_9.py
           python3 tools/rework_paldea_correct_order_v4_9.py
       - name: Validate static structure and regressions
         run: |
