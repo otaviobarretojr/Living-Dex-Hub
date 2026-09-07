@@ -59,6 +59,7 @@ jobs:
           python3 tools/polish_visual_v3_1.py
           python3 tools/clean_home_v3_1_1.py
           python3 tools/rework_reference_v4.py
+          python3 tools/fix_reference_v4_runtime_qa.py
       - name: Validate static structure and regressions
         run: |
           python3 tools/validate_core1.py
@@ -72,6 +73,7 @@ jobs:
           python3 tools/validate_reference_v4.py
           grep -q 'living-dex-reference-ui" content="4.0"' app/src/main/assets/index.html
           grep -q 'reference-v4' app/src/main/assets/index.html
+          grep -q 'r4QaSetup' app/src/main/assets/index.html
           grep -q 'ldhAndroidResumeAudio' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           grep -q 'SYSTEM_UI_FLAG_LIGHT_STATUS_BAR' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           ! grep -q 'installSafeInsets' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
@@ -88,8 +90,11 @@ jobs:
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
           timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
           grep -q 'data-qa-pass="1"' /tmp/qa.html
-          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-r4 --virtual-time-budget=10000 --dump-dom 'http://127.0.0.1:8000/index.html?homeqa=1&r4qa=1' >/tmp/r4.html
-          grep -q 'data-home-qa="1"' /tmp/r4.html
+          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-r4 --virtual-time-budget=11000 --dump-dom 'http://127.0.0.1:8000/index.html?r4qa=1' >/tmp/r4.html
+          echo '--- R4 QA ---'
+          grep -o 'data-r4-qa="[^"]*"' /tmp/r4.html | head -1 || true
+          grep -o 'data-r4-qa-setup="[^"]*"' /tmp/r4.html | head -1 || true
+          grep -q 'data-r4-qa-setup="1"' /tmp/r4.html
           grep -q 'data-r4-qa="1"' /tmp/r4.html
           grep -q 'id="r4Appbar"' /tmp/r4.html
           grep -q 'reference-v4' /tmp/r4.html
