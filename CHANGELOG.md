@@ -1,5 +1,26 @@
 # Changelog
 
+## UI 1.2 — Validated
+
+- Mantém **Core 1.0** e toda a navegação da **UI 1.1** preservados.
+- Atualiza o Android para **v1.2.0** (`versionCode 31`).
+- Adiciona cabeçalho contextual às 9 áreas do app.
+- A Visão Geral ganha atalhos diretos para National Dex, Faltando, Jogos e Storage/HOME.
+- National Dex e Faltando passam a ter alternância rápida entre visão completa e pendências.
+- Aumenta alvos de toque e melhora espaçamento de controles no mobile.
+- Melhora comportamento da ficha do Pokémon em telas pequenas e área segura inferior.
+- Mantém barra inferior com Início, Jogos, Dex, Faltando e Mais.
+- Adiciona suíte própria da UI 1.2 e mantém uma suíte de regressão da UI 1.1.
+- Core 1.0, UI 1.1 e UI 1.2 passaram nas verificações estruturais.
+- Sintaxe JavaScript aprovada.
+- Smoke test em Chrome real aprovado.
+- Persistência após reabertura aprovada.
+- APK compilado e inspecionado com **1.025 sprites**, Data Pack completo, Core 1.0 e UI 1.2.
+
+### Estado de distribuição
+
+O APK v1.2.0 continua sendo um **debug APK validado para instalação e QA**. Release público depende de assinatura/keystore de produção.
+
 ## UI 1.1 — Validated
 
 - Mantém o **Core 1.0** congelado e altera somente apresentação/navegação.
@@ -17,10 +38,6 @@
 - Smoke test em Chrome real passou com a UI 1.1.
 - Persistência após fechar e reabrir o navegador continuou aprovada.
 - APK foi compilado, inspecionado e confirmado com UI 1.1 + 1.025 sprites locais.
-
-### Estado de distribuição
-
-O APK v1.1.0 é um **debug APK validado para instalação e QA**. Release público continua dependendo de assinatura/keystore de produção.
 
 ## Core 1.0 — Validated
 
