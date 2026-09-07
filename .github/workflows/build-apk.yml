@@ -58,7 +58,9 @@ jobs:
         run: python3 tools/rework_audio_v2_2.py
       - name: Apply game Dex navigation fix 2.2.1
         run: python3 tools/fix_game_dex_v2_2_1.py
-      - name: Validate Core, UI, Journey, Map, Navigation and Audio
+      - name: Apply General library and Android visual audit 2.3
+        run: python3 tools/rework_general_library_v2_3.py
+      - name: Validate Core, UI, Journey, Map, Navigation, Audio and General library
         run: |
           python3 tools/validate_core1.py
           python3 tools/validate_ui_v1.py
@@ -73,8 +75,12 @@ jobs:
           python3 tools/validate_map_v2_0.py
           python3 tools/validate_navigation_v2_1.py
           python3 tools/validate_audio_v2_2.py
+          python3 tools/validate_general_library_v2_3.py
           grep -q 'living-dex-game-dex-fix" content="2.2.1"' app/src/main/assets/index.html
-          grep -q 'nav221OpenGameDex' app/src/main/assets/index.html
+          grep -q 'living-dex-general-library" content="2.3"' app/src/main/assets/index.html
+          grep -q 'installSafeInsets' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
+          grep -q 'WindowInsets.Type.navigationBars' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
+          grep -q "versionName '2.3.0'" app/build.gradle
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -82,26 +88,26 @@ jobs:
           s=pathlib.Path('app/src/main/assets/index.html').read_text(); pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)))
           PY
           node --check /tmp/livingdex.js
-      - name: Browser QA, direct game Dex regression and persistence reopen test
+      - name: Browser QA, General library, direct game Dex and persistence tests
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; test -n "$CHROME"
           python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
-          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
+          timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
           grep -q 'data-qa-pass="1"' /tmp/qa.html
-          grep -q 'living-dex-game-dex-fix" content="2.2.1"' /tmp/qa.html
+          grep -q 'living-dex-general-library" content="2.3"' /tmp/qa.html
           grep -q 'living-dex-audio" content="2.2"' /tmp/qa.html
           curl -fsS 'http://127.0.0.1:8000/assets/maps/paldea-route.svg' | grep -q 'Mapa estilizado de Paldea'
+          rm -rf /tmp/livingdex-general-profile
+          timeout 30s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-general-profile --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/index.html?generalqa=1' >/tmp/general.html
+          grep -q 'data-general-qa="1"' /tmp/general.html
+          grep -q '>Geral<' /tmp/general.html
+          grep -q 'Biblioteca' /tmp/general.html
+          grep -q 'Dex Nacional' /tmp/general.html
           rm -rf /tmp/livingdex-navfix-profile
-          timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-navfix-profile --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/index.html?navfixqa=1' >/tmp/navfix.html
-          echo '--- NAVFIX DIAGNOSTICS ---'
-          grep -o 'data-navfix-buttons="[^"]*"' /tmp/navfix.html | head -1 || true
-          grep -o 'data-navfix-action="[^"]*"' /tmp/navfix.html | head -1 || true
-          grep -o 'data-game-dex-open="[^"]*"' /tmp/navfix.html | head -1 || true
-          grep -o 'data-game-dex-view="[^"]*"' /tmp/navfix.html | head -1 || true
-          grep -o 'data-navfix-pass="[^"]*"' /tmp/navfix.html | head -1 || true
+          timeout 30s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-navfix-profile --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/index.html?navfixqa=1' >/tmp/navfix.html
           grep -q 'data-navfix-pass="1"' /tmp/navfix.html
           grep -q 'data-game-dex-open="1"' /tmp/navfix.html
-          timeout 20s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/reopen.html
+          timeout 22s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/reopen.html
           grep -q 'data-reopen-pass="1"' /tmp/reopen.html
       - name: Seal CI validation marker
         run: |
@@ -114,7 +120,7 @@ jobs:
           python3 tools/validate_map_v2_0.py
           python3 tools/validate_navigation_v2_1.py
           python3 tools/validate_audio_v2_2.py
-          grep -q 'living-dex-game-dex-fix" content="2.2.1"' app/src/main/assets/index.html
+          python3 tools/validate_general_library_v2_3.py
       - name: Build debug and unsigned release APKs
         run: gradle :app:assembleDebug :app:assembleRelease --stacktrace
       - name: Verify APK payloads
@@ -124,7 +130,8 @@ jobs:
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             zipinfo -1 "$APK" | grep -q '^assets/assets/maps/paldea-route.svg$'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-game-dex-fix" content="2.2.1"'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-general-library" content="2.3"'
+            unzip -p "$APK" assets/index.html|grep -q 'nav23OpenLibrary'
             unzip -p "$APK" assets/index.html|grep -q 'nav221OpenGameDex'
             unzip -p "$APK" assets/index.html|grep -q 'LDH_AUDIO_KEY'
           done
@@ -141,14 +148,14 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           zipinfo -1 app/build/outputs/apk/release/app-release.apk | grep -q '^assets/assets/maps/paldea-route.svg$'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-game-dex-fix" content="2.2.1"'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'nav221OpenGameDex'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-general-library" content="2.3"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'nav23OpenLibrary'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
-      - name: Upload production signed v2.2.1
+      - name: Upload production signed v2.3.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v2.2.1-Production-Signed
+          name: LivingDexHub-v2.3.0-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
