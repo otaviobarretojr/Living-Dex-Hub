@@ -12,10 +12,21 @@ s=s.replace('</style>',css+'\n</style>',1)
 js=r'''
 // Box all-games parity 7.3
 const LD73_SUPPORTED=['sv','za','swsh','bdsp','letsgo','arceus'];
+const LD73_FALLBACK_GAMES=[
+ {id:'sv',name:'Scarlet / Violet'},
+ {id:'za',name:'Legends Z-A'},
+ {id:'swsh',name:'Sword / Shield'},
+ {id:'bdsp',name:'Brilliant Diamond / Shining Pearl'},
+ {id:'letsgo',name:"Let\'s Go Pikachu / Eevee"},
+ {id:'arceus',name:'Legends Arceus'}
+];
 const ld73BoxByGame={};
 function ld73SupportedGames(){
- const all=Array.isArray(window.GAMES)?GAMES:[];
- return all.filter(g=>LD73_SUPPORTED.includes(g.id));
+ let source=[];
+ try{if(typeof GAMES!=='undefined'&&Array.isArray(GAMES))source=GAMES}catch(e){}
+ if(!source.length&&Array.isArray(window.GAMES))source=window.GAMES;
+ const byId=new Map(source.map(g=>[g.id,g]));
+ return LD73_SUPPORTED.map(id=>byId.get(id)||LD73_FALLBACK_GAMES.find(g=>g.id===id)).filter(Boolean)
 }
 function ld73RememberBox(){const id=state?.activeGameId;if(id)ld73BoxByGame[id]=ld71BoxIndex||0}
 function ld73RestoreBox(id){ld71BoxIndex=Math.max(0,Number(ld73BoxByGame[id]||0))}
@@ -30,9 +41,10 @@ async function ld73LoadGame(id){
 }
 window.ld72OpenGames=function(){
  ld72EnsureSheet();const root=document.getElementById('ld72GamesList');if(!root)return;
- const active=state.activeGameId;
- root.innerHTML=ld73SupportedGames().map(g=>`<button class="ld72-gameitem ${g.id===active?'active':''}" onclick="ld73SelectGame('${g.id}')"><img src="${ld72Cover(g)}"><span><b>${g.name}</b><small>Boxes organizadas de 30 em 30</small><span class="ld73-meta"><span class="ld73-pill">Living Dex</span><span class="ld73-pill">Box por jogo</span></span></span><span class="ld72-check">${g.id===active?'✓':'›'}</span></button>`).join('')
- document.getElementById('ld72GameSheet').classList.add('active')
+ const active=state?.activeGameId;
+ const games=ld73SupportedGames();
+ root.innerHTML=games.map(g=>`<button class="ld72-gameitem ${g.id===active?'active':''}" onclick="ld73SelectGame('${g.id}')"><img src="${ld72Cover(g)}"><span><b>${g.name}</b><small>Boxes organizadas de 30 em 30</small><span class="ld73-meta"><span class="ld73-pill">Living Dex</span><span class="ld73-pill">Box por jogo</span></span></span><span class="ld72-check">${g.id===active?'✓':'›'}</span></button>`).join('');
+ document.getElementById('ld72GameSheet')?.classList.add('active')
 }
 async function ld73SelectGame(id){
  const ok=await ld73LoadGame(id);if(!ok)return;
