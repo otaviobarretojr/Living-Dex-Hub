@@ -11,13 +11,10 @@ manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
 if manifest.get("count") != 1025 or manifest.get("missing"):
     raise SystemExit("Não é permitido finalizar o Core sem 1.025 imagens locais válidas.")
 
-# Build identity.
 html = re.sub(r"<title>.*?</title>", "<title>Living Dex Hub — Core 1.0</title>", html, count=1)
 if 'name="living-dex-build"' not in html:
     html = html.replace("</head>", '<meta name="living-dex-build" content="core-1.0"/>\n</head>', 1)
 
-# Physical APK build markers. BUILD_QA_VALIDATED only becomes true after the
-# headless browser tests have actually passed in CI.
 marker = "const OFFLINE_POKEMON_ASSET_COUNT=1025;\nconst ANDROID_BUILD_READY=true;\nconst BUILD_QA_VALIDATED=false;\n"
 if "OFFLINE_POKEMON_ASSET_COUNT" not in html:
     html = html.replace("function offlineImageCount(){", marker + "function offlineImageCount(){", 1)
@@ -28,15 +25,9 @@ html = re.sub(
     count=1,
 )
 
-# Honest acquisition closure: exact/derived/general are distinct. We eliminate
-# the meaningless unknown state without inventing a location or encounter.
 html = html.replace(
     "const map={verified:['VERIFICADO','verified'],derived:['DERIVADO DA BASE','derived'],partial:['PARCIAL','partial']},x=map[level]||map.partial;",
     "const map={verified:['VERIFICADO','verified'],derived:['DERIVADO DA BASE','derived'],general:['ORIENTAÇÃO GERAL','partial'],partial:['PARCIAL','partial']},x=map[level]||map.general;",
-)
-html = html.replace(
-    "alternatives.sort((a,b)=>({verified:0,derived:1,partial:2}[a.confidence]-({verified:0,derived:1,partial:2}[b.confidence]));",
-    "alternatives.sort((a,b)=>({verified:0,derived:1,general:2,partial:3}[a.confidence]-({verified:0,derived:1,general:2,partial:3}[b.confidence]));",
 )
 html = html.replace(
     "if(av?.native)return {kind:'native',method:'Disponível nesta Pokédex',details:[`Presente em: ${av.subdexes.join(', ')}`,'A base confirma pertencimento à Pokédex, mas não encontrou encontro direto; pode ser presente, evento, encontro fixo, fóssil ou outro método especial.'],confidence:'partial',source:'Data Pack da Pokédex',routes:[],alternatives:[]};",
@@ -50,15 +41,12 @@ html = html.replace(
     "return {kind:'unknown',method:'Método ainda não fechado',details:['Sem rota direta, evolução ou aquisição especial validada na base atual.'],confidence:'partial',source:'Sem validação',routes:[],alternatives:[]}",
     "return {kind:'unavailable',method:'Sem obtenção direta confirmada neste jogo',details:['Nenhuma rota direta, evolução ou aquisição especial foi confirmada para esta combinação.','Use outro jogo compatível ou Pokémon HOME quando a espécie aceitar transferência.'],confidence:'general',source:'Cobertura local sem rota direta',routes:[],alternatives:[]}",
 )
-
-# Coverage report: general guidance is useful but is not presented as an exact route.
 html = html.replace("let verified=0,derived=0,partial=0,unknown=0,special=0,samples=[];", "let verified=0,derived=0,general=0,partial=0,unknown=0,special=0,samples=[];")
 html = html.replace("if(a.confidence==='verified')verified++; else if(a.confidence==='derived')derived++; else partial++;", "if(a.confidence==='verified')verified++; else if(a.confidence==='derived')derived++; else if(a.confidence==='general')general++; else partial++;")
 html = html.replace("const result={gameId,total:members.length,verified,derived,partial,unknown,special,samples,finishedAt:new Date().toISOString()};", "const result={gameId,total:members.length,verified,derived,general,partial,unknown,special,samples,finishedAt:new Date().toISOString()};")
 html = html.replace("const {gameId,total,verified,derived,partial,unknown,special=0,samples,finishedAt}=result;", "const {gameId,total,verified,derived,general=0,partial,unknown,special=0,samples,finishedAt}=result;")
 html = html.replace("const unresolved=Object.values(audits).filter(Boolean).reduce((n,x)=>n+(x.partial||0),0);", "const unresolved=Object.values(audits).filter(Boolean).reduce((n,x)=>n+(x.partial||0)+(x.unknown||0),0);")
 
-# Core/APK gates now reflect the physical package and CI validation.
 html = re.sub(
     r"\{id:'all-coverage',label:'Auditoria de obtenção dos 6 jogos concluída'.*?\},",
     "{id:'all-coverage',label:'Engine de obtenção sem estado desconhecido',severity:'blocker',ok:()=>typeof deriveAcquisition==='function'&&!String(deriveAcquisition).includes(\"kind:'unknown'\"),note:'Rotas exatas, derivadas e orientações gerais permanecem diferenciadas; o app não devolve mais um estado sem resposta.'},",
@@ -79,7 +67,6 @@ html = re.sub(
     flags=re.S,
 )
 
-# Persistence/reopen harness for CI. It is inert for normal users.
 old = "if(new URLSearchParams(location.search).get('qa')==='1'){\n setTimeout(()=>runRuntimeSmokeTest(),700)\n}"
 new = """if(new URLSearchParams(location.search).get('qa')==='1'){
  localStorage.setItem('livingdex-ci-reopen','core1');
@@ -92,7 +79,6 @@ if old not in html:
     raise SystemExit("Harness QA esperado não encontrado")
 html = html.replace(old, new, 1)
 
-# Mobile usability pass.
 mobile = """
 /* Core 1.0 — mobile usability pass */
 @media(max-width:700px){
@@ -111,7 +97,7 @@ if "Core 1.0 — mobile usability pass" not in html:
 
 required = [
     "Core 1.0", "OFFLINE_POKEMON_ASSET_COUNT=1025", "BUILD_QA_VALIDATED=false",
-    "kind:'unavailable'", "ORIENTAÇÃO GERAL", "data.reopenPass",
+    "kind:'unavailable'", "ORIENTAÇÃO GERAL", "dataset.reopenPass",
 ]
 missing = [x for x in required if x not in html]
 if missing or "Método ainda não fechado" in html:
