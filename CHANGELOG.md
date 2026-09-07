@@ -1,5 +1,27 @@
 # Changelog
 
+## UI 1.1 — Validated
+
+- Mantém o **Core 1.0** congelado e altera somente apresentação/navegação.
+- Atualiza o pacote Android para **v1.1.0** (`versionCode 30`).
+- Rework visual completo de fundo, superfícies, cards, botões, status e hierarquia.
+- No mobile, substitui a navegação superior extensa por barra inferior com **Início, Jogos, Dex, Faltando e Mais**.
+- O menu **Mais** reúne Famílias evolutivas, Planejamento, Form Dex, Storage/HOME e Configurações.
+- Desktop mantém as 9 áreas originais.
+- Busca e filtros ficam sticky durante a rolagem em telas menores.
+- Grids da Pokédex se adaptam para 3 ou 2 colunas conforme a largura do aparelho.
+- Paginação respeita a barra inferior e `safe-area-inset-bottom`.
+- Adiciona suíte específica da interface com **13/13 verificações**.
+- Core continua aprovado em **17/17 verificações**.
+- JavaScript continua aprovado em `node --check`.
+- Smoke test em Chrome real passou com a UI 1.1.
+- Persistência após fechar e reabrir o navegador continuou aprovada.
+- APK foi compilado, inspecionado e confirmado com UI 1.1 + 1.025 sprites locais.
+
+### Estado de distribuição
+
+O APK v1.1.0 é um **debug APK validado para instalação e QA**. Release público continua dependendo de assinatura/keystore de produção.
+
 ## Core 1.0 — Validated
 
 - Fecha o Data Pack offline em **12/12 Pokédexes**.
@@ -15,10 +37,6 @@
 - Sela `BUILD_QA_VALIDATED=true` somente após os testes funcionais passarem.
 - Compila o APK Android e inspeciona o conteúdo interno para confirmar 1.025 sprites e Core 1.0 validado.
 - Gera e valida SHA-256 do APK.
-
-### Estado de distribuição
-
-O APK atual é um **debug APK validado para QA e instalação**. Um release público ainda requer assinatura com keystore de produção.
 
 ## Build 25.0 — Offline Data Pack
 
