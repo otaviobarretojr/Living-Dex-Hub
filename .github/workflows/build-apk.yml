@@ -65,6 +65,9 @@ jobs:
       - name: Finalize Core 1.0 logic and mobile UI
         run: python3 tools/finalize_core1.py
 
+      - name: Update runtime QA for complete offline pack
+        run: python3 tools/patch_core1_runtime_qa.py
+
       - name: Static Core 1.0 validation
         run: python3 tools/validate_core1.py
 
@@ -86,9 +89,13 @@ jobs:
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
           sleep 2
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=12000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/livingdex-qa.html
-          grep -q 'data-qa-pass="1"' /tmp/livingdex-qa.html
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=4000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/livingdex-reopen.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/livingdex-qa.html
+          if ! grep -q 'data-qa-pass="1"' /tmp/livingdex-qa.html; then
+            echo 'Runtime smoke failed. QA result:'
+            grep -A120 -B5 'id="qaResult"' /tmp/livingdex-qa.html || true
+            exit 1
+          fi
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/livingdex-reopen.html
           grep -q 'data-reopen-pass="1"' /tmp/livingdex-reopen.html
           echo 'Browser QA: PASS'
           echo 'Persistence after browser reopen: PASS'
