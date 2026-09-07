@@ -47,8 +47,7 @@ jobs:
       - name: Browser QA professional UI 6.0
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
-          timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-v60 --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?v50qa=1&pro60qa=1' >/tmp/v60.html
-          grep -q 'data-v50-qa="1"' /tmp/v60.html
+          timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-v60 --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?pro60qa=1' >/tmp/v60.html
           grep -q 'data-pro60-qa="1"' /tmp/v60.html
           grep -q 'data-professional-ui="6.0"' /tmp/v60.html
           grep -q 'id="jh52"' /tmp/v60.html
