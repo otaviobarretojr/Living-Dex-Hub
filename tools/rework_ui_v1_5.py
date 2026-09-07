@@ -5,7 +5,6 @@ HTML=ROOT/'app'/'src'/'main'/'assets'/'index.html'
 html=HTML.read_text(encoding='utf-8')
 html=html.replace('<meta name="living-dex-ui" content="1.4"/>','<meta name="living-dex-ui" content="1.5"/>',1)
 html=html.replace('Core 1.0 • UI 1.4 • Offline','Core 1.0 • UI 1.5 • Offline',1)
-# Remove duplicated Home shortcut strip from UI 1.2: Home is now progress-only.
 html=html.replace(" if(viewId==='home')ui12HomeShortcuts(v);","",1)
 html=html.replace("home:['Visão geral','Seu progresso, próximos passos e visão rápida da coleção.']","home:['Seu progresso','Visão geral da sua coleção, sem repetir as ferramentas das outras abas.']",1)
 css=r'''
@@ -27,8 +26,6 @@ function ui15QuickCapture(ev,card){
  ev.preventDefault();ev.stopPropagation();
  const id=ui15SpeciesId(card); if(!id)return;
  if(card.classList.contains('caught')){ if(typeof openPokemon==='function')openPokemon(id); else card.click(); return; }
- // Reuse the app's own card interaction and registration UI instead of maintaining parallel collection state.
- // A synthetic click opens the species sheet; the first registration action is then invoked when discoverable.
  card.click();
  setTimeout(()=>{
   const modal=document.getElementById('modal'); if(!modal)return;
@@ -58,7 +55,7 @@ function ui15ForwardBackup(rx){
 }
 function ui15Ensure(){ui15DecorateDex();ui15BackupGuide()}
 const UI15_OBSERVER=new MutationObserver(()=>ui15Ensure());
-setTimeout(()=>{ui15Ensure();UI15_OBSERVER.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']})},0);
+setTimeout(()=>{ui15Ensure();UI15_OBSERVER.observe(document.body,{childList:true,subtree:true})},0);
 '''
 if 'Living Dex Hub UI 1.5 — usability layer' not in html: html=html.replace('function androidHandleBack(){',js+'\nfunction androidHandleBack(){',1)
 required=['living-dex-ui" content="1.5','Living Dex Hub UI 1.5','function ui15QuickCapture','quick-catch','Criar backup','Restaurar backup','Core 1.0 • UI 1.5 • Offline']
