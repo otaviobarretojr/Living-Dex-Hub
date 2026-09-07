@@ -1,0 +1,65 @@
+name: Build Living Dex APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'app/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Restore app HTML
+        run: |
+          python3 - <<'PY'
+          import gzip, base64, pathlib
+          root=pathlib.Path('app/src/main/assets')
+          parts=[root/f'index.part{i:02d}' for i in range(5)]
+          packed=''.join(p.read_text().strip() for p in parts)
+          out=root/'index.html'
+          out.write_bytes(gzip.decompress(base64.b64decode(packed)))
+          assert out.stat().st_size == 223467, f'Unexpected HTML size: {out.stat().st_size}'
+          for p in parts:
+              p.unlink()
+          print('Restored', out, out.stat().st_size, 'bytes')
+          PY
+
+      - name: Build debug APK
+        run: gradle :app:assembleDebug --stacktrace
+
+      - name: Verify APK exists
+        run: test -f app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Generate SHA-256
+        run: sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/app-debug.apk.sha256
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LivingDexHub-APK
+          path: |
+            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/debug/app-debug.apk.sha256
+          if-no-files-found: error
