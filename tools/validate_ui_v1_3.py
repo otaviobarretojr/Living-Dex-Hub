@@ -2,7 +2,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 html=(ROOT/'app'/'src'/'main'/'assets'/'index.html').read_text(encoding='utf-8')
 checks={
- 'ui_marker':any(f'name="living-dex-ui" content="{v}"' in html for v in ['1.3','1.4']),
+ 'ui_marker':any(f'name="living-dex-ui" content="{v}"' in html for v in ['1.3','1.4','1.5']),
  'core_preserved':'name="living-dex-build" content="core-1.0"' in html,
  'profile_focus':'Living Dex Hub UI 1.3 — Pokemon profile focus pass' in html,
  'sheet_mobile_height':'max-height:96dvh' in html,
