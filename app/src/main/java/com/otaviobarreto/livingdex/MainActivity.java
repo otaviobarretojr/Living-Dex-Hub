@@ -72,7 +72,14 @@ public class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
-        if (webView != null) webView.onResume();
+        if (webView != null) {
+            webView.onResume();
+            webView.postDelayed(() -> {
+                if (webView != null) {
+                    webView.evaluateJavascript("if(typeof ldhAndroidResumeAudio==='function'){ldhAndroidResumeAudio()}", null);
+                }
+            }, 120);
+        }
     }
 
     @Override protected void onPause() {
