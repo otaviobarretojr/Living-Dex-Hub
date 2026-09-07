@@ -1,0 +1,13 @@
+{
+  "version": "4.5",
+  "purpose": "Offline visual media used by the reference-faithful game library and Paldea map UI",
+  "assets": [
+    {"id":"letsgo","file":"letsgo.jpg","url":"https://2.bp.blogspot.com/-iBHO6FapV2w/W_yN0ezp8EI/AAAAAAAAEL8/VJUGYddg39clQlsIyiOKY9ovoGcKdZlEACLcBGAs/s1600/pokemonbanner1.png","source_page":"https://www.nintendoblast.com.br/2018/11/analise-pokemon-lets-go-pikachu-eevee-review-switch.html"},
+    {"id":"swsh","file":"swsh.jpg","url":"https://imagenes.hobbyconsolas.com/files/image_1920_1080/uploads/imagenes/2023/04/25/6902fb865da94.jpeg","source_page":"https://swordshield.pokemon.com/en-us/"},
+    {"id":"bdsp","file":"bdsp.jpg","url":"https://wp-uploads.qualbert.com/2023/04/Pokemon-BDSP-Key-Art-1-scaled.jpg","source_page":"https://diamondpearl.pokemon.com/en-us/"},
+    {"id":"arceus","file":"arceus.jpg","url":"https://media.vgm.io/releases/98/13689/13689-1628704429.png","source_page":"https://www.nintendo.com/pt-br/store/products/pokemon-legends-arceus-switch/"},
+    {"id":"sv","file":"sv.jpg","url":"https://miketendo64.com/wp-content/uploads/2022/11/20221124_110906.jpg","source_page":"https://www.nintendo.com/pt-br/store/products/pokemon-violet-switch/"},
+    {"id":"za","file":"za.jpg","url":"https://i.3djuegos.com/juegos/19576/leyendas_pok__mon_za/fotos/ficha/leyendas_pok__mon_za-5987238.jpg","source_page":"https://www.nintendo.com/pt-br/store/products/pokemon-legends-z-a-switch/"},
+    {"id":"paldea-map","file":"paldea-map.jpg","url":"https://progameguides.com/wp-content/uploads/2022/09/Pokemon-Scarlet-and-Violet-Paldea-Map.jpg","source_page":"https://progameguides.com/pokemon-scarlet-and-violet/pokemon-scarlet-and-violet-map-of-the-paldea-region-pois-and-new-features/"}
+  ]
+}
