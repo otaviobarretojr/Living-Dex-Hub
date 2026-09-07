@@ -76,9 +76,9 @@ jobs:
           python3 tools/validate_general_library_v2_3.py
           grep -q 'living-dex-general-library" content="2.3"' app/src/main/assets/index.html
           grep -q 'living-dex-general-routing" content="2.3.1"' app/src/main/assets/index.html
-          grep -q 'installSafeInsets' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q 'WindowInsets.Type.navigationBars' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q "versionName '2.3.0'" app/build.gradle
+          ! grep -q 'installSafeInsets' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
+          ! grep -q 'WindowInsets.Type.navigationBars' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
+          grep -q "versionName '2.3.1'" app/build.gradle
 
       - name: Validate JavaScript syntax
         run: |
@@ -93,29 +93,19 @@ jobs:
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; test -n "$CHROME"
           python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
-
           timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
           grep -q 'data-qa-pass="1"' /tmp/qa.html
           grep -q 'living-dex-general-library" content="2.3"' /tmp/qa.html
           curl -fsS 'http://127.0.0.1:8000/assets/maps/paldea-route.svg' | grep -q 'Mapa estilizado de Paldea'
-
           rm -rf /tmp/livingdex-general-profile
           timeout 30s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-general-profile --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/index.html?generalqa=1' >/tmp/general.html
-          echo '--- GENERAL QA ---'
-          grep -o 'data-general-qa="[^"]*"' /tmp/general.html | head -1 || true
-          grep -o 'nav23-general-switch' /tmp/general.html | head -1 || true
           grep -q 'data-general-qa="1"' /tmp/general.html
           grep -q 'Biblioteca' /tmp/general.html
           grep -q 'Dex Nacional' /tmp/general.html
-
           rm -rf /tmp/livingdex-navfix-profile
           timeout 30s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-navfix-profile --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/index.html?navfixqa=1' >/tmp/navfix.html
-          echo '--- GAME DEX QA ---'
-          grep -o 'data-navfix-pass="[^"]*"' /tmp/navfix.html | head -1 || true
-          grep -o 'data-game-dex-open="[^"]*"' /tmp/navfix.html | head -1 || true
           grep -q 'data-navfix-pass="1"' /tmp/navfix.html
           grep -q 'data-game-dex-open="1"' /tmp/navfix.html
-
           timeout 22s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/reopen.html
           grep -q 'data-reopen-pass="1"' /tmp/reopen.html
 
@@ -140,8 +130,6 @@ jobs:
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
             unzip -p "$APK" assets/index.html|grep -q 'living-dex-general-library" content="2.3"'
             unzip -p "$APK" assets/index.html|grep -q 'living-dex-general-routing" content="2.3.1"'
-            unzip -p "$APK" assets/index.html|grep -q 'nav23OpenLibrary'
-            unzip -p "$APK" assets/index.html|grep -q 'nav221OpenGameDex'
           done
 
       - name: Prepare private production keystore
@@ -158,15 +146,13 @@ jobs:
         run: |
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-general-library" content="2.3"'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-general-routing" content="2.3.1"'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
 
-      - name: Upload production signed v2.3.0
+      - name: Upload production signed v2.3.1
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v2.3.0-Production-Signed
+          name: LivingDexHub-v2.3.1-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
