@@ -1,11 +1,8 @@
 from pathlib import Path
 import re
-
-ROOT=Path(__file__).resolve().parents[1]
-HTML=ROOT/'app'/'src'/'main'/'assets'/'index.html'
-html=HTML.read_text(encoding='utf-8')
+ROOT=Path(__file__).resolve().parents[1]; HTML=ROOT/'app'/'src'/'main'/'assets'/'index.html'; html=HTML.read_text(encoding='utf-8')
 checks={
- 'ui12_marker':'name="living-dex-ui" content="1.2"' in html,
+ 'ui12_marker':any(f'name="living-dex-ui" content="{v}"' in html for v in ['1.2','1.3']),
  'core_marker':'name="living-dex-build" content="core-1.0"' in html,
  'context_headers':'UI12_SCREENS' in html and 'function ui12Intro' in html,
  'home_shortcuts':'function ui12HomeShortcuts' in html and html.count('class="quick-tile"')>=4,
@@ -16,8 +13,6 @@ checks={
  'touch_targets':'min-height:44px' in html,
  'sheet_mobile':'sheet-head' in html and 'safe-area-inset-bottom' in html,
  'core_functions':all(x in html for x in ['function backup()','function createSnapshot','function addSpecimenInstance','function renderFormDex','function deriveAcquisition']),
- 'no_gamification':all(x not in html for x in ['Sistema de missões','Cronômetro de missão','XP de usuário']),
-}
-failed=[k for k,v in checks.items() if not v]
-print({'passed':len(checks)-len(failed),'total':len(checks),'failed':failed})
-if failed: raise SystemExit('UI 1.2 validation failed: '+', '.join(failed))
+ 'no_gamification':all(x not in html for x in ['Sistema de missões','Cronômetro de missão','XP de usuário'])}
+failed=[k for k,v in checks.items() if not v]; print({'passed':len(checks)-len(failed),'total':len(checks),'failed':failed})
+if failed: raise SystemExit('UI 1.2 regression validation failed: '+', '.join(failed))
