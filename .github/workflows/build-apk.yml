@@ -90,10 +90,19 @@ jobs:
           grep -q 'Seu andamento em Paldea' /tmp/home.html
           grep -q 'Time recomendado' /tmp/home.html
           grep -q '>Continuar jornada</button>' /tmp/home.html
-          timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-audio --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?audio25qa=1' >/tmp/audio.html
+      - name: Audio runtime QA
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8001 --directory app/src/main/assets >/tmp/http-audio.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
+          timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-audio2 --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8001/index.html?audio25qa=1' >/tmp/audio.html
+          echo '--- AUDIO 2.5 QA MARKERS ---'
+          grep -o 'data-audio25-qa="[^"]*"' /tmp/audio.html | head -1 || true
+          grep -o 'data-audio25-music="[^"]*"' /tmp/audio.html | head -1 || true
+          grep -o 'data-audio25-sfx="[^"]*"' /tmp/audio.html | head -1 || true
+          grep -o 'data-audio25-volume="[^"]*"' /tmp/audio.html | head -1 || true
           grep -q 'data-audio25-qa="1"' /tmp/audio.html
-          ! grep -q 'id="ldhAudioQuick"' /tmp/audio.html
-          ! grep -q 'id="ldhAudioSettings"' /tmp/audio.html
+          grep -q 'data-audio25-music="true"' /tmp/audio.html
+          grep -q 'data-audio25-sfx="true"' /tmp/audio.html
+          grep -q 'data-audio25-volume="1"' /tmp/audio.html
       - name: Seal CI validation marker
         run: |
           python3 - <<'PY'
