@@ -4,9 +4,9 @@ root=Path(__file__).resolve().parents[1]
 html=(root/'app/src/main/assets/index.html').read_text(encoding='utf-8')
 java=(root/'app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java').read_text(encoding='utf-8')
 gradle=(root/'app/build.gradle').read_text(encoding='utf-8')
-# This validator protects the v4 visual foundation. Release-version validation belongs to CI,
-# so later v4.x polish releases do not falsely fail this historical structural check.
-m=re.search(r"versionName\s+'(4\.\d+\.\d+)'",gradle)
+# This validator protects the v4 visual foundation only. Release-version validation belongs to CI,
+# so later major/minor releases do not falsely fail this historical structural check.
+m=re.search(r"versionName\s+'(\d+\.\d+\.\d+)'",gradle)
 checks={
  'marker':'living-dex-reference-ui\" content=\"4.0\"' in html,
  'reference-class':'reference-v4' in html,
@@ -21,7 +21,7 @@ checks={
  'light-status-icons':'SYSTEM_UI_FLAG_LIGHT_STATUS_BAR' in java,
  'light-nav-icons':'SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR' in java,
  'audio-resume':'ldhAndroidResumeAudio' in java,
- 'v4-release-line':bool(m),
+ 'release-version-present':bool(m),
  'no-old-windowinsets':'installSafeInsets' not in java and 'WindowInsets.Type.navigationBars' not in java,
 }
 for k,v in checks.items(): print(('PASS' if v else 'FAIL'),k)
