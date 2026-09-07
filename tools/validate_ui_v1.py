@@ -1,11 +1,10 @@
 from pathlib import Path
 import re
-
 ROOT=Path(__file__).resolve().parents[1]
 HTML=ROOT/'app'/'src'/'main'/'assets'/'index.html'
 html=HTML.read_text(encoding='utf-8')
 checks={
- 'ui_marker':any(f'name="living-dex-ui" content="{v}"' in html for v in ['1.1','1.2','1.3']),
+ 'ui_marker':any(f'name="living-dex-ui" content="{v}"' in html for v in ['1.1','1.2','1.3','1.4']),
  'core_preserved':'name="living-dex-build" content="core-1.0"' in html and ('BUILD_QA_VALIDATED=false' in html or 'BUILD_QA_VALIDATED=true' in html),
  'desktop_tabs_9':len(re.findall(r'class="tab(?: active)?" data-v="',html))==9,
  'mobile_nav_5':len(re.findall(r'class="mnav-item(?: active)?"',html))==5,
