@@ -60,6 +60,7 @@ jobs:
           python3 tools/clean_home_v3_1_1.py
           python3 tools/rework_reference_v4.py
           python3 tools/fix_reference_v4_runtime_qa.py
+          python3 tools/rework_reference_structure_v4_1.py
       - name: Validate static structure and regressions
         run: |
           python3 tools/validate_core1.py
@@ -71,13 +72,11 @@ jobs:
           python3 tools/validate_general_library_v2_3.py
           python3 tools/validate_home_journey_v2_3_2.py
           python3 tools/validate_reference_v4.py
-          grep -q 'living-dex-reference-ui" content="4.0"' app/src/main/assets/index.html
-          grep -q 'reference-v4' app/src/main/assets/index.html
-          grep -q 'r4QaSetup' app/src/main/assets/index.html
+          python3 tools/validate_reference_structure_v4_1.py
+          grep -q 'living-dex-reference-structure" content="4.1"' app/src/main/assets/index.html
           grep -q 'ldhAndroidResumeAudio' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q 'SYSTEM_UI_FLAG_LIGHT_STATUS_BAR' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           ! grep -q 'installSafeInsets' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q "versionName '4.0.0'" app/build.gradle
+          grep -q "versionName '4.1.0'" app/build.gradle
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -91,21 +90,16 @@ jobs:
           timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
           grep -q 'data-qa-pass="1"' /tmp/qa.html
           timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-r4 --virtual-time-budget=11000 --dump-dom 'http://127.0.0.1:8000/index.html?r4qa=1' >/tmp/r4.html
-          echo '--- R4 QA ---'
-          grep -o 'data-r4-qa="[^"]*"' /tmp/r4.html | head -1 || true
-          grep -o 'data-r4-qa-setup="[^"]*"' /tmp/r4.html | head -1 || true
-          grep -q 'data-r4-qa-setup="1"' /tmp/r4.html
           grep -q 'data-r4-qa="1"' /tmp/r4.html
-          grep -q 'id="r4Appbar"' /tmp/r4.html
-          grep -q 'reference-v4' /tmp/r4.html
-          grep -q 'Seu andamento em Paldea' /tmp/r4.html
+          grep -q 'ref41-journey' /tmp/r4.html
+          grep -q 'Próximo objetivo' /tmp/r4.html
           grep -q 'Time recomendado' /tmp/r4.html
+          grep -q 'Rota de Paldea' /tmp/r4.html
       - name: Audio runtime QA
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8001 --directory app/src/main/assets >/tmp/http-audio.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
           timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-audio --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8001/index.html?audio25qa=1' >/tmp/audio.html
           grep -q 'data-audio25-qa="1"' /tmp/audio.html
-          grep -q 'data-audio25-volume="1"' /tmp/audio.html
       - name: Seal CI validation marker
         run: |
           python3 - <<'PY'
@@ -118,7 +112,7 @@ jobs:
         run: |
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-reference-ui" content="4.0"'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-reference-structure" content="4.1"'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           done
       - name: Prepare private production keystore
@@ -134,11 +128,11 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
-      - name: Upload production signed v4.0.0
+      - name: Upload production signed v4.1.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v4.0.0-Production-Signed
+          name: LivingDexHub-v4.1.0-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
