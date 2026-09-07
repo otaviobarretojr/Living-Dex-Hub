@@ -1,5 +1,25 @@
 # Changelog
 
+## Core 1.0 — Validated
+
+- Fecha o Data Pack offline em **12/12 Pokédexes**.
+- Empacota e valida fisicamente **1.025/1.025 sprites Pokémon** dentro do APK.
+- Mantém imagem local como primeira fonte e fallbacks remotos para melhoria de qualidade.
+- Remove o estado genérico `Método ainda não fechado` da engine de obtenção.
+- Diferencia obtenção verificada, derivada, orientação geral e ausência de obtenção direta confirmada, sem inventar localização.
+- Adiciona uma passada de usabilidade mobile para navegação, grids, fichas e paginação.
+- Adiciona suíte bloqueante com **17/17 verificações estruturais**.
+- Valida sintaxe JavaScript com `node --check`.
+- Executa smoke test do aplicativo em Chrome headless real.
+- Reabre o navegador com o mesmo perfil e confirma persistência de `localStorage`.
+- Sela `BUILD_QA_VALIDATED=true` somente após os testes funcionais passarem.
+- Compila o APK Android e inspeciona o conteúdo interno para confirmar 1.025 sprites e Core 1.0 validado.
+- Gera e valida SHA-256 do APK.
+
+### Estado de distribuição
+
+O APK atual é um **debug APK validado para QA e instalação**. Um release público ainda requer assinatura com keystore de produção.
+
 ## Build 25.0 — Offline Data Pack
 
 - Automatiza a geração do Data Pack das Pokédexes no GitHub Actions.
@@ -7,12 +27,6 @@
 - Validação bloqueante exige as 12 Pokédexes antes da compilação.
 - Pipeline confirmado com 12/12 Pokédexes embutidas.
 - APK debug compilado, verificado, hash SHA-256 gerado e artefato publicado com sucesso.
-
-### Próximos bloqueadores para Core 1.0
-
-- Empacotar imagens Pokémon localmente para uso offline real no APK.
-- Auditar e fechar rotas de obtenção parciais/especiais.
-- Executar teste funcional real de persistência, reabertura e navegação em Android.
 
 ## Build 24.0 — Image Integrity
 
