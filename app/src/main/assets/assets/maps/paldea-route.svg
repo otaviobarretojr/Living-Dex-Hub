@@ -1,33 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Mapa estilizado de Paldea para orientação de rota">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Mapa vetorial de Paldea com regiões e cidades principais">
 <defs>
-  <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#83c7d8"/><stop offset="1" stop-color="#4a94ad"/></linearGradient>
-  <linearGradient id="land" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#9bcf66"/><stop offset=".55" stop-color="#78b85d"/><stop offset="1" stop-color="#b38a55"/></linearGradient>
-  <linearGradient id="desert" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d8b163"/><stop offset="1" stop-color="#c58f4d"/></linearGradient>
-  <linearGradient id="brown" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a98759"/><stop offset="1" stop-color="#7e6348"/></linearGradient>
-  <radialGradient id="crater"><stop stop-color="#7f96a2" stop-opacity=".85"/><stop offset=".45" stop-color="#cdd8db" stop-opacity=".7"/><stop offset="1" stop-color="#ecf5f5" stop-opacity=".15"/></radialGradient>
-  <filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#143143" flood-opacity=".35"/></filter>
-  <filter id="cloud"><feGaussianBlur stdDeviation="18"/></filter>
-  <pattern id="contours" width="90" height="70" patternUnits="userSpaceOnUse"><path d="M0 35 Q25 10 45 35 T90 35" fill="none" stroke="#496d43" stroke-width="2" opacity=".28"/></pattern>
+ <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9ad5df"/><stop offset="1" stop-color="#5ca7bd"/></linearGradient>
+ <linearGradient id="plain" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#afd878"/><stop offset="1" stop-color="#78bd69"/></linearGradient>
+ <linearGradient id="high" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8ebe67"/><stop offset="1" stop-color="#698f57"/></linearGradient>
+ <linearGradient id="desert" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e7c979"/><stop offset="1" stop-color="#cda253"/></linearGradient>
+ <linearGradient id="snow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f6fbfc"/><stop offset="1" stop-color="#c9e3e7"/></linearGradient>
+ <radialGradient id="crater"><stop stop-color="#b9ccd0"/><stop offset=".62" stop-color="#dce7e8"/><stop offset="1" stop-color="#91aa9c"/></radialGradient>
+ <filter id="shadow"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#21445a" flood-opacity=".28"/></filter>
+ <pattern id="contours" width="65" height="50" patternUnits="userSpaceOnUse"><path d="M0 25 Q18 5 32 25 T65 25" fill="none" stroke="#557b50" stroke-width="1.5" opacity=".16"/></pattern>
 </defs>
 <rect width="1200" height="900" fill="url(#sea)"/>
-<g opacity=".22"><path d="M0 90 Q160 20 320 80 T620 70 T920 90 T1200 45" fill="none" stroke="#e8fbff" stroke-width="42"/><path d="M0 790 Q170 720 350 790 T720 770 T1200 800" fill="none" stroke="#e8fbff" stroke-width="55"/></g>
-<g filter="url(#shadow)">
-  <path d="M290 86 L420 68 L505 95 L575 70 L690 90 L790 65 L875 120 L953 187 L1010 285 L982 380 L1045 490 L980 605 L905 685 L818 720 L740 805 L640 780 L552 825 L472 760 L365 750 L294 690 L210 610 L228 515 L170 440 L210 342 L168 250 L245 175 Z" fill="url(#land)" stroke="#6d9a59" stroke-width="10"/>
-  <path d="M205 423 L330 375 L432 410 L450 545 L332 610 L218 574 L186 496 Z" fill="url(#desert)" opacity=".88"/>
-  <path d="M800 405 L985 380 L1030 500 L930 610 L815 570 L770 490 Z" fill="url(#brown)" opacity=".7"/>
-  <path d="M495 92 L610 72 L670 180 L588 250 L470 205 Z" fill="#79a95a" opacity=".8"/>
-  <path d="M360 650 L515 690 L565 810 L438 776 L338 742 Z" fill="#87bd63" opacity=".8"/>
-  <path d="M245 175 L360 120 L418 202 L333 282 L220 260 Z" fill="#72b561" opacity=".82"/>
+<g fill="none" stroke="#dff6f8" stroke-width="9" opacity=".22"><path d="M30 190Q180 130 330 178T640 160T930 182T1180 150"/><path d="M10 740Q170 690 340 740T690 720T1190 745"/></g>
+<!-- Paldea silhouette, intentionally original but geographically aligned to the game -->
+<path filter="url(#shadow)" d="M289 89C355 55 428 68 487 88C539 56 611 55 676 79C741 53 811 70 868 108C927 147 976 206 1001 270C1026 334 994 387 1016 440C1042 503 1025 566 978 617C934 664 873 681 831 726C790 770 747 818 690 805C636 793 599 827 546 821C500 816 470 775 421 767C363 758 314 736 274 694C234 651 216 604 225 553C196 513 175 473 190 429C166 378 171 320 196 274C174 224 203 163 249 127C262 116 276 102 289 89Z" fill="url(#plain)" stroke="#6e9f65" stroke-width="8"/>
+<!-- West / Asado -->
+<path d="M196 387C239 350 303 334 363 350C412 365 446 403 443 458C439 518 389 561 324 574C268 585 218 563 198 520C179 478 177 427 196 387Z" fill="url(#desert)" opacity=".95"/>
+<!-- NW lake / Casseroya basin -->
+<path d="M253 158C308 119 381 116 427 148C462 173 468 214 444 245C418 278 366 285 319 273C278 262 244 234 239 202C236 184 241 169 253 158Z" fill="#5fa8bd" stroke="#d6eff1" stroke-width="5"/>
+<g fill="#75b9c8"><ellipse cx="292" cy="181" rx="19" ry="11"/><ellipse cx="363" cy="212" rx="25" ry="14"/><ellipse cx="402" cy="168" rx="13" ry="8"/></g>
+<!-- North mountains / Glaseado -->
+<path d="M453 96C514 67 583 68 642 87C702 63 778 74 827 111C852 131 871 158 879 185C836 212 785 229 724 228C656 228 600 204 545 208C501 211 469 197 437 174C435 141 441 114 453 96Z" fill="url(#snow)" opacity=".98"/>
+<path d="M492 122l37 45 33-49 41 57 40-62 40 52 45-47 54 62" fill="none" stroke="#a8c9ce" stroke-width="12" stroke-linejoin="round" opacity=".72"/>
+<!-- Northeast forest / Tagtree -->
+<path d="M806 230C868 219 929 246 957 290C976 322 974 364 953 393C912 392 866 378 837 350C810 324 792 270 806 230Z" fill="url(#high)" opacity=".94"/>
+<g fill="#466f47" opacity=".5"><circle cx="850" cy="278" r="10"/><circle cx="892" cy="310" r="12"/><circle cx="922" cy="268" r="9"/><circle cx="878" cy="352" r="11"/></g>
+<!-- East rocky provinces -->
+<path d="M821 395C894 372 973 396 1006 449C1027 482 1020 528 997 563C966 609 910 629 851 614C802 601 775 568 776 523C776 475 791 425 821 395Z" fill="#99b56d" opacity=".9"/>
+<!-- Southwest highland / Alfornada -->
+<path d="M236 584C281 568 338 579 375 613C407 642 418 690 400 738C351 733 308 714 277 684C247 655 231 622 236 584Z" fill="#7ea66a"/>
+<!-- South grassland -->
+<path d="M401 623C455 595 515 603 559 632C604 662 620 713 600 775C551 817 496 798 447 774C409 755 385 719 384 682C383 658 390 637 401 623Z" fill="#9fce72" opacity=".92"/>
+<!-- Central crater -->
+<circle cx="605" cy="430" r="132" fill="url(#crater)" stroke="#e9f0ef" stroke-width="15"/>
+<circle cx="605" cy="430" r="105" fill="#8ea9a7" opacity=".34"/>
+<path d="M516 407Q605 343 694 407Q644 459 605 519Q566 459 516 407Z" fill="#e8f1ef" opacity=".48"/>
+<!-- Terrain texture -->
+<path d="M289 89C355 55 428 68 487 88C539 56 611 55 676 79C741 53 811 70 868 108C927 147 976 206 1001 270C1026 334 994 387 1016 440C1042 503 1025 566 978 617C934 664 873 681 831 726C790 770 747 818 690 805C636 793 599 827 546 821C500 816 470 775 421 767C363 758 314 736 274 694C234 651 216 604 225 553C196 513 175 473 190 429C166 378 171 320 196 274C174 224 203 163 249 127C262 116 276 102 289 89Z" fill="url(#contours)" opacity=".52"/>
+<!-- Rivers / roads -->
+<g fill="none" stroke="#5aa8bc" stroke-linecap="round" opacity=".75"><path d="M424 237C470 268 493 307 491 353" stroke-width="11"/><path d="M746 222C761 280 746 331 718 371" stroke-width="9"/><path d="M508 539C488 594 478 650 492 704" stroke-width="8"/></g>
+<g fill="none" stroke="#6c8a58" stroke-width="4" opacity=".4" stroke-dasharray="8 7"><path d="M321 683Q421 614 498 577Q563 548 605 543"/><path d="M694 532Q772 544 860 520Q918 501 965 472"/><path d="M695 303Q755 282 827 296Q895 308 939 339"/><path d="M465 302Q407 288 350 304Q288 322 237 366"/></g>
+<!-- Cities and landmarks -->
+<g font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" fill="#31504b">
+ <g><circle cx="505" cy="662" r="7" fill="#fff" stroke="#496c63" stroke-width="4"/><text x="520" y="668">Mesagoza</text></g>
+ <g><circle cx="333" cy="698" r="6" fill="#fff" stroke="#496c63" stroke-width="4"/><text x="250" y="724">Cortondo</text></g>
+ <g><circle cx="795" cy="610" r="6" fill="#fff" stroke="#496c63" stroke-width="4"/><text x="810" y="616">Artazon</text></g>
+ <g><circle cx="916" cy="479" r="6" fill="#fff" stroke="#496c63" stroke-width="4"/><text x="931" y="485">Levincia</text></g>
+ <g><circle cx="302" cy="418" r="6" fill="#fff" stroke="#496c63" stroke-width="4"/><text x="218" y="409">Cascarrafa</text></g>
+ <g><circle cx="454" cy="334" r="6" fill="#fff" stroke="#496c63" stroke-width="4"/><text x="391" y="323">Medali</text></g>
+ <g><circle cx="619" cy="163" r="6" fill="#fff" stroke="#496c63" stroke-width="4"/><text x="573" y="151">Montenevera</text></g>
+ <g><circle cx="538" cy="111" r="6" fill="#fff" stroke="#496c63" stroke-width="4"/><text x="478" y="99">Glaseado</text></g>
+ <g><circle cx="289" cy="652" r="6" fill="#fff" stroke="#496c63" stroke-width="4"/><text x="205" y="642">Alfornada</text></g>
 </g>
-<path d="M190 232 C340 250 386 328 450 405 C525 495 678 505 760 430 C852 345 880 258 1000 260" fill="none" stroke="#3f9dc1" stroke-width="18" opacity=".8"/>
-<path d="M260 660 C360 610 440 570 520 560 C625 548 690 595 778 650" fill="none" stroke="#4a9fc0" stroke-width="13" opacity=".75"/>
-<path d="M525 790 C565 660 550 560 588 470" fill="none" stroke="#4a9fc0" stroke-width="10" opacity=".65"/>
-<g fill="none" stroke="#5b7d4d" stroke-width="4" opacity=".52"><path d="M240 205 Q330 245 390 325 T515 480"/><path d="M290 600 Q400 555 505 580 T720 620"/><path d="M650 180 Q720 285 830 300 T970 415"/><path d="M720 700 Q760 600 820 540 T955 500"/></g>
-<path d="M290 86 L420 68 L505 95 L575 70 L690 90 L790 65 L875 120 L953 187 L1010 285 L982 380 L1045 490 L980 605 L905 685 L818 720 L740 805 L640 780 L552 825 L472 760 L365 750 L294 690 L210 610 L228 515 L170 440 L210 342 L168 250 L245 175 Z" fill="url(#contours)" opacity=".55"/>
-<circle cx="610" cy="450" r="142" fill="url(#crater)" stroke="#cfdadb" stroke-width="12" stroke-dasharray="12 10" opacity=".92"/>
-<g filter="url(#cloud)" opacity=".72" fill="#edf7f7"><ellipse cx="540" cy="418" rx="112" ry="52"/><ellipse cx="650" cy="418" rx="120" ry="58"/><ellipse cx="602" cy="500" rx="128" ry="62"/></g>
-<g fill="#d7e8d2" opacity=".8"><circle cx="365" cy="210" r="6"/><circle cx="835" cy="235" r="7"/><circle cx="930" cy="520" r="5"/><circle cx="315" cy="555" r="6"/><circle cx="735" cy="695" r="7"/></g>
-<g font-family="Arial, sans-serif" fill="#274239" opacity=".65" font-size="24" font-weight="700"><text x="272" y="180">OESTE</text><text x="828" y="185">NORTE</text><text x="860" y="650">LESTE</text><text x="430" y="735">SUL</text></g>
-<g font-family="Arial, sans-serif" fill="#1c3a43" font-size="20" font-weight="800"><text x="550" y="440">CRATERA</text><text x="546" y="466">DE PALDEA</text></g>
-<g opacity=".22" fill="#efffff"><circle cx="80" cy="120" r="54"/><circle cx="1090" cy="120" r="64"/><circle cx="1100" cy="760" r="72"/><circle cx="105" cy="760" r="62"/></g>
+<g font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="800" fill="#46625e" opacity=".8"><text x="533" y="425">CRATERA DE</text><text x="561" y="445">PALDEA</text><text x="270" y="236">LAGO CASSEROYA</text><text x="220" y="494">DESERTO ASADO</text><text x="800" y="330">TAGTREE</text></g>
+<!-- Compass -->
+<g transform="translate(1085 110)" fill="none" stroke="#fff" stroke-width="3" opacity=".75"><circle r="34"/><path d="M0-26L7 0L0 26L-7 0Z" fill="#fff" opacity=".55"/><text x="-6" y="-42" fill="#fff" stroke="none" font-family="Arial" font-size="16" font-weight="800">N</text></g>
 </svg>
