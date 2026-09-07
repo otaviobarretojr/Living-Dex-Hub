@@ -48,6 +48,8 @@ jobs:
         run: python3 tools/rework_journey_v1_8.py
       - name: Apply Journey 1.9 smart preparation
         run: python3 tools/rework_journey_v1_9.py
+      - name: Apply Violet-specific Journey 1.9 build
+        run: python3 tools/patch_journey_v1_9_ceruledge.py
       - name: Validate Core, UI and Journey
         run: |
           python3 tools/validate_core1.py
@@ -80,6 +82,7 @@ jobs:
           grep -q 'contextual quick add/remove by game + selected version' /tmp/qa.html
           grep -q 'Golpes recomendados' /tmp/qa.html
           grep -q 'Preparação inteligente' /tmp/qa.html
+          grep -q 'Bitter Blade' /tmp/qa.html
           timeout 20s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/reopen.html
           grep -q 'data-reopen-pass="1"' /tmp/reopen.html
           grep -q 'living-dex-smart-prep" content="1.9"' /tmp/reopen.html
@@ -103,6 +106,7 @@ jobs:
             unzip -p "$APK" assets/index.html|grep -q 'living-dex-smart-prep" content="1.9"'
             unzip -p "$APK" assets/index.html|grep -q 'SV_BUILDS'
             unzip -p "$APK" assets/index.html|grep -q 'svSmartPrep'
+            unzip -p "$APK" assets/index.html|grep -q 'Bitter Blade'
           done
       - name: Prepare private production keystore
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
@@ -118,6 +122,7 @@ jobs:
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-smart-prep" content="1.9"'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'svSmartPrep'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'Bitter Blade'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - name: Upload production signed v1.9.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
