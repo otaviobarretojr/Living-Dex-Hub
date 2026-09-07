@@ -47,10 +47,13 @@ document.addEventListener('pointerdown',()=>{ldhStarted=true;ldh25Start()},{once
 setTimeout(()=>{
  ldh25NormalizeAudio();
  if(new URLSearchParams(location.search).has('audio25qa')){
-  const ok=ldhAudioPrefs.music===true&&ldhAudioPrefs.sfx===true&&Number(ldhAudioPrefs.volume)===1&&!document.getElementById('ldhAudioQuick')&&!document.getElementById('ldhAudioSettings')&&typeof ldhAndroidResumeAudio==='function';
-  document.documentElement.dataset.audio25Qa=ok?'1':'0';
+  const ok=ldhAudioPrefs.music===true&&ldhAudioPrefs.sfx===true&&Number(ldhAudioPrefs.volume)===1&&!document.getElementById('ldhAudioQuick')&&!document.getElementById('ldhAudioSettings')&&typeof window.ldhAndroidResumeAudio==='function';
+  document.documentElement.setAttribute('data-audio25-qa',ok?'1':'0');
+  document.documentElement.setAttribute('data-audio25-music',String(ldhAudioPrefs.music));
+  document.documentElement.setAttribute('data-audio25-sfx',String(ldhAudioPrefs.sfx));
+  document.documentElement.setAttribute('data-audio25-volume',String(ldhAudioPrefs.volume));
  }
-},0);
+},80);
 '''
 s=s.replace('</body>','<script>'+js+'</script>\n</body>',1)
 p.write_text(s,encoding='utf-8')
