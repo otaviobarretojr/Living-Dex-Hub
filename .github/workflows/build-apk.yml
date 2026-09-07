@@ -54,6 +54,7 @@ jobs:
           python3 tools/fix_general_dex_routing_v2_3_1.py
           python3 tools/fix_home_journey_v2_3_2.py
           python3 tools/cleanup_explanatory_copy_v2_4.py
+          python3 tools/audio_always_on_v2_5.py
       - name: Validate static structure and regressions
         run: |
           python3 tools/validate_core1.py
@@ -65,9 +66,11 @@ jobs:
           python3 tools/validate_general_library_v2_3.py
           python3 tools/validate_home_journey_v2_3_2.py
           grep -q 'living-dex-clean-copy" content="2.4"' app/src/main/assets/index.html
-          grep -q 'ui24CleanExplanatoryCopy' app/src/main/assets/index.html
+          grep -q 'living-dex-audio-always-on" content="2.5"' app/src/main/assets/index.html
+          grep -q 'ldhAndroidResumeAudio' app/src/main/assets/index.html
+          grep -q 'ldhAndroidResumeAudio' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           ! grep -q 'installSafeInsets' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q "versionName '2.4.0'" app/build.gradle
+          grep -q "versionName '2.5.0'" app/build.gradle
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -81,12 +84,16 @@ jobs:
           timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
           grep -q 'data-qa-pass="1"' /tmp/qa.html
           grep -q 'living-dex-clean-copy" content="2.4"' /tmp/qa.html
+          grep -q 'living-dex-audio-always-on" content="2.5"' /tmp/qa.html
           timeout 30s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-home --virtual-time-budget=8000 --dump-dom 'http://127.0.0.1:8000/index.html?homeqa=1' >/tmp/home.html
           grep -q 'data-home-qa="1"' /tmp/home.html
           grep -q 'Seu andamento em Paldea' /tmp/home.html
           grep -q 'Time recomendado' /tmp/home.html
           grep -q '>Continuar jornada</button>' /tmp/home.html
-          grep -q 'ui24-explainer-hidden' /tmp/home.html
+          timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-audio --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?audio25qa=1' >/tmp/audio.html
+          grep -q 'data-audio25-qa="1"' /tmp/audio.html
+          ! grep -q 'id="ldhAudioQuick"' /tmp/audio.html
+          ! grep -q 'id="ldhAudioSettings"' /tmp/audio.html
       - name: Seal CI validation marker
         run: |
           python3 - <<'PY'
@@ -97,7 +104,12 @@ jobs:
         run: gradle :app:assembleDebug :app:assembleRelease --stacktrace
       - name: Verify APK payloads
         run: |
-          for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025; unzip -p "$APK" assets/index.html|grep -q 'living-dex-clean-copy" content="2.4"'; unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'; done
+          for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
+            test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-clean-copy" content="2.4"'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-audio-always-on" content="2.5"'
+            unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
+          done
       - name: Prepare private production keystore
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         run: echo "$RELEASE_KEYSTORE_BASE64"|base64 --decode > "$RUNNER_TEMP/livingdex-production.jks" && chmod 600 "$RUNNER_TEMP/livingdex-production.jks"
@@ -111,11 +123,11 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
-      - name: Upload production signed v2.4.0
+      - name: Upload production signed v2.5.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v2.4.0-Production-Signed
+          name: LivingDexHub-v2.5.0-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
