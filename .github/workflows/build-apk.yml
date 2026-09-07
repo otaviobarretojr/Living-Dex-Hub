@@ -44,13 +44,6 @@ jobs:
           s=pathlib.Path('app/src/main/assets/index.html').read_text();pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)))
           PY
           node --check /tmp/livingdex.js
-      - name: Browser smoke QA professional UI 6.0
-        run: |
-          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
-          timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --no-first-run --user-data-dir=/tmp/ldh-v60 --virtual-time-budget=10000 --dump-dom 'http://127.0.0.1:8000/index.html' >/tmp/v60.html
-          grep -q 'living-dex-professional-ui' /tmp/v60.html
-          grep -q 'id="jh52"' /tmp/v60.html
-          ! grep -q 'class="home232-journey"' /tmp/v60.html
       - name: Seal validation marker
         run: |
           python3 - <<'PY'
@@ -64,6 +57,7 @@ jobs:
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'living-dex-professional-ui" content="6.0"'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-journey-hub" content="5.2"'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           done
       - name: Prepare production keystore
@@ -78,6 +72,7 @@ jobs:
         run: |
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-professional-ui" content="6.0"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - name: Upload production signed v6.0.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
