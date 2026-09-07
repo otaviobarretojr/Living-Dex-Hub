@@ -98,6 +98,15 @@ function ui15DecorateDex(){
   b.onclick=e=>ui15QuickCapture(e,card);
  });
 }
+function ui151InstallRenderHooks(){
+ ['renderDex','renderGlobal','renderMissing'].forEach(name=>{
+  const original=window[name];if(typeof original!=='function'||original.__ui151Wrapped)return;
+  const wrapped=function(...args){const result=original.apply(this,args);setTimeout(ui15DecorateDex,0);return result};
+  wrapped.__ui151Wrapped=true;window[name]=wrapped;
+ });
+ ui15Ensure();
+}
+setTimeout(ui151InstallRenderHooks,0);
 '''
 marker='// Living Dex Hub v1.5.1 — contextual quick add/remove by game + selected version.'
 if marker not in html:
@@ -107,7 +116,7 @@ css='''\n/* v1.5.1 contextual quick toggle */\n.quick-catch.is-owned{background:
 if 'v1.5.1 contextual quick toggle' not in html:
     html=html.replace('</style>',css+'\n</style>',1)
 
-required=[marker,'function ui151AddGame','function ui151RemoveGame','state.versionCaught=state.versionCaught||{}','Este registro será removido somente desta versão.','function ui15QuickCapture']
+required=[marker,'function ui151AddGame','function ui151RemoveGame','state.versionCaught=state.versionCaught||{}','Este registro será removido somente desta versão.','function ui15QuickCapture','function ui151InstallRenderHooks','setTimeout(ui151InstallRenderHooks,0)']
 missing=[x for x in required if x not in html]
 if missing: raise SystemExit('Patch v1.5.1 incompleto: '+str(missing))
 HTML.write_text(html,encoding='utf-8')
