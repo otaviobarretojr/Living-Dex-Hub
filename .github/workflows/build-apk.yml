@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -36,13 +36,18 @@ jobs:
           python3 - <<'PY'
           import gzip, base64, pathlib
           root=pathlib.Path('app/src/main/assets')
-          parts=[root/f'index.part{i:02d}' for i in range(5)]
+          parts=[
+              root/'index.part00',
+              root/'index.part01x0', root/'index.part01x1', root/'index.part01x2', root/'index.part01x3',
+              root/'index.part02', root/'index.part03', root/'index.part04'
+          ]
+          sizes=[p.stat().st_size for p in parts]
+          assert sizes == [20000,6500,6500,6500,500,20000,20000,864], f'Unexpected part sizes: {sizes}'
           packed=''.join(p.read_text().strip() for p in parts)
+          assert len(packed) == 80864, f'Unexpected Base64 length: {len(packed)}'
           out=root/'index.html'
           out.write_bytes(gzip.decompress(base64.b64decode(packed)))
           assert out.stat().st_size == 223467, f'Unexpected HTML size: {out.stat().st_size}'
-          for p in parts:
-              p.unlink()
           print('Restored', out, out.stat().st_size, 'bytes')
           PY
 
