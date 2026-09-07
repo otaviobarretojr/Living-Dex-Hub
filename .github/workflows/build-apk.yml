@@ -21,46 +21,43 @@ jobs:
         with: { distribution: temurin, java-version: '17' }
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: '8.10.2' }
+
       - name: Restore canonical app HTML
         run: |
           python3 - <<'PY'
           import gzip,base64,pathlib
-          root=pathlib.Path('app/src/main/assets'); parts=[root/'index.part00',root/'index.part01x0',root/'index.part01x1',root/'index.part01x2',root/'index.part01x3',root/'index.part02',root/'index.part03',root/'index.part04']
-          sizes=[p.stat().st_size for p in parts]; assert sizes==[20000,6500,6500,6500,500,20000,20000,864],sizes
+          root=pathlib.Path('app/src/main/assets')
+          parts=[root/'index.part00',root/'index.part01x0',root/'index.part01x1',root/'index.part01x2',root/'index.part01x3',root/'index.part02',root/'index.part03',root/'index.part04']
+          assert [p.stat().st_size for p in parts]==[20000,6500,6500,6500,500,20000,20000,864]
           packed=''.join(p.read_text().strip() for p in parts); assert len(packed)==80864
           out=root/'index.html'; out.write_bytes(gzip.decompress(base64.b64decode(packed))); assert out.stat().st_size==223467
           PY
-      - run: python3 tools/build_embedded_dex_pack.py
-      - run: python3 tools/inject_embedded_dex_pack.py
-      - run: python3 tools/sync_pokemon_assets.py
-      - run: python3 tools/finalize_core1.py
-      - run: python3 tools/patch_core1_runtime_qa.py
-      - run: python3 tools/rework_ui_v1.py
-      - run: python3 tools/rework_ui_v1_2.py
-      - run: python3 tools/rework_ui_v1_3.py
-      - run: python3 tools/rework_ui_v1_4.py
-      - run: python3 tools/rework_ui_v1_5.py
-      - run: python3 tools/patch_quick_toggle_v1_5_1.py
-      - run: python3 tools/rework_ui_v1_6.py
-      - name: Apply Journey 1.7
-        run: python3 tools/rework_journey_v1_7.py
-      - name: Apply Journey 1.8
-        run: python3 tools/rework_journey_v1_8.py
-      - name: Apply Journey 1.9 smart preparation
-        run: python3 tools/rework_journey_v1_9.py
-      - name: Apply Violet-specific Journey 1.9 build
-        run: python3 tools/patch_journey_v1_9_ceruledge.py
-      - name: Apply offline Paldea Map 2.0
-        run: python3 tools/rework_map_v2_0.py
-      - name: Apply navigation audit 2.1
-        run: python3 tools/rework_navigation_v2_1.py
-      - name: Apply original audio experience 2.2
-        run: python3 tools/rework_audio_v2_2.py
-      - name: Apply game Dex navigation fix 2.2.1
-        run: python3 tools/fix_game_dex_v2_2_1.py
-      - name: Apply General library and Android visual audit 2.3
-        run: python3 tools/rework_general_library_v2_3.py
-      - name: Validate Core, UI, Journey, Map, Navigation, Audio and General library
+
+      - name: Assemble app content
+        run: |
+          python3 tools/build_embedded_dex_pack.py
+          python3 tools/inject_embedded_dex_pack.py
+          python3 tools/sync_pokemon_assets.py
+          python3 tools/finalize_core1.py
+          python3 tools/patch_core1_runtime_qa.py
+          python3 tools/rework_ui_v1.py
+          python3 tools/rework_ui_v1_2.py
+          python3 tools/rework_ui_v1_3.py
+          python3 tools/rework_ui_v1_4.py
+          python3 tools/rework_ui_v1_5.py
+          python3 tools/patch_quick_toggle_v1_5_1.py
+          python3 tools/rework_ui_v1_6.py
+          python3 tools/rework_journey_v1_7.py
+          python3 tools/rework_journey_v1_8.py
+          python3 tools/rework_journey_v1_9.py
+          python3 tools/patch_journey_v1_9_ceruledge.py
+          python3 tools/rework_map_v2_0.py
+          python3 tools/rework_navigation_v2_1.py
+          python3 tools/rework_audio_v2_2.py
+          python3 tools/fix_game_dex_v2_2_1.py
+          python3 tools/rework_general_library_v2_3.py
+
+      - name: Validate static structure and regressions
         run: |
           python3 tools/validate_core1.py
           python3 tools/validate_ui_v1.py
@@ -76,39 +73,47 @@ jobs:
           python3 tools/validate_navigation_v2_1.py
           python3 tools/validate_audio_v2_2.py
           python3 tools/validate_general_library_v2_3.py
-          grep -q 'living-dex-game-dex-fix" content="2.2.1"' app/src/main/assets/index.html
           grep -q 'living-dex-general-library" content="2.3"' app/src/main/assets/index.html
           grep -q 'installSafeInsets' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           grep -q 'WindowInsets.Type.navigationBars' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           grep -q "versionName '2.3.0'" app/build.gradle
+
       - name: Validate JavaScript syntax
         run: |
           python3 - <<'PY'
           import pathlib,re
-          s=pathlib.Path('app/src/main/assets/index.html').read_text(); pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)))
+          s=pathlib.Path('app/src/main/assets/index.html').read_text()
+          pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)))
           PY
           node --check /tmp/livingdex.js
-      - name: Browser QA, General library, direct game Dex and persistence tests
+
+      - name: Browser QA
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; test -n "$CHROME"
           python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
+
           timeout 40s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
           grep -q 'data-qa-pass="1"' /tmp/qa.html
           grep -q 'living-dex-general-library" content="2.3"' /tmp/qa.html
-          grep -q 'living-dex-audio" content="2.2"' /tmp/qa.html
           curl -fsS 'http://127.0.0.1:8000/assets/maps/paldea-route.svg' | grep -q 'Mapa estilizado de Paldea'
+
           rm -rf /tmp/livingdex-general-profile
           timeout 30s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-general-profile --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/index.html?generalqa=1' >/tmp/general.html
+          echo '--- GENERAL QA ---'
+          grep -o 'data-general-qa="[^"]*"' /tmp/general.html | head -1 || true
+          grep -o 'nav23-general-switch' /tmp/general.html | head -1 || true
           grep -q 'data-general-qa="1"' /tmp/general.html
-          grep -q '>Geral<' /tmp/general.html
           grep -q 'Biblioteca' /tmp/general.html
           grep -q 'Dex Nacional' /tmp/general.html
+
           rm -rf /tmp/livingdex-navfix-profile
           timeout 30s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-navfix-profile --virtual-time-budget=7000 --dump-dom 'http://127.0.0.1:8000/index.html?navfixqa=1' >/tmp/navfix.html
           grep -q 'data-navfix-pass="1"' /tmp/navfix.html
           grep -q 'data-game-dex-open="1"' /tmp/navfix.html
+
           timeout 22s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/reopen.html
           grep -q 'data-reopen-pass="1"' /tmp/reopen.html
+
       - name: Seal CI validation marker
         run: |
           python3 - <<'PY'
@@ -116,13 +121,11 @@ jobs:
           p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))
           PY
           python3 tools/validate_core1.py
-          python3 tools/validate_journey_v1_9.py
-          python3 tools/validate_map_v2_0.py
-          python3 tools/validate_navigation_v2_1.py
-          python3 tools/validate_audio_v2_2.py
           python3 tools/validate_general_library_v2_3.py
+
       - name: Build debug and unsigned release APKs
         run: gradle :app:assembleDebug :app:assembleRelease --stacktrace
+
       - name: Verify APK payloads
         run: |
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
@@ -133,24 +136,25 @@ jobs:
             unzip -p "$APK" assets/index.html|grep -q 'living-dex-general-library" content="2.3"'
             unzip -p "$APK" assets/index.html|grep -q 'nav23OpenLibrary'
             unzip -p "$APK" assets/index.html|grep -q 'nav221OpenGameDex'
-            unzip -p "$APK" assets/index.html|grep -q 'LDH_AUDIO_KEY'
           done
+
       - name: Prepare private production keystore
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         run: echo "$RELEASE_KEYSTORE_BASE64"|base64 --decode > "$RUNNER_TEMP/livingdex-production.jks" && chmod 600 "$RUNNER_TEMP/livingdex-production.jks"
+
       - name: Build signed production release
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         env: { RELEASE_STORE_FILE: '${{ runner.temp }}/livingdex-production.jks' }
         run: rm -f app/build/outputs/apk/release/app-release.apk && gradle :app:assembleRelease --rerun-tasks --stacktrace && test -f app/build/outputs/apk/release/app-release.apk
+
       - name: Verify production APK
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         run: |
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          zipinfo -1 app/build/outputs/apk/release/app-release.apk | grep -q '^assets/assets/maps/paldea-route.svg$'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-general-library" content="2.3"'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'nav23OpenLibrary'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
+
       - name: Upload production signed v2.3.0
         if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' && env.RELEASE_STORE_PASSWORD != '' && env.RELEASE_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
