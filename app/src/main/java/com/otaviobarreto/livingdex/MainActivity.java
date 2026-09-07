@@ -50,6 +50,11 @@ public class MainActivity extends Activity {
 
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
+            @Override public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                injectMobileLibraryFix(view);
+            }
+
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 String host = uri.getHost();
@@ -68,6 +73,34 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void injectMobileLibraryFix(WebView view) {
+        String js = "(function(){" +
+            "if(window.__ldhLibraryMobileFix)return;window.__ldhLibraryMobileFix=true;" +
+            "var css='@media(max-width:600px){' +" +
+            "'#games{padding-left:18px!important;padding-right:18px!important;padding-bottom:120px!important}' +" +
+            "'#games h1{font-size:32px!important;line-height:1.08!important;margin-bottom:8px!important}' +" +
+            "'#games>p{font-size:15px!important;line-height:1.4!important;margin-bottom:20px!important}' +" +
+            "'#games .game-grid,#games .games-grid,#games .library-grid,#games [class*=gamesGrid],#games [class*=gameGrid]{display:grid!important;grid-template-columns:1fr!important;gap:16px!important}' +" +
+            "'#games .game-card,#games .gameCard,#games [class*=game-card],#games [class*=gameCard]{width:100%!important;max-width:none!important;min-height:0!important;height:auto!important;margin:0!important;border-radius:24px!important;overflow:hidden!important}' +" +
+            "'#games .game-card button,#games .gameCard button,#games [class*=game-card] button,#games [class*=gameCard] button{min-height:52px!important;border-radius:16px!important;font-size:16px!important;margin-top:12px!important}' +" +
+            "'}';" +
+            "var s=document.createElement('style');s.id='ldh-mobile-library-fix';s.textContent=css;document.head.appendChild(s);" +
+            "function fix(){if(innerWidth>600)return;var root=document.getElementById('games');if(!root)return;" +
+            "var buttons=[].slice.call(root.querySelectorAll('button,a')).filter(function(x){return /Abrir\\s+Dex/i.test(x.textContent||'')});" +
+            "buttons.forEach(function(btn){var card=btn;for(var i=0;i<7&&card.parentElement;i++){card=card.parentElement;var t=card.textContent||'';if(/entradas/i.test(t)&&/Abrir\\s+Dex/i.test(t))break;}" +
+            "card.style.width='100%';card.style.maxWidth='none';card.style.height='auto';card.style.minHeight='0';card.style.margin='0 0 16px';card.style.overflow='hidden';card.style.borderRadius='24px';" +
+            "btn.style.width='100%';btn.style.minHeight='52px';btn.style.marginTop='12px';btn.style.position='relative';btn.style.inset='auto';" +
+            "[].slice.call(card.querySelectorAll('*')).forEach(function(el){var tx=(el.textContent||'').trim();" +
+            "if(/^\\d+%\\s*DEX$/i.test(tx)||(/^\\d+%$/i.test(tx)&&el.children.length===0)){el.style.position='static';el.style.inset='auto';el.style.width='auto';el.style.height='auto';el.style.minWidth='0';el.style.transform='none';el.style.borderRadius='999px';el.style.padding='7px 11px';el.style.display='inline-flex';el.style.alignItems='center';el.style.justifyContent='center';el.style.fontSize='13px';el.style.margin='8px 0';}" +
+            "if(/^(NINTENDO SWITCH\\s*){2,}$/i.test(tx)&&el.children.length===0)el.textContent='NINTENDO SWITCH';" +
+            "});" +
+            "});}" +
+            "fix();setTimeout(fix,120);setTimeout(fix,600);" +
+            "new MutationObserver(function(){clearTimeout(window.__ldhFixTimer);window.__ldhFixTimer=setTimeout(fix,60)}).observe(document.body,{childList:true,subtree:true});" +
+            "})();";
+        view.evaluateJavascript(js, null);
+    }
+
     @Override protected void onSaveInstanceState(Bundle outState) {
         if (webView != null) webView.saveState(outState);
         super.onSaveInstanceState(outState);
@@ -80,6 +113,7 @@ public class MainActivity extends Activity {
             webView.postDelayed(() -> {
                 if (webView != null) {
                     webView.evaluateJavascript("if(typeof ldhAndroidResumeAudio==='function'){ldhAndroidResumeAudio()}", null);
+                    injectMobileLibraryFix(webView);
                 }
             }, 120);
         }
