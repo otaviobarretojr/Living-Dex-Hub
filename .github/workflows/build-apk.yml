@@ -62,13 +62,12 @@ jobs:
         run: |
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"; test -n "$CHROME"
           python3 -m http.server 8000 --directory app/src/main/assets >/tmp/http.log 2>&1 & P=$!; trap 'kill $P || true' EXIT; sleep 2
-          FLAGS="--headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --host-resolver-rules=MAP\ *\ 127.0.0.1,EXCLUDE\ 127.0.0.1 --user-data-dir=/tmp/livingdex-profile"
-          timeout 35s "$CHROME" $FLAGS --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
+          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=14000 --dump-dom 'http://127.0.0.1:8000/index.html?qa=1' >/tmp/qa.html
           grep -q 'data-qa-pass="1"' /tmp/qa.html
           grep -q 'living-dex-ui" content="1.5"' /tmp/qa.html
           grep -q 'quick-catch' /tmp/qa.html
           grep -q 'contextual quick add/remove by game + selected version' /tmp/qa.html
-          timeout 20s "$CHROME" $FLAGS --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/reopen.html
+          timeout 20s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-sync --no-first-run --user-data-dir=/tmp/livingdex-profile --virtual-time-budget=5000 --dump-dom 'http://127.0.0.1:8000/index.html?reopen=1' >/tmp/reopen.html
           grep -q 'data-reopen-pass="1"' /tmp/reopen.html
       - name: Seal CI validation marker
         run: |
