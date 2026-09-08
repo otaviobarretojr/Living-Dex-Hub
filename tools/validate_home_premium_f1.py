@@ -1,8 +1,41 @@
 from pathlib import Path
-R=Path(__file__).resolve().parents[1]; H=(R/'app/src/main/assets/index.html').read_text(); J=(R/'app/src/main/assets/pokemon-detail-v8.js').read_text(); C=(R/'app/src/main/assets/pokemon-detail-v8.css').read_text(); X=(R/'app/src/main/assets/game-context-v8.js').read_text(); E=(R/'app/src/main/assets/pokemon-evolution-v8.js').read_text(); D=(R/'app/src/main/assets/pokemon-data-v8.js').read_text(); A=(R/'app/src/main/assets/pokemon-about-v8.js').read_text(); AC=(R/'app/src/main/assets/pokemon-about-v8.css').read_text(); B=(R/'app/src/main/assets/pokemon-alive-beta-v8.js').read_text(); BC=(R/'app/src/main/assets/pokemon-alive-beta-v8.css').read_text(); T=(R/'app/src/main/assets/pokemon-frame-animation-v8.js').read_text(); TC=(R/'app/src/main/assets/pokemon-frame-animation-v8.css').read_text()
-ids=['906','907','908','909','910','911','912','913','914']
-checks={'canonical':'living-dex-canonical-baseline" content="7.14.0"' in H,'context':'F2.5-independent' in H and "version:'8.0-f2.5.1'" in X,'f34 detail':"version:'8.0-f3.4'" in J,'f35 evolution':"version:'8.0-f3.5'" in E,'f36 data':"version:'8.0-f3.6'" in D,'f37 about':"version:'8.0-f3.7'" in A,'f39':"version:'8.0-f3.9-experimental'" in B,'f3102':"version:'8.0-f3.10.2-local-frame-animation'" in T,'frame animation injected':'pokemon-frame-animation-v8.js' in H and 'pokemon-frame-animation-v8.css' in H and 'frame-animation-f3102' in H,'nine starters':all(x in T for x in ids),'actual frame animation':'actualFrameAnimation:true' in T and "format:'GIF'" in T and 'localAnimationAssets:true' in T,'offline animation':'animationNetworkRequired:false' in T and 'pokemon-animated/${n}.gif' in T,'tap interaction':'tapInteraction:true' in T and 'bridgeCry' in T and 'pointerup' in T,'cry network explicit':'cryNetworkRequired:true' in T,'png fallback':'pngFallbackPreserved:true' in T and 'hidePngOnlyAfterAnimationLoad:true' in T and 'ld3102-loaded>img' in TC,'reduced motion':'reducedMotionFallback:true' in T and 'prefers-reduced-motion' in TC,'no abandoned model viewer':'model-viewer-f3101' not in H and 'pokemon-3d-v8.js' not in H,'f39 retained':'livingStateEngine:true' in B and 'cryOnTap:true' in B,'fullscreen':'fullscreenMobile:true' in A and 'height:100dvh' in AC,'pt about':'portugueseOnlyVisibleContent:true' in A,'evolution':'officialEvolutionChain:true' in E,'data':'technicalOnly:true' in D,'box':'boxActionPreserved' in J and 'Na Box' in C,'context preserved':'primaryBoxContextUntouched:true' in J and 'primaryBoxContextUntouched:true' in A,'1025 local art':(R/'app/src/main/assets/assets/pokemon').exists()}
+R=Path(__file__).resolve().parents[1]
+A=R/'app/src/main/assets'
+H=(A/'index.html').read_text(encoding='utf-8')
+J=(A/'pokemon-detail-v8.js').read_text(encoding='utf-8')
+C=(A/'pokemon-detail-v8.css').read_text(encoding='utf-8')
+X=(A/'game-context-v8.js').read_text(encoding='utf-8')
+E=(A/'pokemon-evolution-v8.js').read_text(encoding='utf-8')
+D=(A/'pokemon-data-v8.js').read_text(encoding='utf-8')
+AB=(A/'pokemon-about-v8.js').read_text(encoding='utf-8')
+AC=(A/'pokemon-about-v8.css').read_text(encoding='utf-8')
+HV=(A/'home-v8.js').read_text(encoding='utf-8')
+legacy=['pokemon-alive-beta-v8.js','pokemon-alive-beta-v8.css','pokemon-3d-v8.js','pokemon-3d-v8.css','pokemon-frame-animation-v8.js','pokemon-frame-animation-v8.css']
+pokemon_dir=A/'assets/pokemon'
+pngs=list(pokemon_dir.glob('*.png')) if pokemon_dir.exists() else []
+checks={
+ 'canonical baseline':'living-dex-canonical-baseline" content="7.14.0"' in H,
+ 'home mounted':'home-v8.js' in H and "version:'8.0-f2.1'" in HV,
+ 'independent game context':'F2.5-independent' in H and "version:'8.0-f2.5.1'" in X,
+ 'detail F3.4':"version:'8.0-f3.4'" in J,
+ 'evolution F3.5':"version:'8.0-f3.5'" in E and 'officialEvolutionChain:true' in E,
+ 'data F3.6':"version:'8.0-f3.6'" in D and 'technicalOnly:true' in D,
+ 'about F3.7.1':"version:'8.0-f3.7.1'" in AB,
+ 'about compact cards':'compactAutoHeightCards:true' in AB and 'aboutInternalScroll:true' in AB,
+ 'national number fixed':'nationalNumberFixed:true' in AB and 'fixHeaderNumber' in AB,
+ 'Portuguese type labels':'portugueseTypeLabels:true' in AB and "grass:'Planta'" in AB,
+ 'Portuguese about':'portugueseOnlyVisibleContent:true' in AB and 'ptOfficialEntryPreferred:true' in AB,
+ 'game contextual about':'gameContextAware:true' in AB and 'VERSION_MAP' in AB,
+ 'obtain preserved':'obtainPreserved' in AB and 'ld75Obtain' in AB,
+ 'about cache':'localAboutCache:true' in AB and 'localStorage' in AB,
+ 'fullscreen mobile':'100dvh' in AC,
+ 'box action preserved':'boxActionPreserved' in J and 'Na Box' in C,
+ 'primary vs consultation preserved':'primaryBoxContextUntouched:true' in J and 'primaryBoxContextUntouched:true' in AB,
+ 'only current static runtime':all(x not in H for x in legacy),
+ 'legacy files physically removed':all(not (A/x).exists() for x in legacy),
+ '1025 canonical Pokemon art':len(pngs)==1025,
+}
 failed=[k for k,v in checks.items() if not v]
-for k,v in checks.items():print(('OK  ' if v else 'FAIL')+k)
-if failed:raise SystemExit('F3.10.2 validation failed: '+', '.join(failed))
-print(f'PHASE F3.10.2 LOCAL FRAME ANIMATION: {len(checks)}/{len(checks)} checks OK')
+for k,v in checks.items(): print(('OK   ' if v else 'FAIL ')+k)
+if failed: raise SystemExit('STABLE BASELINE validation failed: '+', '.join(failed))
+print(f'STABLE BASELINE: {len(checks)}/{len(checks)} checks OK • static Pokemon artwork • F3.7.1 Sobre • 1025 images')
