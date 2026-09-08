@@ -34,7 +34,8 @@ checks={
  'Box nonblocking feedback':'boxToastFeedback:true' in UX and 'ld842-toast' in UXC,
  'Home refresh from Box':'homeProgressRefresh:true' in UX and 'ld8HomeRender' in UX,
  'independent game context':'F2.5-independent' in H and "version:'8.0-f2.5.1'" in X,
- 'detail F3.4':"version:'8.0-f3.4'" in J,
+ 'detail F3.4.1':"version:'8.0-f3.4.1'" in J and 'legacyLoreFetchSuppressedWhenF371:true' in J,
+ 'single About fetch path':"if(typeof window.ld8f37Audit!=='function')renderLore()" in J,
  'evolution F3.5':"version:'8.0-f3.5'" in E and 'officialEvolutionChain:true' in E,
  'data F3.6':"version:'8.0-f3.6'" in D and 'technicalOnly:true' in D,
  'about F3.7.1':"version:'8.0-f3.7.1'" in AB,
@@ -60,4 +61,4 @@ checks={
 failed=[k for k,v in checks.items() if not v]
 for k,v in checks.items(): print(('OK   ' if v else 'FAIL ')+k)
 if failed: raise SystemExit('PRODUCT UX validation failed: '+', '.join(failed))
-print(f'PRODUCT UX BASELINE: {len(checks)}/{len(checks)} checks OK • v7.20.0 • Home F4.1 • Box F4.2 • 1025 images')
+print(f'PRODUCT UX BASELINE: {len(checks)}/{len(checks)} checks OK • v7.20.0 • Home F4.1 • Box F4.2 • Detail F3.4.1 • 1025 images')
