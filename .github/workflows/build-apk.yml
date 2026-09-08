@@ -27,7 +27,7 @@ jobs:
           python3 tools/sync_pokemon_assets.py
           python3 tools/sync_ui_media_v4_5.py
           python3 tools/ensure_pokemon_manifest_v7_14.py
-      - name: Apply canonical through F3.10
+      - name: Apply canonical through F3.10.1
         run: |
           python3 tools/canonicalize_runtime_v7_14.py
           python3 tools/apply_home_premium_f1.py
@@ -37,15 +37,36 @@ jobs:
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
-          grep -q "versionName '7.18.9'" app/build.gradle
-          grep -q "version:'8.0-f3.10-experimental'" app/src/main/assets/pokemon-3d-v8.js
-          grep -q 'realTimeWebGL:true' app/src/main/assets/pokemon-3d-v8.js
-          grep -q 'procedural3D:true' app/src/main/assets/pokemon-3d-v8.js
-          grep -q 'touchRotate:true' app/src/main/assets/pokemon-3d-v8.js
-          grep -q 'offlineVisuals:true' app/src/main/assets/pokemon-3d-v8.js
-          grep -q 'ld310-canvas' app/src/main/assets/pokemon-3d-v8.css
+          grep -q "versionName '7.19.0'" app/build.gradle
+          grep -q "version:'8.0-f3.10.1-real-3d'" app/src/main/assets/pokemon-3d-v8.js
+          grep -q 'realPokemonModels:true' app/src/main/assets/pokemon-3d-v8.js
+          grep -q 'procedural3D:false' app/src/main/assets/pokemon-3d-v8.js
+          grep -q 'embeddedAnimationClips:true' app/src/main/assets/pokemon-3d-v8.js
+          grep -q 'networkRequired:true' app/src/main/assets/pokemon-3d-v8.js
           node --check app/src/main/assets/pokemon-alive-beta-v8.js
           node --check app/src/main/assets/pokemon-3d-v8.js
+      - name: Validate real GLB animation assets
+        run: |
+          mkdir -p "$RUNNER_TEMP/pokemon-glb"
+          for ID in 906 907 908 909 910 911 912 913 914; do
+            curl --fail --location --retry 3 --silent --show-error "https://raw.githubusercontent.com/Pokemon-3D-api/assets/main/models/opt/regular/${ID}.glb" -o "$RUNNER_TEMP/pokemon-glb/${ID}.glb"
+          done
+          python3 - <<'PY'
+          import json,struct,os
+          root=os.path.join(os.environ['RUNNER_TEMP'],'pokemon-glb')
+          for i in range(906,915):
+              p=os.path.join(root,f'{i}.glb')
+              b=open(p,'rb').read()
+              assert b[:4]==b'glTF',f'{i}: not GLB'
+              assert len(b)>20,f'{i}: truncated GLB'
+              json_len,kind=struct.unpack_from('<II',b,12)
+              assert kind==0x4E4F534A,f'{i}: first chunk is not JSON'
+              doc=json.loads(b[20:20+json_len].decode('utf-8').rstrip('\x00 '))
+              animations=doc.get('animations') or []
+              assert animations,f'{i}: GLB has no embedded animations'
+              assert doc.get('meshes'),f'{i}: GLB has no mesh'
+              print(f'{i}: REAL GLB • meshes={len(doc.get("meshes",[]))} • animations={len(animations)}')
+          PY
       - name: Seal validation marker
         run: python3 -c "from pathlib import Path;p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))"
       - name: Build APKs
@@ -55,8 +76,9 @@ jobs:
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/pokemon-3d-v8.js|grep -q "version:'8.0-f3.10-experimental'"
-            unzip -p "$APK" assets/pokemon-3d-v8.js|grep -q 'realTimeWebGL:true'
+            unzip -p "$APK" assets/index.html|grep -q 'model-viewer-f3101'
+            unzip -p "$APK" assets/pokemon-3d-v8.js|grep -q "version:'8.0-f3.10.1-real-3d'"
+            unzip -p "$APK" assets/pokemon-3d-v8.js|grep -q 'realPokemonModels:true'
           done
       - name: Prepare production keystore
         run: |
@@ -71,12 +93,12 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1)
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-3d-v8.js|grep -q "version:'8.0-f3.10-experimental'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-3d-v8.css|grep -q 'ld310-canvas'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-3d-v8.js|grep -q "version:'8.0-f3.10.1-real-3d'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-3d-v8.css|grep -q 'ld3101-viewer'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.18.9-F3.10-ANIMATED-3D-Signed
+          name: LivingDexHub-v7.19.0-F3.10.1-REAL-3D-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
