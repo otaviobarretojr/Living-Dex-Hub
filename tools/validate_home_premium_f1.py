@@ -27,6 +27,9 @@ checks={
  'legacy home hidden':'#home> :not(#ld8Home){display:none!important}' in css,
  'fullscreen wrap':'.wrap{width:100%!important;max-width:none!important' in shell,
  'legacy chrome hidden':'.wrap>.top,.wrap>.nav,.wrap>.mobile-nav' in shell,
+ 'legacy injected appbars quarantined':'#v3Appbar,#r4Appbar,.v3-appbar,.v4-appbar' in shell,
+ 'legacy audio quick actions quarantined':'#ldhAudioQuick,#ldh712MusicQuick,.audio-quick' in shell,
+ 'legacy quarantine blocks interaction':'pointer-events:none!important' in shell and 'visibility:hidden!important' in shell,
  'fixed bottom dock':'position:fixed!important;' in shell and 'bottom:0!important;' in shell,
  'edge-to-edge dock':'left:0!important;right:0!important;' in shell and 'border-radius:0!important' in shell,
  'two-column dock':'grid-template-columns:repeat(2,minmax(0,1fr))' in shell,
@@ -39,5 +42,5 @@ checks={
 }
 failed=[k for k,v in checks.items() if not v]
 for k,v in checks.items():print(('OK  ' if v else 'FAIL')+k)
-if failed:raise SystemExit('F1.1 validation failed: '+', '.join(failed))
-print(f'PHASE F1.1 FULLSCREEN + DOCK: {len(checks)}/{len(checks)} checks OK')
+if failed:raise SystemExit('F1.2 validation failed: '+', '.join(failed))
+print(f'PHASE F1.2 CLEAN CHROME: {len(checks)}/{len(checks)} checks OK')
