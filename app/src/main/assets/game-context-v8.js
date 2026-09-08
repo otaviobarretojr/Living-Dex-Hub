@@ -1,4 +1,4 @@
-/* Living Dex Hub — F2.3 primary game vs consultation context, recursion-free Box loader */
+/* Living Dex Hub — F2.4 primary game vs consultation context, direct Box open/close */
 (()=>{
 'use strict';
 const IDS=['sv','za','swsh','bdsp','letsgo','arceus'];
@@ -56,11 +56,33 @@ function directOpenBox(){
  box.classList.add('active');box.removeAttribute('hidden');box.setAttribute('aria-hidden','false');
  try{window.ld71Render?.()}catch(e){try{ld71Render()}catch(_){}}
  try{window.ld72Focus?.()}catch(e){try{ld72Focus()}catch(_){}}
- try{window.ld7121SyncNav?.()}catch(e){}
  try{document.body.classList.add('ld7121-box')}catch(e){}
+ try{window.ld7121SyncNav?.()}catch(e){}
  requestAnimationFrame(()=>{box.style.display='block';box.classList.add('active');try{window.ld71Render?.()}catch(e){}});
  setTimeout(()=>{box.style.display='block';box.classList.add('active')},80);
  return true
+}
+function directCloseBox(){
+ closeAllSelectors();
+ const box=document.getElementById('ld71BoxView');
+ if(box){
+  box.classList.remove('active');
+  box.style.display='none';box.style.visibility='hidden';box.style.opacity='0';box.style.pointerEvents='none';
+  box.setAttribute('hidden','');box.setAttribute('aria-hidden','true');
+ }
+ try{document.body.classList.remove('ld7121-box','game-dex-focus')}catch(e){}
+ try{document.documentElement.style.overflow=''}catch(e){}
+ try{document.body.style.overflow=''}catch(e){}
+ writeActive(primaryId());
+ const home=document.getElementById('home');
+ if(home){home.style.display='block';home.style.visibility='visible';home.removeAttribute('hidden');home.setAttribute('aria-hidden','false')}
+ const nav=document.querySelector('.mnav.ld79-nav');
+ if(nav){nav.removeAttribute('inert');nav.setAttribute('aria-hidden','false');nav.style.removeProperty('display')}
+ try{window.ld8HomeRender?.()}catch(e){}
+ try{window.ld7NavState?.()}catch(e){}
+ try{window.ld79Render?.()}catch(e){}
+ window.scrollTo?.(0,0);
+ return !box||!box.classList.contains('active')
 }
 async function consultBox(id,{open=true}={}){
  if(!valid(id))return false;saveKey(BOX_KEY,id);closeAllSelectors();
@@ -77,11 +99,17 @@ async function selectPrimary(id){
  return primaryId()===id
 }
 function openSelector(mode){selectorMode=mode;if(mode==='primary'&&typeof window.ld82OpenPrimarySelector==='function')return window.ld82OpenPrimarySelector();if(typeof originalSelector!=='function')return;writeActive(mode==='box'?boxId():primaryId());return originalSelector()}
-window.ld813PrimaryGameId=primaryId;window.ld813BoxContextId=boxId;window.ld813SetPrimaryGame=selectPrimary;window.ld813ConsultGame=consultBox;window.ld813ContinuePrimary=continuePrimary;window.ld813DirectOpenBox=directOpenBox;window.ld813LoadContextDirect=loadContextDirect;window.ld813OpenPrimarySelector=function(){return openSelector('primary')};window.ld813OpenConsultSelector=function(){return openSelector('box')};
+window.ld813PrimaryGameId=primaryId;window.ld813BoxContextId=boxId;window.ld813SetPrimaryGame=selectPrimary;window.ld813ConsultGame=consultBox;window.ld813ContinuePrimary=continuePrimary;window.ld813DirectOpenBox=directOpenBox;window.ld813DirectCloseBox=directCloseBox;window.ld813LoadContextDirect=loadContextDirect;window.ld813OpenPrimarySelector=function(){return openSelector('primary')};window.ld813OpenConsultSelector=function(){return openSelector('box')};
 async function contextualSelect(id){const mode=selectorMode||((document.getElementById('ld71BoxView')?.classList.contains('active'))?'box':'primary');closeAllSelectors();return mode==='primary'?selectPrimary(id):consultBox(id,{open:false})}
-window.ld73SelectGame=contextualSelect;window.ld72SelectGame=contextualSelect;window.ld71Open=async function(){return consultBox(boxId(),{open:true})};
-if(typeof originalGo==='function')window.go=function(dest){if(String(dest)==='home')restorePrimary();return originalGo.apply(this,arguments)};
-document.addEventListener('click',e=>{const item=e.target.closest?.('.mnav.ld79-nav .ld79-item,.ld7-navbtn[data-ld7="box"]');if(!item)return;const txt=(item.textContent||'').trim().toLowerCase();if(item.matches?.('[data-ld7="box"]')||txt.includes('box')){e.preventDefault();e.stopImmediatePropagation();window.ld71Open?.();return}if(txt.includes('início')||txt.includes('inicio'))restorePrimary()},true);
+window.ld73SelectGame=contextualSelect;window.ld72SelectGame=contextualSelect;window.ld71Open=async function(){return consultBox(boxId(),{open:true})};window.ld71Close=directCloseBox;
+if(typeof originalGo==='function')window.go=function(dest){if(String(dest)==='home'){directCloseBox();return}return originalGo.apply(this,arguments)};
+document.addEventListener('click',e=>{
+ const back=e.target.closest?.('#ld71BoxView .ld71-back');if(back){e.preventDefault();e.stopImmediatePropagation();directCloseBox();return}
+ const item=e.target.closest?.('.mnav.ld79-nav .ld79-item,.ld7-navbtn[data-ld7="box"]');if(!item)return;
+ const txt=(item.textContent||'').trim().toLowerCase();
+ if(item.matches?.('[data-ld7="box"]')||txt.includes('box')){e.preventDefault();e.stopImmediatePropagation();window.ld71Open?.();return}
+ if(txt.includes('início')||txt.includes('inicio')){e.preventDefault();e.stopImmediatePropagation();directCloseBox()}
+},true);
 restorePrimary();
-window.ld813Audit=function(){const box=document.getElementById('ld71BoxView');return {version:'8.0-f2.3',primaryGame:primaryId(),boxContext:boxId(),runtimeGame:String(window.currentGame?.id||''),stateActive:String(st().activeGameId||''),selectorMode:selectorMode||null,directContextLoader:true,noLegacyOpenGame:true,directBoxOpen:true,boxActive:!!box?.classList.contains('active'),boxDisplay:box?getComputedStyle(box).display:'missing',detailContextUsesRuntime:true}};
+window.ld813Audit=function(){const box=document.getElementById('ld71BoxView');return {version:'8.0-f2.4',primaryGame:primaryId(),boxContext:boxId(),runtimeGame:String(window.currentGame?.id||''),stateActive:String(st().activeGameId||''),selectorMode:selectorMode||null,directContextLoader:true,noLegacyOpenGame:true,directBoxOpen:true,directBoxClose:true,boxActive:!!box?.classList.contains('active'),boxDisplay:box?getComputedStyle(box).display:'missing',detailContextUsesRuntime:true}};
 })();
