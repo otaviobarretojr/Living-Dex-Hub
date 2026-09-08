@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 33
-v7.12.2 final HEAD validation: redundant Registered/Missing/Total footer removed from every Box in every supported game.
+Living Dex Hub Android Build 34
+v7.12.3 final HEAD validation: responsive compact Box viewport with 6 x 5 layout targeting all 30 slots visible on phone without scrolling.
