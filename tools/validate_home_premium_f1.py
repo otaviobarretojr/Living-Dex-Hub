@@ -1,27 +1,38 @@
 from pathlib import Path
-import re
 
 ROOT=Path(__file__).resolve().parents[1]
 html=(ROOT/'app/src/main/assets/index.html').read_text(encoding='utf-8')
 css=(ROOT/'app/src/main/assets/home-v8.css').read_text(encoding='utf-8')
 js=(ROOT/'app/src/main/assets/home-v8.js').read_text(encoding='utf-8')
+ctx=(ROOT/'app/src/main/assets/game-context-v8.js').read_text(encoding='utf-8')
 ds=(ROOT/'app/src/main/assets/design-system-v8.css').read_text(encoding='utf-8')
 shell=(ROOT/'app/src/main/assets/shell-v8.css').read_text(encoding='utf-8')
 
 checks={
  'phase marker':'living-dex-design-phase" content="F1-home-premium"' in html,
  'shell marker':'living-dex-shell" content="F1.1-fullscreen-dock"' in html,
+ 'context marker':'living-dex-game-context" content="F1.3-primary-vs-consultation"' in html,
  'design system linked':'href="design-system-v8.css"' in html,
  'home css linked':'href="home-v8.css"' in html,
  'shell css linked':'href="shell-v8.css"' in html,
+ 'context js linked':'src="game-context-v8.js"' in html,
  'home js linked':'src="home-v8.js"' in html,
+ 'context before home':html.find('src="game-context-v8.js"') < html.find('src="home-v8.js"'),
  'six games':all(k in js for k in ["sv:","za:","swsh:","bdsp:","letsgo:","arceus:"]),
  'six cards contract':"gameCards:root?.querySelectorAll('.ld8-game').length" in js,
  'real progress hook':"home77Progress" in js,
- 'box continue hook':"ld71Open" in js,
- 'game loader hook':"ld73LoadGame" in js,
- 'game selector hook':"ld72OpenGames" in js,
- 'home sync hook':"renderActiveGameHome" in js and "ld75CommitBox" in js,
+ 'primary home hook':'ld813PrimaryGameId' in js,
+ 'continue primary hook':'ld813ContinuePrimary' in js,
+ 'explicit primary selector':'ld813OpenPrimarySelector' in js,
+ 'browse selector':'ld813OpenConsultSelector' in js,
+ 'card consultation':'ld813ConsultGame' in js,
+ 'primary persistent key':"PRIMARY_KEY='ld8.primaryGame'" in ctx,
+ 'box context persistent key':"BOX_KEY='ld8.boxContextGame'" in ctx,
+ 'explicit primary setter':'window.ld813SetPrimaryGame=selectPrimary' in ctx,
+ 'box context getter':'window.ld813BoxContextId=boxId' in ctx,
+ 'selector mode split':"mode==='primary'" in ctx and "selectorMode='box'" in ctx,
+ 'state restored to primary':'restorePrimary()' in ctx,
+ 'detail context runtime preserved':'currentGame?.id' in ctx and 'detailContextUsesRuntime' in ctx,
  'hero component':'.ld8-hero{' in css,
  '3x2 games grid':'grid-template-columns:repeat(3,minmax(0,1fr))' in css,
  'legacy home hidden':'#home> :not(#ld8Home){display:none!important}' in css,
@@ -42,5 +53,5 @@ checks={
 }
 failed=[k for k,v in checks.items() if not v]
 for k,v in checks.items():print(('OK  ' if v else 'FAIL')+k)
-if failed:raise SystemExit('F1.2 validation failed: '+', '.join(failed))
-print(f'PHASE F1.2 CLEAN CHROME: {len(checks)}/{len(checks)} checks OK')
+if failed:raise SystemExit('F1.3 validation failed: '+', '.join(failed))
+print(f'PHASE F1.3 PRIMARY VS CONSULTATION: {len(checks)}/{len(checks)} checks OK')
