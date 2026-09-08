@@ -5,17 +5,22 @@ H=(A/'index.html').read_text(encoding='utf-8')
 J=(A/'pokemon-detail-v8.js').read_text(encoding='utf-8')
 C=(A/'pokemon-detail-v8.css').read_text(encoding='utf-8')
 X=(A/'game-context-v8.js').read_text(encoding='utf-8')
+S=(A/'game-selector-v8.js').read_text(encoding='utf-8')
 E=(A/'pokemon-evolution-v8.js').read_text(encoding='utf-8')
 D=(A/'pokemon-data-v8.js').read_text(encoding='utf-8')
 AB=(A/'pokemon-about-v8.js').read_text(encoding='utf-8')
 AC=(A/'pokemon-about-v8.css').read_text(encoding='utf-8')
 HV=(A/'home-v8.js').read_text(encoding='utf-8')
+ANDROID=(R/'app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java').read_text(encoding='utf-8')
+GRADLE=(R/'app/build.gradle').read_text(encoding='utf-8')
 legacy=['pokemon-alive-beta-v8.js','pokemon-alive-beta-v8.css','pokemon-3d-v8.js','pokemon-3d-v8.css','pokemon-frame-animation-v8.js','pokemon-frame-animation-v8.css']
 pokemon_dir=A/'assets/pokemon'
 pngs=list(pokemon_dir.glob('*.png')) if pokemon_dir.exists() else []
 checks={
  'canonical baseline':'living-dex-canonical-baseline" content="7.14.0"' in H,
- 'home mounted':'home-v8.js' in H and "version:'8.0-f2.1'" in HV,
+ 'home mounted':'home-v8.js' in H and "version:'8.0-f2.1.1'" in HV,
+ 'home safe actions':'gameOverviewAction:true' in HV and 'musicSafeFallback:true' in HV and 'ld82OpenGameOverview' in HV,
+ 'game overview':'fullScreenGameOverview:true' in S and 'ld82OpenGameOverview' in S,
  'independent game context':'F2.5-independent' in H and "version:'8.0-f2.5.1'" in X,
  'detail F3.4':"version:'8.0-f3.4'" in J,
  'evolution F3.5':"version:'8.0-f3.5'" in E and 'officialEvolutionChain:true' in E,
@@ -28,14 +33,19 @@ checks={
  'game contextual about':'gameContextAware:true' in AB and 'VERSION_MAP' in AB,
  'obtain preserved':'obtainPreserved' in AB and 'ld75Obtain' in AB,
  'about cache':'localAboutCache:true' in AB and 'localStorage' in AB,
+ 'data offline fallback':'localDataCache:true' in D and 'legacyOfflineFallback:true' in D,
  'fullscreen mobile':'100dvh' in AC,
  'box action preserved':'boxActionPreserved' in J and 'Na Box' in C,
  'primary vs consultation preserved':'primaryBoxContextUntouched:true' in J and 'primaryBoxContextUntouched:true' in AB,
+ 'modern Android bars':'WindowInsetsController' in ANDROID and 'setSystemBarsAppearance' in ANDROID,
+ 'modern Android back':'OnBackInvokedDispatcher' in ANDROID and 'handleBackAction' in ANDROID,
+ 'Android WebView safety':'MIXED_CONTENT_NEVER_ALLOW' in ANDROID and 'setSafeBrowsingEnabled(true)' in ANDROID,
+ 'release version':"versionName '7.19.3'" in GRADLE and 'versionCode 138' in GRADLE,
  'only current static runtime':all(x not in H for x in legacy),
  'legacy files physically removed':all(not (A/x).exists() for x in legacy),
  '1025 canonical Pokemon art':len(pngs)==1025,
 }
 failed=[k for k,v in checks.items() if not v]
 for k,v in checks.items(): print(('OK   ' if v else 'FAIL ')+k)
-if failed: raise SystemExit('STABLE BASELINE validation failed: '+', '.join(failed))
-print(f'STABLE BASELINE: {len(checks)}/{len(checks)} checks OK • static Pokemon artwork • F3.7.1 Sobre • 1025 images')
+if failed: raise SystemExit('AUDIT IMPROVEMENT validation failed: '+', '.join(failed))
+print(f'AUDIT IMPROVEMENT BASELINE: {len(checks)}/{len(checks)} checks OK • v7.19.3 • stable static Pokemon artwork • 1025 images')
