@@ -62,7 +62,7 @@ jobs:
       - name: Apply idempotent canonical guard
         run: python3 tools/canonicalize_runtime_v7_14.py
 
-      - name: Apply Phase F1.1 premium Home shell
+      - name: Apply Phase F1.2 premium Home shell
         run: python3 tools/apply_home_premium_f1.py
 
       - name: Validate application and all Pokedexes
@@ -80,11 +80,13 @@ jobs:
           grep -q 'living-dex-integrity-ux" content="7.11.0"' app/src/main/assets/index.html
           grep -q 'living-dex-detail-overlay-fix" content="7.12.5"' app/src/main/assets/index.html
           grep -q 'living-dex-personal-music" content="7.12.0"' app/src/main/assets/index.html
-          grep -q "versionName '7.15.1'" app/build.gradle
+          grep -q "versionName '7.15.2'" app/build.gradle
           test -f app/src/main/assets/design-system-v8.css
           test -f app/src/main/assets/home-v8.css
           test -f app/src/main/assets/home-v8.js
           test -f app/src/main/assets/shell-v8.css
+          grep -q '#v3Appbar,#r4Appbar,.v3-appbar,.v4-appbar' app/src/main/assets/shell-v8.css
+          grep -q '#ldhAudioQuick,#ldh712MusicQuick,.audio-quick' app/src/main/assets/shell-v8.css
           node --check app/src/main/assets/home-v8.js
           python3 - <<'PY'
           import pathlib,re
@@ -118,6 +120,8 @@ jobs:
             zipinfo -1 "$APK"|grep -q '^assets/home-v8.css$'
             zipinfo -1 "$APK"|grep -q '^assets/home-v8.js$'
             zipinfo -1 "$APK"|grep -q '^assets/shell-v8.css$'
+            unzip -p "$APK" assets/shell-v8.css|grep -q '#v3Appbar,#r4Appbar,.v3-appbar,.v4-appbar'
+            unzip -p "$APK" assets/shell-v8.css|grep -q '#ldhAudioQuick,#ldh712MusicQuick,.audio-quick'
           done
 
       - name: Prepare production keystore
@@ -145,11 +149,13 @@ jobs:
           zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/home-v8.css$'
           zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/home-v8.js$'
           zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/shell-v8.css$'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/shell-v8.css|grep -q '#v3Appbar,#r4Appbar,.v3-appbar,.v4-appbar'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/shell-v8.css|grep -q '#ldhAudioQuick,#ldh712MusicQuick,.audio-quick'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
 
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.15.1-F1.1-Production-Signed
+          name: LivingDexHub-v7.15.2-F1.2-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
