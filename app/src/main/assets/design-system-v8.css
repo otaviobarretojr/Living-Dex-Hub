@@ -1,0 +1,34 @@
+:root {
+  --ld-bg-0:#071019;--ld-bg-1:#0B1621;--ld-bg-2:#101E2B;--ld-surface:#142331;
+  --ld-surface-soft:rgba(20,35,49,.82);--ld-line:rgba(255,255,255,.09);
+  --ld-text:#F7FAFC;--ld-text-2:#A9B6C2;--ld-text-3:#71808E;
+  --ld-action:#FF3946;--ld-action-pressed:#E52F3B;--ld-success:#20C997;
+  --ld-missing:#AAB4BE;--ld-white-surface:#F8FAFC;--ld-dark-on-light:#17212B;
+  --ld-space-1:4px;--ld-space-2:8px;--ld-space-3:12px;--ld-space-4:16px;
+  --ld-space-5:20px;--ld-space-6:24px;--ld-space-7:32px;--ld-space-8:40px;
+  --ld-radius-sm:10px;--ld-radius-md:14px;--ld-radius-lg:18px;--ld-radius-xl:24px;
+  --ld-shadow-card:0 8px 24px rgba(0,0,0,.22);--ld-shadow-hero:0 16px 40px rgba(0,0,0,.32);
+  --ld-shadow-sheet:0 -16px 48px rgba(0,0,0,.42);
+  --ld-ease:cubic-bezier(.2,.8,.2,1);--ld-tap:120ms;--ld-motion:180ms;--ld-screen:220ms;
+  --ld-game-sv:#FF4B50;--ld-game-za:#1CC7B7;--ld-game-swsh:#2E9BFF;
+  --ld-game-bdsp:#5577FF;--ld-game-letsgo:#F5B82E;--ld-game-arceus:#7895A8;
+}
+
+/* Phase 0 only: shared primitives. Screen-specific composition starts in Phase 1. */
+.ld-v8-surface{background:var(--ld-bg-2);color:var(--ld-text);border:1px solid var(--ld-line);border-radius:var(--ld-radius-lg);box-shadow:var(--ld-shadow-card)}
+.ld-v8-card{padding:var(--ld-space-4);border-radius:var(--ld-radius-lg);overflow:hidden}
+.ld-v8-btn{min-height:44px;padding:0 var(--ld-space-4);border:0;border-radius:var(--ld-radius-md);font:700 14px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;transition:transform var(--ld-tap) var(--ld-ease),background var(--ld-tap) var(--ld-ease),opacity var(--ld-tap) var(--ld-ease)}
+.ld-v8-btn:active{transform:scale(.985)}
+.ld-v8-btn--primary{background:var(--ld-action);color:#fff}.ld-v8-btn--primary:active{background:var(--ld-action-pressed)}
+.ld-v8-btn--secondary{background:var(--ld-surface);color:var(--ld-text);border:1px solid var(--ld-line)}
+.ld-v8-chip{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:999px;font:700 11px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.ld-v8-progress{height:5px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12)}
+.ld-v8-progress>i{display:block;height:100%;border-radius:inherit;background:var(--ld-success);transition:width var(--ld-motion) var(--ld-ease)}
+.ld-v8-tabs{display:flex;min-height:48px;border-bottom:1px solid var(--ld-line)}
+.ld-v8-tab{position:relative;display:flex;flex:1;align-items:center;justify-content:center;min-height:44px;color:var(--ld-text-2);font:650 12px/1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.ld-v8-tab[aria-selected="true"]{color:var(--ld-text)}.ld-v8-tab[aria-selected="true"]:after{content:"";position:absolute;left:18%;right:18%;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--ld-action)}
+.ld-v8-muted{color:var(--ld-text-2)}.ld-v8-micro{font-size:10px;line-height:14px;font-weight:650;letter-spacing:.02em}
+.ld-v8-safe-bottom{padding-bottom:max(var(--ld-space-4),env(safe-area-inset-bottom))}
+
+@media (prefers-reduced-motion:reduce){.ld-v8-btn,.ld-v8-progress>i{transition:none!important;animation:none!important}}
+@media (max-width:360px){:root{--ld-space-4:14px;--ld-space-5:18px}}
