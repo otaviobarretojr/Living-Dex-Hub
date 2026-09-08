@@ -19,15 +19,7 @@ on:
       - 'app/src/main/assets/pokemon-detail-v8.js'
       - 'app/src/main/assets/shell-v8.css'
       - 'app/src/main/assets/assets/maps/**'
-      - 'tools/canonicalize_runtime_v7_14.py'
-      - 'tools/apply_home_premium_f1.py'
-      - 'tools/validate_home_premium_f1.py'
-      - 'tools/sync_pokemon_assets.py'
-      - 'tools/sync_ui_media_v4_5.py'
-      - 'tools/ensure_pokemon_manifest_v7_14.py'
-      - 'tools/validate_core1.py'
-      - 'tools/validate_all_dexes_v7_13.py'
-      - 'tools/validate_canonical_v7_14.py'
+      - 'tools/**'
       - 'data/**'
       - 'docs/**'
       - 'build.gradle'
@@ -61,7 +53,7 @@ jobs:
           python3 tools/ensure_pokemon_manifest_v7_14.py
       - name: Apply idempotent canonical guard
         run: python3 tools/canonicalize_runtime_v7_14.py
-      - name: Apply Phase F3
+      - name: Apply Phase F3.1
         run: python3 tools/apply_home_premium_f1.py
       - name: Validate application and all Pokedexes
         run: |
@@ -69,20 +61,19 @@ jobs:
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
-          grep -q "versionName '7.17.0'" app/build.gradle
+          grep -q "versionName '7.17.1'" app/build.gradle
           grep -q "version:'8.0-f2.5.1'" app/src/main/assets/game-context-v8.js
           grep -q "version:'8.0-f2.5'" app/src/main/assets/game-selector-v8.js
-          grep -q "version:'8.0-f3.0'" app/src/main/assets/pokemon-detail-v8.js
-          grep -q 'boxRuntimeStaysActiveWhileOpen:true' app/src/main/assets/game-context-v8.js
-          grep -q 'ld813SetBoxGame=setBoxGame' app/src/main/assets/game-context-v8.js
-          grep -q "text.includes('meus jogos')" app/src/main/assets/game-context-v8.js
-          grep -q "ld82OpenBoxSelector=()=>open('box')" app/src/main/assets/game-selector-v8.js
-          grep -q 'ld813SetBoxGame?.(id,{open:true})' app/src/main/assets/game-selector-v8.js
+          grep -q "version:'8.0-f3.1'" app/src/main/assets/pokemon-detail-v8.js
+          grep -q 'duplicateStatusRemoved' app/src/main/assets/pokemon-detail-v8.js
+          grep -q 'compactControls:true' app/src/main/assets/pokemon-detail-v8.js
           grep -q 'primaryBoxContextUntouched:true' app/src/main/assets/pokemon-detail-v8.js
           grep -q 'boxActionPreserved' app/src/main/assets/pokemon-detail-v8.js
           grep -q 'evolutionPreserved' app/src/main/assets/pokemon-detail-v8.js
+          grep -q '.ld8f3-status{display:none' app/src/main/assets/pokemon-detail-v8.css
+          grep -q '#ld75BoxBtn:before' app/src/main/assets/pokemon-detail-v8.css
+          grep -q '.ld8f3-tab.active:after' app/src/main/assets/pokemon-detail-v8.css
           grep -q 'body.ld8f3-detail-open .mnav.ld79-nav' app/src/main/assets/pokemon-detail-v8.css
-          grep -q 'visual-only' app/src/main/assets/home-v8.js
           node --check app/src/main/assets/home-v8.js
           node --check app/src/main/assets/game-context-v8.js
           node --check app/src/main/assets/game-selector-v8.js
@@ -103,12 +94,9 @@ jobs:
             unzip -p "$APK" assets/index.html|grep -q 'F2.5-independent'
             unzip -p "$APK" assets/index.html|grep -q 'F3-detail-2.0'
             unzip -p "$APK" assets/game-context-v8.js|grep -q "version:'8.0-f2.5.1'"
-            unzip -p "$APK" assets/game-context-v8.js|grep -q 'boxRuntimeStaysActiveWhileOpen:true'
-            unzip -p "$APK" assets/game-selector-v8.js|grep -q "version:'8.0-f2.5'"
-            unzip -p "$APK" assets/pokemon-detail-v8.js|grep -q "version:'8.0-f3.0'"
-            unzip -p "$APK" assets/pokemon-detail-v8.js|grep -q 'primaryBoxContextUntouched:true'
-            unzip -p "$APK" assets/pokemon-detail-v8.css|grep -q 'ld8f3-detail-open'
-            unzip -p "$APK" assets/home-v8.js|grep -q 'visual-only'
+            unzip -p "$APK" assets/pokemon-detail-v8.js|grep -q "version:'8.0-f3.1'"
+            unzip -p "$APK" assets/pokemon-detail-v8.js|grep -q 'duplicateStatusRemoved'
+            unzip -p "$APK" assets/pokemon-detail-v8.css|grep -q '.ld8f3-tab.active:after'
           done
       - name: Prepare production keystore
         run: |
@@ -125,15 +113,13 @@ jobs:
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'F2.5-independent'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'F3-detail-2.0'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/game-context-v8.js|grep -q "version:'8.0-f2.5.1'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/game-context-v8.js|grep -q 'boxRuntimeStaysActiveWhileOpen:true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-detail-v8.js|grep -q "version:'8.0-f3.0'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-detail-v8.js|grep -q 'boxActionPreserved'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-detail-v8.js|grep -q "version:'8.0-f3.1'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-detail-v8.js|grep -q 'compactControls:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-detail-v8.css|grep -q '#ld75BoxBtn:before'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.17.0-F3-Production-Signed
+          name: LivingDexHub-v7.17.1-F3.1-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
