@@ -3,7 +3,25 @@ on:
   workflow_dispatch:
   push:
     branches: [ main, master ]
-    paths: ['app/**','tools/canonicalize_runtime_v7_14.py','tools/sync_pokemon_assets.py','tools/sync_ui_media_v4_5.py','tools/ensure_pokemon_manifest_v7_14.py','tools/validate_core1.py','tools/validate_all_dexes_v7_13.py','tools/validate_canonical_v7_14.py','data/**','docs/**','build.gradle','settings.gradle','.github/workflows/build-apk.yml']
+    paths:
+      - 'app/build.gradle'
+      - 'app/BUILD_TRIGGER.txt'
+      - 'app/src/main/java/**'
+      - 'app/src/main/AndroidManifest.xml'
+      - 'app/src/main/assets/canonical/**'
+      - 'app/src/main/assets/assets/maps/**'
+      - 'tools/canonicalize_runtime_v7_14.py'
+      - 'tools/sync_pokemon_assets.py'
+      - 'tools/sync_ui_media_v4_5.py'
+      - 'tools/ensure_pokemon_manifest_v7_14.py'
+      - 'tools/validate_core1.py'
+      - 'tools/validate_all_dexes_v7_13.py'
+      - 'tools/validate_canonical_v7_14.py'
+      - 'data/**'
+      - 'docs/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - '.github/workflows/build-apk.yml'
 jobs:
   build:
     runs-on: ubuntu-latest
