@@ -1,11 +1,12 @@
-/* Living Dex Hub — F3.10 EXPERIMENTAL 3D viewport */
-#modal .poke-hero.ld310-3d{position:relative;overflow:hidden;isolation:isolate}
-#modal .poke-hero.ld310-3d>img{opacity:0!important;pointer-events:none!important}
-#modal .ld310-canvas{position:absolute;z-index:6;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;background:transparent}
-#modal .ld310-canvas:active{cursor:grabbing}
-#modal .poke-hero.ld310-3d::before{content:'3D • arraste para girar';position:absolute;z-index:9;top:10px;left:50%;transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.74);backdrop-filter:blur(10px);border:1px solid rgba(120,140,165,.18);font-size:8px;font-weight:850;color:#64748b;letter-spacing:.03em;pointer-events:none;white-space:nowrap}
-#modal .poke-hero.ld310-3d::after{content:'';position:absolute;z-index:3;left:50%;bottom:15%;width:118px;height:23px;transform:translateX(-50%);border-radius:50%;background:rgba(42,54,70,.13);filter:blur(7px);animation:ld310Ground 2.8s ease-in-out infinite;pointer-events:none}
-#modal .poke-hero.ld310-3d.ld310-action::after{animation:ld310Impact .9s ease-out 1}
-@keyframes ld310Ground{0%,100%{transform:translateX(-50%) scale(1);opacity:.7}50%{transform:translateX(-50%) scale(.84);opacity:.48}}
-@keyframes ld310Impact{0%{transform:translateX(-50%) scale(.65);opacity:.25}42%{transform:translateX(-50%) scale(1.25);opacity:.8}100%{transform:translateX(-50%) scale(1);opacity:.62}}
-@media(prefers-reduced-motion:reduce){#modal .poke-hero.ld310-3d::after{animation:none!important}}
+/* Living Dex Hub — F3.10.1 REAL 3D viewport */
+#modal .poke-hero.ld3101-real3d{position:relative;overflow:hidden;isolation:isolate}
+#modal .poke-hero.ld3101-real3d>img{transition:opacity .22s ease;z-index:4}
+#modal .poke-hero.ld3101-real3d.ld3101-loaded>img{opacity:0!important;pointer-events:none!important}
+#modal .ld3101-viewer{position:absolute;z-index:6;inset:0;width:100%;height:100%;display:block;background:transparent;--poster-color:transparent;touch-action:pan-y}
+#modal .poke-hero.ld3101-real3d::before{content:'3D real • arraste para girar • toque para interagir';position:absolute;z-index:10;top:10px;left:50%;transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.78);backdrop-filter:blur(10px);border:1px solid rgba(120,140,165,.18);font-size:8px;font-weight:850;color:#64748b;letter-spacing:.02em;pointer-events:none;white-space:nowrap;opacity:.92}
+#modal .poke-hero.ld3101-real3d:not(.ld3101-loaded)::before{content:'Carregando modelo 3D…'}
+#modal .poke-hero.ld3101-real3d.ld3101-loaded::after{content:'';position:absolute;z-index:3;left:50%;bottom:14%;width:122px;height:23px;transform:translateX(-50%);border-radius:50%;background:rgba(42,54,70,.12);filter:blur(7px);pointer-events:none;animation:ld3101Ground 2.8s ease-in-out infinite}
+#modal .poke-hero.ld3101-real3d.ld3101-action::after{animation:ld3101Impact .85s ease-out 1}
+@keyframes ld3101Ground{0%,100%{transform:translateX(-50%) scale(1);opacity:.68}50%{transform:translateX(-50%) scale(.88);opacity:.46}}
+@keyframes ld3101Impact{0%{transform:translateX(-50%) scale(.72);opacity:.28}45%{transform:translateX(-50%) scale(1.22);opacity:.78}100%{transform:translateX(-50%) scale(1);opacity:.62}}
+@media(prefers-reduced-motion:reduce){#modal .poke-hero.ld3101-real3d::after{animation:none!important}}
