@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowInsetsController;
+import android.window.OnBackInvokedDispatcher;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -15,6 +17,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+@SuppressWarnings("deprecation")
 public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
@@ -23,15 +26,7 @@ public class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
-        getWindow().setStatusBarColor(APP_BG);
-        getWindow().setNavigationBarColor(APP_BG);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            getWindow().setNavigationBarContrastEnforced(false);
-            getWindow().setStatusBarContrastEnforced(false);
-        }
-        int flags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        getWindow().getDecorView().setSystemUiVisibility(flags);
+        configureSystemBars();
 
         webView = new WebView(this);
         webView.setBackgroundColor(APP_BG);
@@ -104,9 +99,49 @@ public class MainActivity extends Activity {
             }
         });
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    this::handleBackAction
+            );
+        }
+
         if (state == null || webView.restoreState(state) == null) {
             webView.loadUrl("file:///android_asset/index.html");
         }
+    }
+
+    private void configureSystemBars() {
+        getWindow().setStatusBarColor(APP_BG);
+        getWindow().setNavigationBarColor(APP_BG);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            getWindow().setNavigationBarContrastEnforced(false);
+            getWindow().setStatusBarContrastEnforced(false);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                int mask = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS |
+                        WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                controller.setSystemBarsAppearance(mask, mask);
+            }
+        } else {
+            int flags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            getWindow().getDecorView().setSystemUiVisibility(flags);
+        }
+    }
+
+    private void handleBackAction() {
+        if (webView == null) {
+            finishAfterTransition();
+            return;
+        }
+        webView.evaluateJavascript("(typeof androidHandleBack==='function'&&androidHandleBack())?'1':'0'", value -> {
+            if ("\"1\"".equals(value)) return;
+            if (webView != null && webView.canGoBack()) webView.goBack();
+            else finishAfterTransition();
+        });
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -168,11 +203,10 @@ public class MainActivity extends Activity {
     }
 
     @Override public void onBackPressed() {
-        if (webView == null) { super.onBackPressed(); return; }
-        webView.evaluateJavascript("(typeof androidHandleBack==='function'&&androidHandleBack())?'1':'0'", value -> {
-            if ("\"1\"".equals(value)) return;
-            if (webView != null && webView.canGoBack()) webView.goBack();
-            else MainActivity.super.onBackPressed();
-        });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            super.onBackPressed();
+            return;
+        }
+        handleBackAction();
     }
 }
