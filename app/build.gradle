@@ -23,7 +23,6 @@ android {
             release {
                 storeFile file(releaseStoreFile)
                 storePassword releaseStorePassword
-                releaseKeyAlias = releaseKeyAlias
                 keyAlias releaseKeyAlias
                 keyPassword releaseKeyPassword
                 enableV1Signing true
