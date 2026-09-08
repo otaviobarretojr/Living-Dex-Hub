@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 40
-v7.15.1 F1.1: Home edge-to-edge no celular, chrome legado oculto, dock fixo inferior Início + Box alinhado ao novo design, base funcional e progresso ligados à Box preservados.
+Living Dex Hub Android Build 41
+v7.15.2 F1.2: cabeçalhos e ícones globais legados ocultos definitivamente; apenas o novo header Pokédex v8, ação de música atual e dock inferior Início + Box permanecem visíveis.
