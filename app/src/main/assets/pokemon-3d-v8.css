@@ -1,0 +1,11 @@
+/* Living Dex Hub — F3.10 EXPERIMENTAL 3D viewport */
+#modal .poke-hero.ld310-3d{position:relative;overflow:hidden;isolation:isolate}
+#modal .poke-hero.ld310-3d>img{opacity:0!important;pointer-events:none!important}
+#modal .ld310-canvas{position:absolute;z-index:6;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;background:transparent}
+#modal .ld310-canvas:active{cursor:grabbing}
+#modal .poke-hero.ld310-3d::before{content:'3D • arraste para girar';position:absolute;z-index:9;top:10px;left:50%;transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.74);backdrop-filter:blur(10px);border:1px solid rgba(120,140,165,.18);font-size:8px;font-weight:850;color:#64748b;letter-spacing:.03em;pointer-events:none;white-space:nowrap}
+#modal .poke-hero.ld310-3d::after{content:'';position:absolute;z-index:3;left:50%;bottom:15%;width:118px;height:23px;transform:translateX(-50%);border-radius:50%;background:rgba(42,54,70,.13);filter:blur(7px);animation:ld310Ground 2.8s ease-in-out infinite;pointer-events:none}
+#modal .poke-hero.ld310-3d.ld310-action::after{animation:ld310Impact .9s ease-out 1}
+@keyframes ld310Ground{0%,100%{transform:translateX(-50%) scale(1);opacity:.7}50%{transform:translateX(-50%) scale(.84);opacity:.48}}
+@keyframes ld310Impact{0%{transform:translateX(-50%) scale(.65);opacity:.25}42%{transform:translateX(-50%) scale(1.25);opacity:.8}100%{transform:translateX(-50%) scale(1);opacity:.62}}
+@media(prefers-reduced-motion:reduce){#modal .poke-hero.ld310-3d::after{animation:none!important}}
