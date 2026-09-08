@@ -42,16 +42,24 @@ async function selectPrimary(id){
  setPrimaryRaw(id);saveKey(BOX_KEY,id);selectorMode=null;
  try{window.ld72CloseGames?.()}catch(e){};try{window.go?.('home')}catch(e){};try{window.ld8HomeRender?.()}catch(e){};return true
 }
+function openSelector(mode){
+ if(typeof originalSelector!=='function')return;
+ selectorMode=mode;
+ if(mode==='box'){
+  const p=primaryId();try{writeActive(boxId());return originalSelector()}finally{primary=p;restorePrimary()}
+ }
+ return originalSelector()
+}
 window.ld813PrimaryGameId=primaryId;
 window.ld813BoxContextId=boxId;
 window.ld813SetPrimaryGame=selectPrimary;
 window.ld813ConsultGame=consultBox;
 window.ld813ContinuePrimary=continuePrimary;
-window.ld813OpenPrimarySelector=function(){selectorMode='primary';if(typeof originalSelector==='function')return originalSelector()};
-window.ld813OpenConsultSelector=function(){selectorMode='box';if(typeof originalSelector==='function')return originalSelector()};
+window.ld813OpenPrimarySelector=function(){return openSelector('primary')};
+window.ld813OpenConsultSelector=function(){return openSelector('box')};
 if(typeof originalSelector==='function')window.ld72OpenGames=function(){
  if(!selectorMode){const box=document.getElementById('ld71BoxView');selectorMode=box?.classList.contains('active')?'box':'primary'}
- return originalSelector.apply(this,arguments)
+ return openSelector(selectorMode)
 };
 async function contextualSelect(id){
  const mode=selectorMode||((document.getElementById('ld71BoxView')?.classList.contains('active'))?'box':'primary');
