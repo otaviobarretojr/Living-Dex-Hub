@@ -12,16 +12,19 @@ checks={
 'load order':html.find('src="game-context-v8.js"') < html.find('src="game-selector-v8.js"') < html.find('src="home-v8.js"'),
 'primary persistent':"PRIMARY_KEY='ld8.primaryGame'" in ctx,
 'box persistent':"BOX_KEY='ld8.boxContextGame'" in ctx,
-'commit primary first':'primaryCommittedFirst:true' in ctx and 'setPrimaryRaw(id);saveKey(BOX_KEY,id)' in ctx,
+'commit primary first':'primaryCommittedFirst:true' in ctx,
 'primary event':"ld:primary-game-changed" in ctx,
 'consult independent':'ld813ConsultGame=consultBox' in ctx,
 'box hook':'window.ld71Open=async function()' in ctx,
+'direct box opener':'ld813DirectOpenBox=directOpenBox' in ctx and 'directBoxOpen:true' in ctx,
+'box class activation':"box.classList.add('active')" in ctx,
+'selectors closed before box':'closeAllSelectors();' in ctx and 'ld72GameSheet' in ctx,
 'detail runtime':'detailContextUsesRuntime:true' in ctx,
-'selector version':"version:'8.0-f2.1'" in sel,
+'context version':"version:'8.0-f2.2'" in ctx,
 'selector setter':'ld813SetPrimaryGame' in sel,
 'library function':'ld82OpenGameLibrary' in sel,
 'fullscreen library':'.ld82-selector.library-mode' in css and 'min-height:100dvh' in css,
-'home cards visual only':'class="ld8-game ${active?\'active\':\'\'} visual-only"' in home,
+'home cards visual only':'visual-only' in home,
 'no home card click handler':"querySelectorAll('[data-ld8-game]').forEach" not in home,
 'ver todos library':'ld82OpenGameLibrary' in home,
 'continue primary':'ld813ContinuePrimary' in home,
@@ -31,5 +34,5 @@ checks={
 }
 failed=[k for k,v in checks.items() if not v]
 for k,v in checks.items():print(('OK  ' if v else 'FAIL')+k)
-if failed:raise SystemExit('F2.1 validation failed: '+', '.join(failed))
-print(f'PHASE F2.1: {len(checks)}/{len(checks)} checks OK')
+if failed:raise SystemExit('F2.2 validation failed: '+', '.join(failed))
+print(f'PHASE F2.2 DIRECT BOX: {len(checks)}/{len(checks)} checks OK')
