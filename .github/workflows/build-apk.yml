@@ -65,7 +65,7 @@ jobs:
           ! grep -q 'OnBackInvokedDispatcher' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           ! grep -q 'WindowInsetsController' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           grep -q 'onBackPressed()' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q 'setWebContentsDebuggingEnabled(BuildConfig.DEBUG)' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
+          grep -q 'setWebContentsDebuggingEnabled(false)' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           for F in pokemon-alive-beta-v8.js pokemon-alive-beta-v8.css pokemon-3d-v8.js pokemon-3d-v8.css pokemon-frame-animation-v8.js pokemon-frame-animation-v8.css; do test ! -e "app/src/main/assets/$F"; done
       - name: Seal validation marker
         run: python3 -c "from pathlib import Path;p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))"
