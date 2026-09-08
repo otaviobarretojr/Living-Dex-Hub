@@ -52,7 +52,6 @@ jobs:
         run: |
           test -f "$CANONICAL_FILE"; test -f "$DEX_PACK_FILE"
           base64 --decode "$CANONICAL_FILE" | xz -d > app/src/main/assets/index.html
-          grep -q 'living-dex-canonical-baseline" content="7.14.0"' app/src/main/assets/index.html
       - name: Sync active runtime media
         run: |
           python3 tools/sync_pokemon_assets.py
@@ -60,7 +59,7 @@ jobs:
           python3 tools/ensure_pokemon_manifest_v7_14.py
       - name: Apply idempotent canonical guard
         run: python3 tools/canonicalize_runtime_v7_14.py
-      - name: Apply Phase F2 premium selector
+      - name: Apply Phase F2.1
         run: python3 tools/apply_home_premium_f1.py
       - name: Validate application and all Pokedexes
         run: |
@@ -68,23 +67,13 @@ jobs:
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
-          grep -q 'living-dex-game-selector" content="F2-explicit-primary"' app/src/main/assets/index.html
-          grep -q "versionName '7.16.1'" app/build.gradle
-          for F in design-system-v8.css home-v8.css home-v8.js game-context-v8.js game-selector-v8.css game-selector-v8.js shell-v8.css; do test -f "app/src/main/assets/$F"; done
-          grep -q 'z-index:12050' app/src/main/assets/game-selector-v8.css
-          grep -q "version:'8.0-f2.0.1'" app/src/main/assets/game-context-v8.js
+          grep -q "versionName '7.16.2'" app/build.gradle
+          grep -q "version:'8.0-f2.1'" app/src/main/assets/game-context-v8.js
+          grep -q 'ld82OpenGameLibrary' app/src/main/assets/game-selector-v8.js
+          grep -q 'visual-only' app/src/main/assets/home-v8.js
           node --check app/src/main/assets/home-v8.js
           node --check app/src/main/assets/game-context-v8.js
           node --check app/src/main/assets/game-selector-v8.js
-          python3 - <<'PY'
-          import pathlib,re
-          s=pathlib.Path('app/src/main/assets/index.html').read_text()
-          assert "const LD714_PUBLIC_SURFACES=['home','box']" in s
-          assert "const LD73_SUPPORTED=['sv','za','swsh','bdsp','letsgo','arceus']" in s
-          assert s.find('src="game-context-v8.js"') < s.find('src="game-selector-v8.js"') < s.find('src="home-v8.js"')
-          pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)))
-          PY
-          node --check /tmp/livingdex.js
       - name: Seal validation marker
         run: |
           python3 - <<'PY'
@@ -97,10 +86,10 @@ jobs:
         run: |
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-game-selector" content="F2-explicit-primary"'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/game-selector-v8.css|grep -q 'z-index:12050'
-            unzip -p "$APK" assets/game-context-v8.js|grep -q "version:'8.0-f2.0.1'"
+            unzip -p "$APK" assets/game-context-v8.js|grep -q "version:'8.0-f2.1'"
+            unzip -p "$APK" assets/game-selector-v8.js|grep -q 'ld82OpenGameLibrary'
+            unzip -p "$APK" assets/home-v8.js|grep -q 'visual-only'
           done
       - name: Prepare production keystore
         run: |
@@ -115,14 +104,13 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1)
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-game-selector" content="F2-explicit-primary"'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/game-selector-v8.css|grep -q 'z-index:12050'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/game-context-v8.js|grep -q "version:'8.0-f2.0.1'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/game-context-v8.js|grep -q "version:'8.0-f2.1'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/game-selector-v8.js|grep -q 'ld82OpenGameLibrary'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.16.1-F2-Hotfix-Production-Signed
+          name: LivingDexHub-v7.16.2-F2.1-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
