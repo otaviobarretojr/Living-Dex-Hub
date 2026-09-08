@@ -37,8 +37,8 @@ jobs:
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
-          grep -q "versionName '7.20.2'" app/build.gradle
-          grep -q 'versionCode 141' app/build.gradle
+          grep -q "versionName '7.20.3'" app/build.gradle
+          grep -q 'versionCode 142' app/build.gradle
           node --check app/src/main/assets/game-context-v8.js
           node --check app/src/main/assets/game-selector-v8.js
           node --check app/src/main/assets/home-v8.js
@@ -49,6 +49,8 @@ jobs:
           node --check app/src/main/assets/product-ux-v8.js
           grep -q 'pokemon-reference-theme-v8.css' app/src/main/assets/index.html
           grep -q 'F4.3-adaptive-reference' app/src/main/assets/index.html
+          grep -q 'feedbackFromPersistedState:true' app/src/main/assets/product-ux-v8.js
+          grep -q 'mutationDrivenFeedback:true' app/src/main/assets/product-ux-v8.js
           ! grep -q 'OnBackInvokedDispatcher' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           ! grep -q 'WindowInsetsController' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           grep -q 'onBackPressed()' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
@@ -64,8 +66,9 @@ jobs:
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
             unzip -p "$APK" assets/index.html|grep -q 'pokemon-reference-theme-v8.css'
             unzip -p "$APK" assets/index.html|grep -q 'F4.3-adaptive-reference'
-            unzip -p "$APK" assets/product-ux-v8.js|grep -q "version:'8.0-f4.2.1'"
-            unzip -p "$APK" assets/product-ux-v8.js|grep -q 'feedbackOnlyAfterStateChange:true'
+            unzip -p "$APK" assets/product-ux-v8.js|grep -q "version:'8.0-f4.4'"
+            unzip -p "$APK" assets/product-ux-v8.js|grep -q 'feedbackFromPersistedState:true'
+            unzip -p "$APK" assets/product-ux-v8.js|grep -q 'mutationDrivenFeedback:true'
             unzip -p "$APK" assets/pokemon-detail-v8.js|grep -q "version:'8.0-f3.4.2'"
             unzip -p "$APK" assets/pokemon-reference-theme-v8.css|grep -q 'data-primary-type="water"'
             unzip -p "$APK" assets/pokemon-reference-theme-v8.css|grep -q 'data-primary-type="fire"'
@@ -90,13 +93,14 @@ jobs:
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'pokemon-reference-theme-v8.css'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/product-ux-v8.js|grep -q "version:'8.0-f4.2.1'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/product-ux-v8.js|grep -q "version:'8.0-f4.4'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/product-ux-v8.js|grep -q 'feedbackFromPersistedState:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-detail-v8.js|grep -q "version:'8.0-f3.4.2'"
           ! zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -Eq '^assets/(pokemon-alive-beta-v8|pokemon-3d-v8|pokemon-frame-animation-v8)\.(js|css)$'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.20.2-ADAPTIVE-DETAIL-Signed
+          name: LivingDexHub-v7.20.3-RELIABILITY-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
