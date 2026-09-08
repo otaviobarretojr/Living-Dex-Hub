@@ -39,6 +39,8 @@ jobs:
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
+          python3 tools/audit_offline_pokemon_core.py
+          python3 tools/audit_runtime_budget.py
           node tools/journey_reliability_harness.js
           grep -q "versionName '7.22.0'" app/build.gradle
           grep -q 'versionCode 144' app/build.gradle
