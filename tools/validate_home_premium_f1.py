@@ -34,7 +34,8 @@ checks={
  'Box UX injected':'product-ux-v8.js' in H and 'product-ux-v8.css' in H,
  'Box search':'boxSearch:true' in UX and 'ld842Search' in UX,
  'Box filters':"boxFilters:['all','owned','missing']" in UX and 'data-ld842-filter="missing"' in UX,
- 'Box feedback state-safe':"version:'8.0-f4.2.1'" in UX and 'feedbackOnlyAfterStateChange:true' in UX and 'noSlotOpenFalseToast:true' in UX and 'before===after' in UX,
+ 'Box feedback persisted-state':"version:'8.0-f4.4'" in UX and 'feedbackFromPersistedState:true' in UX and 'persistedRegistered' in UX,
+ 'Box feedback mutation-driven':'mutationDrivenFeedback:true' in UX and 'new MutationObserver(finish)' in UX and 'noFixedFeedbackDelay:true' in UX,
  'Box card open has no toast':"closest?.('#ld71BoxView .ld71-slot')" not in UX,
  'Home refresh from Box':'homeProgressRefresh:true' in UX and 'ld8HomeRender' in UX,
  'independent game context':'F2.5-independent' in H and "version:'8.0-f2.5.1'" in X,
@@ -60,12 +61,12 @@ checks={
  'primary vs consultation preserved':'primaryBoxContextUntouched:true' in J and 'primaryBoxContextUntouched:true' in AB,
  'startup-safe Android wrapper':'OnBackInvokedDispatcher' not in ANDROID and 'WindowInsetsController' not in ANDROID and 'onBackPressed()' in ANDROID,
  'Android WebView safety':'MIXED_CONTENT_NEVER_ALLOW' in ANDROID and 'setSafeBrowsingEnabled(true)' in ANDROID,
- 'release version':"versionName '7.20.2'" in GRADLE and 'versionCode 141' in GRADLE,
+ 'release version':"versionName '7.20.3'" in GRADLE and 'versionCode 142' in GRADLE,
  'only current static runtime':all(x not in H for x in legacy),
  'legacy files physically removed':all(not (A/x).exists() for x in legacy),
  '1025 canonical Pokemon art':len(pngs)==1025,
 }
 failed=[k for k,v in checks.items() if not v]
 for k,v in checks.items(): print(('OK   ' if v else 'FAIL ')+k)
-if failed: raise SystemExit('REFERENCE DETAIL validation failed: '+', '.join(failed))
-print(f'REFERENCE DETAIL: {len(checks)}/{len(checks)} checks OK • v7.20.2 • F4.3 adaptive theme • Box feedback hotfix • 1025 images')
+if failed: raise SystemExit('RELIABILITY validation failed: '+', '.join(failed))
+print(f'RELIABILITY: {len(checks)}/{len(checks)} checks OK • v7.20.3 • persisted-state Box feedback • F4.3 adaptive theme • 1025 images')
