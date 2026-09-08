@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 36
-v7.12.5 final HEAD validation: Pokemon detail sheet restored after v7.12.4 cleanup; observations and Jornada/Time/Mapa remain hidden without hiding the modal content.
+Living Dex Hub Android Build 37
+v7.13.0 final HEAD validation: 12 Pokedexes audited, six primary Boxes verified, Isle of Armor 211 metadata corrected, special evolution guidance consolidated.
