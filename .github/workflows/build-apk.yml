@@ -42,25 +42,23 @@ jobs:
           grep -q 'realPokemonModels:true' app/src/main/assets/pokemon-3d-v8.js
           node --check app/src/main/assets/pokemon-alive-beta-v8.js
           node --check app/src/main/assets/pokemon-3d-v8.js
-      - name: Inspect real GLB rigs and animation clips
+      - name: Inspect original real GLB rigs and animation clips
         run: |
           mkdir -p "$RUNNER_TEMP/pokemon-glb"
           for ID in 906 907 908 909 910 911 912 913 914; do
-            curl --fail --location --retry 3 --silent --show-error "https://raw.githubusercontent.com/Pokemon-3D-api/assets/main/models/opt/regular/${ID}.glb" -o "$RUNNER_TEMP/pokemon-glb/${ID}.glb"
+            curl --fail --location --retry 3 --silent --show-error "https://raw.githubusercontent.com/Sudhanshu-Ambastha/Pokemon-3D-api/main/models/glb/regular/${ID}.glb" -o "$RUNNER_TEMP/pokemon-glb/${ID}.glb"
           done
           python3 - <<'PY'
           import json,struct,os
           root=os.path.join(os.environ['RUNNER_TEMP'],'pokemon-glb')
-          missing=[]
+          bad=[]
           for i in range(906,915):
-              b=open(os.path.join(root,f'{i}.glb'),'rb').read(); assert b[:4]==b'glTF'
+              b=open(os.path.join(root,f'{i}.glb'),'rb').read(); assert b[:4]==b'glTF',f'{i}: not GLB'
               n,k=struct.unpack_from('<II',b,12); doc=json.loads(b[20:20+n].decode('utf-8').rstrip('\x00 '))
               skins=doc.get('skins') or []; anim=doc.get('animations') or []; nodes=doc.get('nodes') or []
-              names=[x.get('name','') for x in nodes if x.get('name')]
-              print(f'{i}: meshes={len(doc.get("meshes",[]))} skins={len(skins)} animations={len(anim)} nodes={len(nodes)}')
-              print(f'{i}: node names sample={names[:35]}')
-              if not skins: missing.append(i)
-          assert not missing,f'GLB models without skeletal skin: {missing}'
+              print(f'{i}: bytes={len(b)} meshes={len(doc.get("meshes",[]))} skins={len(skins)} animations={len(anim)} nodes={len(nodes)}')
+              if not skins or not anim: bad.append((i,len(skins),len(anim)))
+          assert not bad,f'Original GLBs missing rig/animation: {bad}'
           PY
       - name: Seal validation marker
         run: python3 -c "from pathlib import Path;p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))"
