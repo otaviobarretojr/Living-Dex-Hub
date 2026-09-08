@@ -37,8 +37,8 @@ jobs:
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
-          grep -q "versionName '7.20.0'" app/build.gradle
-          grep -q 'versionCode 139' app/build.gradle
+          grep -q "versionName '7.20.1'" app/build.gradle
+          grep -q 'versionCode 140' app/build.gradle
           node --check app/src/main/assets/game-context-v8.js
           node --check app/src/main/assets/game-selector-v8.js
           node --check app/src/main/assets/home-v8.js
@@ -47,8 +47,9 @@ jobs:
           node --check app/src/main/assets/pokemon-data-v8.js
           node --check app/src/main/assets/pokemon-about-v8.js
           node --check app/src/main/assets/product-ux-v8.js
-          grep -q 'OnBackInvokedDispatcher' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q 'WindowInsetsController' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
+          ! grep -q 'OnBackInvokedDispatcher' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
+          ! grep -q 'WindowInsetsController' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
+          grep -q 'onBackPressed()' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           for F in pokemon-alive-beta-v8.js pokemon-alive-beta-v8.css pokemon-3d-v8.js pokemon-3d-v8.css pokemon-frame-animation-v8.js pokemon-frame-animation-v8.css; do test ! -e "app/src/main/assets/$F"; done
       - name: Seal validation marker
         run: python3 -c "from pathlib import Path;p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))"
@@ -89,7 +90,7 @@ jobs:
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.20.0-PRODUCT-UX-Signed
+          name: LivingDexHub-v7.20.1-STARTUP-HOTFIX-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
