@@ -27,7 +27,7 @@ jobs:
           python3 tools/sync_pokemon_assets.py
           python3 tools/sync_ui_media_v4_5.py
           python3 tools/ensure_pokemon_manifest_v7_14.py
-      - name: Apply stable static detail baseline
+      - name: Apply stable product UX baseline
         run: |
           python3 tools/canonicalize_runtime_v7_14.py
           python3 tools/apply_home_premium_f1.py
@@ -37,8 +37,8 @@ jobs:
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
-          grep -q "versionName '7.19.3'" app/build.gradle
-          grep -q 'versionCode 138' app/build.gradle
+          grep -q "versionName '7.20.0'" app/build.gradle
+          grep -q 'versionCode 139' app/build.gradle
           node --check app/src/main/assets/game-context-v8.js
           node --check app/src/main/assets/game-selector-v8.js
           node --check app/src/main/assets/home-v8.js
@@ -46,6 +46,7 @@ jobs:
           node --check app/src/main/assets/pokemon-evolution-v8.js
           node --check app/src/main/assets/pokemon-data-v8.js
           node --check app/src/main/assets/pokemon-about-v8.js
+          node --check app/src/main/assets/product-ux-v8.js
           grep -q 'OnBackInvokedDispatcher' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           grep -q 'WindowInsetsController' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           for F in pokemon-alive-beta-v8.js pokemon-alive-beta-v8.css pokemon-3d-v8.js pokemon-3d-v8.css pokemon-frame-animation-v8.js pokemon-frame-animation-v8.css; do test ! -e "app/src/main/assets/$F"; done
@@ -58,10 +59,10 @@ jobs:
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/index.html|grep -q 'pokemon-about-v8.js'
+            unzip -p "$APK" assets/index.html|grep -q 'product-ux-v8.js'
+            unzip -p "$APK" assets/home-v8.js|grep -q "version:'8.0-f4.1'"
+            unzip -p "$APK" assets/product-ux-v8.js|grep -q "version:'8.0-f4.2'"
             unzip -p "$APK" assets/pokemon-about-v8.js|grep -q "version:'8.0-f3.7.1'"
-            unzip -p "$APK" assets/home-v8.js|grep -q "version:'8.0-f2.1.1'"
-            unzip -p "$APK" assets/game-selector-v8.js|grep -q 'fullScreenGameOverview:true'
             ! unzip -p "$APK" assets/index.html|grep -q 'pokemon-alive-beta-v8.js'
             ! unzip -p "$APK" assets/index.html|grep -q 'pokemon-3d-v8.js'
             ! unzip -p "$APK" assets/index.html|grep -q 'pokemon-frame-animation-v8.js'
@@ -81,13 +82,14 @@ jobs:
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/home-v8.js|grep -q "version:'8.0-f4.1'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/product-ux-v8.js|grep -q "version:'8.0-f4.2'"
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-about-v8.js|grep -q "version:'8.0-f3.7.1'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/home-v8.js|grep -q "version:'8.0-f2.1.1'"
           ! zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -Eq '^assets/(pokemon-alive-beta-v8|pokemon-3d-v8|pokemon-frame-animation-v8)\.(js|css)$'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.19.3-AUDIT-IMPROVEMENTS-Signed
+          name: LivingDexHub-v7.20.0-PRODUCT-UX-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
