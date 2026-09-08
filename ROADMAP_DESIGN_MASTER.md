@@ -3,6 +3,22 @@
 Status base: v7.14.0 consolidada e funcional.
 Objetivo: transformar o Living Dex Hub em uma experiência visual premium, com linguagem inspirada nos produtos oficiais Pokémon/Nintendo, preservando a lógica já validada e usando o conceito visual aprovado como referência principal.
 
+## Status executivo
+
+- [x] F0 — Fundação / Design System — CONCLUÍDA em 08/09/2026
+- [ ] F1 — Início premium
+- [ ] F2 — Seletor de jogo
+- [ ] F3 — Detalhes do Pokémon 2.0
+- [ ] F4 — Box premium
+- [ ] F5 — Pesquisa global
+- [ ] F6 — Habitat e Dados por jogo
+- [ ] F7 — Identidade visual por jogo
+- [ ] F8 — Splash / Loading / acabamento
+- [ ] F9 — Navegação final
+- [ ] F10 — Auditoria visual 1:1
+- [ ] F11 — Auditoria funcional completa
+- [ ] F12 — Release final
+
 ## Regras permanentes
 
 1. A v7.14.0 é a base funcional. Nenhum rework visual pode quebrar Pokédex, Box, progresso, persistência, detalhes, evolução ou música.
@@ -16,17 +32,27 @@ Objetivo: transformar o Living Dex Hub em uma experiência visual premium, com l
 9. Assets existentes devem ser reaproveitados quando adequados. Novos assets só entram de forma controlada e coerente com o Design Master.
 10. Cada fase termina com auditoria funcional, responsiva e visual antes do APK de produção.
 
-## Fase 0 — Fundação / Design System
+## Fase 0 — Fundação / Design System — CONCLUÍDA
 
-- Inventariar a UI atual e mapear componentes reutilizáveis.
-- Definir tokens de cor, tipografia, tamanhos, espaçamento, raios, sombras, transparências e elevação.
-- Criar componentes compartilhados: cabeçalho, cards, botões, chips, barra de progresso, tabs, slots, modais/sheets, estados vazio/carregando/erro.
-- Definir linguagem visual Pokémon premium: base escura sofisticada + cores/artwork do jogo atual + vermelho como ação controlada.
-- Definir comportamento Android/mobile-first e breakpoints.
-- Definir sistema de fundos/hero por jogo.
-- Criar checklist visual 1:1 contra o conceito aprovado.
+Entregas versionadas:
+- `docs/design/DESIGN_SYSTEM_V8.md` — contrato visual oficial, tokens, componentes, responsividade, acessibilidade, movimento e checklist 1:1.
+- `app/src/main/assets/design-system-v8.css` — tokens e primitives CSS compartilhados para as próximas telas.
 
-Critério de conclusão: componentes-base consistentes, sem alterar a lógica funcional.
+Decisões fechadas:
+- base visual dark navy/charcoal, não preto puro;
+- vermelho coral como ação primária controlada;
+- verde para progresso/registrado;
+- superfícies claras reservadas para Box/listas quando coerentes com o Design Master;
+- identidade contextual por jogo sem fragmentar o Design System;
+- escala única de spacing 4/8/12/16/20/24/32/40;
+- raios 10/14/18/24;
+- touch target >=44 px;
+- motion 100–240 ms e reduced-motion;
+- mobile-first com referência principal 361–430 px;
+- Início + Box permanecem como navegação atual; Pesquisa só entra após ser implementada;
+- regra `Pokémon + jogo atual + versão = contexto do detalhe` preservada.
+
+Critério atingido: fundação visual definida sem reestruturar nem arriscar a lógica funcional da v7.14.0. A aplicação visual integral começa na F1.
 
 ## Fase 1 — Início premium
 
@@ -199,7 +225,7 @@ F0 Design System → F1 Início → F2 Trocar jogo → F3 Detalhes 2.0 → F4 Bo
 ## Decisões que não devem ser esquecidas
 
 - Uso pessoal; objetivo visual é sensação de produto Pokémon/Nintendo premium.
-- Não basta ficar 'inspirado': buscar alta fidelidade ao conceito aprovado.
+- Não basta ficar inspirado: buscar alta fidelidade ao conceito aprovado.
 - O app deve parecer rico e profissional, não uma tela preta com cards soltos.
 - Mostrar mais informação por organização e abas, não colocando tudo simultaneamente na tela.
 - Habitat nunca deve misturar jogos.
