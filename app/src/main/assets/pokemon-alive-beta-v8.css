@@ -1,0 +1,7 @@
+/* Living Dex Hub — F3.8 BETA Pokemon Alive */
+#modal .poke-hero.ld8f38-alive img.ld8f38-mon{cursor:pointer;transform-origin:50% 82%;animation:ld8f38Idle 3.2s ease-in-out infinite;will-change:transform,filter;touch-action:manipulation}
+#modal .poke-hero.ld8f38-alive img.ld8f38-mon.ld8f38-react{animation:ld8f38React .58s cubic-bezier(.2,.85,.25,1) 1!important;filter:drop-shadow(0 20px 18px rgba(45,63,87,.22))!important}
+#modal .ld8f38-hint{position:absolute;z-index:8;left:50%;bottom:8px;transform:translateX(-50%);padding:5px 10px;border:1px solid color-mix(in srgb,var(--poke-type) 18%,#dce5ef);border-radius:999px;background:rgba(255,255,255,.76);backdrop-filter:blur(10px);color:#718096;font-size:8px;font-weight:850;letter-spacing:.02em;white-space:nowrap;pointer-events:none;opacity:.78}
+@keyframes ld8f38Idle{0%,100%{transform:translateY(0) rotate(-.35deg) scale(1)}45%{transform:translateY(-5px) rotate(.35deg) scale(1.012)}60%{transform:translateY(-4px) rotate(.2deg) scale(1.008)}}
+@keyframes ld8f38React{0%{transform:translateY(0) scale(1)}25%{transform:translateY(-16px) scale(1.055) rotate(-2deg)}48%{transform:translateY(-7px) scale(.985) rotate(1.2deg)}72%{transform:translateY(-11px) scale(1.025) rotate(-.5deg)}100%{transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){#modal .poke-hero.ld8f38-alive img.ld8f38-mon{animation:none}#modal .poke-hero.ld8f38-alive img.ld8f38-mon.ld8f38-react{animation:ld8f38Reduced .25s ease 1!important}@keyframes ld8f38Reduced{50%{transform:scale(1.025)}}}
