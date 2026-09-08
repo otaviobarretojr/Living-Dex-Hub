@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 39
-v7.15.0 Phase 1 preview: premium Home based on the approved Design Master, six real game cards, contextual hero, real Box-linked progress, canonical v7.14 functional baseline preserved.
+Living Dex Hub Android Build 40
+v7.15.1 F1.1: Home edge-to-edge no celular, chrome legado oculto, dock fixo inferior Início + Box alinhado ao novo design, base funcional e progresso ligados à Box preservados.
