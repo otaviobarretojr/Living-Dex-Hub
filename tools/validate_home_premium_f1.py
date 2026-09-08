@@ -11,16 +11,18 @@ checks={
 'box setter':'ld813SetBoxGame=setBoxGame' in ctx,
 'primary no runtime':'primaryDoesNotLoadRuntime:true' in ctx,
 'box runtime':'boxLoadsRuntime:true' in ctx,
-'box restores primary state':'writeActive(primaryId());return ok' in ctx,
+'box runtime remains consulted':"if(ok)writeActive(id);else writeActive(primaryId())" in ctx and 'boxRuntimeStaysActiveWhileOpen:true' in ctx,
+'open box enforces context':'writeActive(boxId());box.removeAttribute' in ctx,
+'close box restores primary':"document.body.classList.remove('ld7121-box','game-dex-focus');writeActive(primaryId())" in ctx,
 'primary selector dedicated':"ld82OpenGameSelector?.('primary')" in ctx and "ld82OpenPrimarySelector=()=>open('primary')" in sel,
 'box selector dedicated':"ld82OpenGameSelector?.('box')" in ctx and "ld82OpenBoxSelector=()=>open('box')" in sel,
 'box selection reopens':"ld813SetBoxGame?.(id,{open:true})" in sel,
 'box change event':'ld:box-game-changed' in ctx,
 'primary change event':'ld:primary-game-changed' in ctx,
-'box header interception':"text.includes('trocar jogo')" in ctx,
+'box header interception':"text.includes('trocar jogo')" in ctx and "text.includes('meus jogos')" in ctx,
 'direct box open':'ld813DirectOpenBox=openBoxView' in ctx,
 'direct box close':'ld813DirectCloseBox=closeBox' in ctx and 'window.ld71Close=closeBox' in ctx,
-'context version':"version:'8.0-f2.5'" in ctx,
+'context version':"version:'8.0-f2.5.1'" in ctx,
 'selector version':"version:'8.0-f2.5'" in sel,
 'detail runtime':'detailContextUsesRuntime:true' in ctx,
 'library':'ld82OpenGameLibrary' in sel and '.ld82-selector.library-mode' in css,
@@ -31,5 +33,5 @@ checks={
 }
 failed=[k for k,v in checks.items() if not v]
 for k,v in checks.items():print(('OK  ' if v else 'FAIL')+k)
-if failed:raise SystemExit('F2.5 validation failed: '+', '.join(failed))
-print(f'PHASE F2.5 INDEPENDENT CONTEXTS: {len(checks)}/{len(checks)} checks OK')
+if failed:raise SystemExit('F2.5.1 validation failed: '+', '.join(failed))
+print(f'PHASE F2.5.1 BOX CONSULTATION RUNTIME: {len(checks)}/{len(checks)} checks OK')
