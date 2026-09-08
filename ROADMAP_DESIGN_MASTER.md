@@ -6,7 +6,7 @@ Objetivo: transformar o Living Dex Hub em uma experiência visual premium, com l
 ## Status executivo
 
 - [x] F0 — Fundação / Design System — CONCLUÍDA em 08/09/2026
-- [ ] F1 — Início premium
+- [ ] F1 — Início premium — EM VALIDAÇÃO VISUAL (F1.3 funcional concluída)
 - [ ] F2 — Seletor de jogo
 - [ ] F3 — Detalhes do Pokémon 2.0
 - [ ] F4 — Box premium
@@ -25,12 +25,13 @@ Objetivo: transformar o Living Dex Hub em uma experiência visual premium, com l
 2. O conceito visual aprovado é o Design Master. A implementação deve buscar fidelidade próxima de 1:1 em hierarquia, composição, espaçamento, cards, fundos, tipografia, ícones e estados.
 3. Implementar e validar uma etapa por vez. Não avançar uma tela grande antes da anterior estar funcional e visualmente aprovada.
 4. Evitar telas pretas/secas e grandes áreas vazias. Usar artwork, identidade do jogo atual, profundidade discreta, gradientes, texturas e composição visual sem poluição.
-5. O jogo/versão selecionado é contexto global. Informações específicas, principalmente Habitat, devem corresponder ao jogo/versão de onde o Pokémon foi aberto.
-6. Box continua sendo a fonte autoritativa do registro do Pokémon e deve sincronizar com Início.
-7. Biblioteca e Living Dex antigas não retornam como abas.
-8. Recursos legados em quarentena não devem reaparecer na UI sem decisão explícita.
-9. Assets existentes devem ser reaproveitados quando adequados. Novos assets só entram de forma controlada e coerente com o Design Master.
-10. Cada fase termina com auditoria funcional, responsiva e visual antes do APK de produção.
+5. Existem dois contextos distintos: **jogo principal** e **jogo em consulta**. Só uma ação explícita de Trocar jogo altera o jogo principal.
+6. Consultar uma Box de outro jogo não altera a jornada principal. O detalhe do Pokémon sempre herda o contexto da Box/origem em que foi aberto.
+7. Box continua sendo a fonte autoritativa do registro do Pokémon e deve sincronizar com Início.
+8. Biblioteca e Living Dex antigas não retornam como abas.
+9. Recursos legados em quarentena não devem reaparecer na UI sem decisão explícita.
+10. Assets existentes devem ser reaproveitados quando adequados. Novos assets só entram de forma controlada e coerente com o Design Master.
+11. Cada fase termina com auditoria funcional, responsiva e visual antes do APK de produção.
 
 ## Fase 0 — Fundação / Design System — CONCLUÍDA
 
@@ -50,27 +51,40 @@ Decisões fechadas:
 - motion 100–240 ms e reduced-motion;
 - mobile-first com referência principal 361–430 px;
 - Início + Box permanecem como navegação atual; Pesquisa só entra após ser implementada;
-- regra `Pokémon + jogo atual + versão = contexto do detalhe` preservada.
+- regra `Pokémon + jogo/versão da origem = contexto do detalhe` preservada.
 
 Critério atingido: fundação visual definida sem reestruturar nem arriscar a lógica funcional da v7.14.0. A aplicação visual integral começa na F1.
 
 ## Fase 1 — Início premium
 
 - Reestruturar o topo e identidade da Pokédex.
-- Hero grande do jogo atual com artwork, região, progresso e CTA Continuar.
-- Ação Trocar jogo integrada ao hero.
+- Hero grande do jogo principal com artwork, região, progresso e CTA Continuar.
+- Ação Trocar jogo integrada ao hero e tratada como alteração explícita da jornada principal.
 - Grade/cartões dos seis jogos com identidade visual própria e progresso real.
+- Cards de jogos podem ser usados para **consulta**, sem trocar silenciosamente o jogo principal.
 - Reduzir áreas pretas vazias e melhorar hierarquia, profundidade e composição.
 - Manter sincronização Início ↔ Box.
 
-Critério: tela inicial visualmente próxima do Design Master e 100% ligada aos dados reais.
+### F1.3 — Arquitetura de contexto — CONCLUÍDA
+
+- `primaryGame`: jogo/jornada principal escolhida explicitamente.
+- `boxContextGame`: jogo atualmente consultado na Box.
+- `detailContextGame`: herdado do runtime/Box de onde o Pokémon foi aberto.
+- `Continuar` abre a Box do jogo principal.
+- Selecionar outro jogo dentro da Box muda apenas a consulta.
+- Tocar em um card de outro jogo na Home abre consulta da Box sem alterar a jornada principal.
+- `Trocar jogo` é a única ação da Home que altera o jogo principal.
+- voltar para a Home preserva a jornada principal mesmo após consultar outro jogo.
+
+Critério: tela inicial visualmente próxima do Design Master, dados reais e sem mudanças acidentais de contexto.
 
 ## Fase 2 — Seletor de jogo
 
 - Tela dedicada Trocar jogo.
 - Cards premium para Scarlet/Violet, Legends Z-A, Sword/Shield, BDSP, Let's Go e Legends Arceus.
 - Mostrar região e progresso real.
-- Troca de jogo deve atualizar contexto global, Início, Box e detalhes.
+- O seletor principal altera explicitamente `primaryGame`.
+- A Box pode usar o mesmo componente visual em modo consulta, alterando apenas `boxContextGame`.
 - Preparar distinção de versão quando necessária: Scarlet/Violet, Sword/Shield, BD/SP e Let's Go Pikachu/Eevee.
 
 ## Fase 3 — Detalhes do Pokémon 2.0
@@ -100,9 +114,9 @@ Transformar o detalhe em perfil completo e modular.
 - prever fallback local/seguro quando fonte externa não estiver disponível.
 
 ### Aba Habitat
-Regra central: Pokémon + jogo atual + versão = contexto do habitat.
+Regra central: Pokémon + jogo/versão da origem = contexto do habitat.
 
-- mostrar apenas localização pertinente ao jogo/versão selecionado;
+- mostrar apenas localização pertinente ao jogo/versão selecionado na consulta;
 - área/rota;
 - método de encontro quando relevante;
 - condição/horário/clima quando relevante;
@@ -124,9 +138,10 @@ Critério: apenas uma aba de conteúdo aberta por vez; mais informação total c
 - Preservar 30 slots por Box e lógica já validada.
 - Reproduzir cabeçalho/contexto do jogo do Design Master.
 - Navegação clara entre Box 1, Box 2, etc.
+- Seletor da Box funciona como consulta e não altera o jogo principal.
 - Estados registrado/faltante visualmente distintos.
 - Melhorar slots, número, miniatura e feedback de toque.
-- Manter abertura do detalhe pelo Pokémon.
+- Manter abertura do detalhe pelo Pokémon e herança do contexto consultado.
 - Manter performance e encaixe mobile.
 
 ## Fase 5 — Pesquisa global
@@ -136,8 +151,8 @@ Nova função deliberada, não apenas decoração do conceito.
 - pesquisa por nome e número;
 - filtros Todos / Registrados / Faltando;
 - considerar Favoritos somente se a função for aprovada/implementada;
-- resultados no contexto do jogo atual por padrão;
-- abrir diretamente Detalhes do Pokémon;
+- resultados no contexto da consulta/jogo escolhido para pesquisa;
+- abrir diretamente Detalhes do Pokémon preservando o contexto de origem;
 - decidir após validação se Pesquisa entra na navegação inferior como terceiro item.
 
 ## Fase 6 — Habitat e dados por jogo: cobertura completa
@@ -196,10 +211,12 @@ Revalidar:
 - 6 Boxes principais;
 - 1.025 assets Pokémon;
 - sequência e correspondência das Dex;
+- jogo principal vs jogo consultado;
 - Início ↔ Box;
 - adicionar/remover;
 - persistência após reiniciar;
-- troca de jogo;
+- troca explícita de jogo principal;
+- consulta de outro jogo sem alteração da jornada;
 - contexto de versão;
 - Sobre/Evolução/Habitat/Dados;
 - busca e filtros;
@@ -228,6 +245,10 @@ F0 Design System → F1 Início → F2 Trocar jogo → F3 Detalhes 2.0 → F4 Bo
 - Não basta ficar inspirado: buscar alta fidelidade ao conceito aprovado.
 - O app deve parecer rico e profissional, não uma tela preta com cards soltos.
 - Mostrar mais informação por organização e abas, não colocando tudo simultaneamente na tela.
+- **Trocar contexto de consulta não é trocar jogo principal.**
+- `Continuar` sempre segue o jogo principal.
+- Box pode consultar qualquer jogo suportado sem alterar a jornada principal.
+- O detalhe sempre herda o jogo/versão da Box/origem em que o Pokémon foi aberto.
 - Habitat nunca deve misturar jogos.
 - Se o Pokémon foi aberto pela Box de Let's Go, Habitat é de Let's Go; se aberto por Sword/Shield, Habitat é de Sword/Shield, e assim por diante.
 - Diferenças de versão devem ser respeitadas quando afetarem encontros/informações.
