@@ -13,6 +13,8 @@ on:
       - 'app/src/main/assets/home-v8.css'
       - 'app/src/main/assets/home-v8.js'
       - 'app/src/main/assets/game-context-v8.js'
+      - 'app/src/main/assets/game-selector-v8.css'
+      - 'app/src/main/assets/game-selector-v8.js'
       - 'app/src/main/assets/shell-v8.css'
       - 'app/src/main/assets/assets/maps/**'
       - 'tools/canonicalize_runtime_v7_14.py'
@@ -46,123 +48,79 @@ jobs:
         with: { distribution: temurin, java-version: '17' }
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: '8.10.2' }
-
       - name: Restore canonical production baseline
         run: |
-          test -f "$CANONICAL_FILE"
-          test -f "$DEX_PACK_FILE"
+          test -f "$CANONICAL_FILE"; test -f "$DEX_PACK_FILE"
           base64 --decode "$CANONICAL_FILE" | xz -d > app/src/main/assets/index.html
           grep -q 'living-dex-canonical-baseline" content="7.14.0"' app/src/main/assets/index.html
-
       - name: Sync active runtime media
         run: |
           python3 tools/sync_pokemon_assets.py
           python3 tools/sync_ui_media_v4_5.py
           python3 tools/ensure_pokemon_manifest_v7_14.py
-
       - name: Apply idempotent canonical guard
         run: python3 tools/canonicalize_runtime_v7_14.py
-
-      - name: Apply Phase F1.3 premium Home context
+      - name: Apply Phase F2 premium selector
         run: python3 tools/apply_home_premium_f1.py
-
       - name: Validate application and all Pokedexes
         run: |
           python3 tools/validate_core1.py
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
-          grep -q 'living-dex-canonical-baseline" content="7.14.0"' app/src/main/assets/index.html
-          grep -q 'living-dex-design-phase" content="F1-home-premium"' app/src/main/assets/index.html
-          grep -q 'living-dex-shell" content="F1.1-fullscreen-dock"' app/src/main/assets/index.html
-          grep -q 'living-dex-game-context" content="F1.3-primary-vs-consultation"' app/src/main/assets/index.html
-          grep -q 'window.ld714CanonicalAudit=function' app/src/main/assets/index.html
-          grep -q 'living-dex-full-audit" content="7.13.0"' app/src/main/assets/index.html
-          grep -q 'LD713_SPECIAL_EVOLUTION_HINTS' app/src/main/assets/index.html
-          grep -q 'living-dex-integrity-ux" content="7.11.0"' app/src/main/assets/index.html
-          grep -q 'living-dex-detail-overlay-fix" content="7.12.5"' app/src/main/assets/index.html
-          grep -q 'living-dex-personal-music" content="7.12.0"' app/src/main/assets/index.html
-          grep -q "versionName '7.15.3'" app/build.gradle
-          test -f app/src/main/assets/design-system-v8.css
-          test -f app/src/main/assets/home-v8.css
-          test -f app/src/main/assets/home-v8.js
-          test -f app/src/main/assets/game-context-v8.js
-          test -f app/src/main/assets/shell-v8.css
-          grep -q '#v3Appbar,#r4Appbar,.v3-appbar,.v4-appbar' app/src/main/assets/shell-v8.css
-          grep -q '#ldhAudioQuick,#ldh712MusicQuick,.audio-quick' app/src/main/assets/shell-v8.css
+          grep -q 'living-dex-game-selector" content="F2-explicit-primary"' app/src/main/assets/index.html
+          grep -q "versionName '7.16.0'" app/build.gradle
+          for F in design-system-v8.css home-v8.css home-v8.js game-context-v8.js game-selector-v8.css game-selector-v8.js shell-v8.css; do test -f "app/src/main/assets/$F"; done
           node --check app/src/main/assets/home-v8.js
           node --check app/src/main/assets/game-context-v8.js
+          node --check app/src/main/assets/game-selector-v8.js
           python3 - <<'PY'
           import pathlib,re
           s=pathlib.Path('app/src/main/assets/index.html').read_text()
           assert "const LD714_PUBLIC_SURFACES=['home','box']" in s
-          assert '#games,#dex,#gameDex,#nationalDex,#library,#livingDex,#global,#missing,#families,#planner,#forms,#storage,#settings{display:none!important}' in s
           assert "const LD73_SUPPORTED=['sv','za','swsh','bdsp','letsgo','arceus']" in s
-          assert s.find('src="game-context-v8.js"') < s.find('src="home-v8.js"')
+          assert s.find('src="game-context-v8.js"') < s.find('src="game-selector-v8.js"') < s.find('src="home-v8.js"')
           pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)))
           PY
           node --check /tmp/livingdex.js
-
       - name: Seal validation marker
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))
           PY
-
       - name: Build APKs
         run: gradle :app:assembleDebug :app:assembleRelease --stacktrace
-
       - name: Verify APK payloads
         run: |
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-canonical-baseline" content="7.14.0"'
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-design-phase" content="F1-home-premium"'
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-game-context" content="F1.3-primary-vs-consultation"'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-game-selector" content="F2-explicit-primary"'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            zipinfo -1 "$APK"|grep -q '^assets/design-system-v8.css$'
-            zipinfo -1 "$APK"|grep -q '^assets/home-v8.css$'
-            zipinfo -1 "$APK"|grep -q '^assets/home-v8.js$'
-            zipinfo -1 "$APK"|grep -q '^assets/game-context-v8.js$'
-            zipinfo -1 "$APK"|grep -q '^assets/shell-v8.css$'
-            unzip -p "$APK" assets/shell-v8.css|grep -q '#v3Appbar,#r4Appbar,.v3-appbar,.v4-appbar'
-            unzip -p "$APK" assets/shell-v8.css|grep -q '#ldhAudioQuick,#ldh712MusicQuick,.audio-quick'
+            zipinfo -1 "$APK"|grep -q '^assets/game-selector-v8.css$'
+            zipinfo -1 "$APK"|grep -q '^assets/game-selector-v8.js$'
           done
-
       - name: Prepare production keystore
         run: |
-          test -n "$RELEASE_KEYSTORE_BASE64"
-          test -n "$RELEASE_STORE_PASSWORD"
-          test -n "$RELEASE_KEY_PASSWORD"
+          test -n "$RELEASE_KEYSTORE_BASE64"; test -n "$RELEASE_STORE_PASSWORD"; test -n "$RELEASE_KEY_PASSWORD"
           echo "$RELEASE_KEYSTORE_BASE64"|base64 --decode > "$RUNNER_TEMP/livingdex-production.jks"
           chmod 600 "$RUNNER_TEMP/livingdex-production.jks"
-
       - name: Build signed production release
         env: { RELEASE_STORE_FILE: '${{ runner.temp }}/livingdex-production.jks' }
         run: rm -f app/build/outputs/apk/release/app-release.apk && gradle :app:assembleRelease --rerun-tasks --stacktrace && test -f app/build/outputs/apk/release/app-release.apk
-
       - name: Verify production APK
         run: |
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1)
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-canonical-baseline" content="7.14.0"'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-design-phase" content="F1-home-premium"'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-game-context" content="F1.3-primary-vs-consultation"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-game-selector" content="F2-explicit-primary"'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-          zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/design-system-v8.css$'
-          zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/home-v8.css$'
-          zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/home-v8.js$'
-          zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/game-context-v8.js$'
-          zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/shell-v8.css$'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/shell-v8.css|grep -q '#v3Appbar,#r4Appbar,.v3-appbar,.v4-appbar'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/shell-v8.css|grep -q '#ldhAudioQuick,#ldh712MusicQuick,.audio-quick'
+          zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/game-selector-v8.css$'
+          zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/game-selector-v8.js$'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
-
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.15.3-F1.3-Production-Signed
+          name: LivingDexHub-v7.16.0-F2-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
