@@ -27,46 +27,22 @@ jobs:
           python3 tools/sync_pokemon_assets.py
           python3 tools/sync_ui_media_v4_5.py
           python3 tools/ensure_pokemon_manifest_v7_14.py
-          mkdir -p app/src/main/assets/pokemon-animated
-          curl --fail --location --retry 3 --silent --show-error https://play.pokemonshowdown.com/sprites/ani/sprigatito.gif -o app/src/main/assets/pokemon-animated/906.gif
-          curl --fail --location --retry 3 --silent --show-error https://play.pokemonshowdown.com/sprites/ani/floragato.gif -o app/src/main/assets/pokemon-animated/907.gif
-          curl --fail --location --retry 3 --silent --show-error https://play.pokemonshowdown.com/sprites/ani/meowscarada.gif -o app/src/main/assets/pokemon-animated/908.gif
-          curl --fail --location --retry 3 --silent --show-error https://play.pokemonshowdown.com/sprites/ani/fuecoco.gif -o app/src/main/assets/pokemon-animated/909.gif
-          curl --fail --location --retry 3 --silent --show-error https://play.pokemonshowdown.com/sprites/ani/crocalor.gif -o app/src/main/assets/pokemon-animated/910.gif
-          curl --fail --location --retry 3 --silent --show-error https://play.pokemonshowdown.com/sprites/ani/skeledirge.gif -o app/src/main/assets/pokemon-animated/911.gif
-          curl --fail --location --retry 3 --silent --show-error https://play.pokemonshowdown.com/sprites/ani/quaxly.gif -o app/src/main/assets/pokemon-animated/912.gif
-          curl --fail --location --retry 3 --silent --show-error https://play.pokemonshowdown.com/sprites/ani/quaxwell.gif -o app/src/main/assets/pokemon-animated/913.gif
-          curl --fail --location --retry 3 --silent --show-error https://play.pokemonshowdown.com/sprites/ani/quaquaval.gif -o app/src/main/assets/pokemon-animated/914.gif
-      - name: Apply canonical through F3.10.2
+      - name: Apply static detail rollback
         run: |
           python3 tools/canonicalize_runtime_v7_14.py
           python3 tools/apply_home_premium_f1.py
-      - name: Validate animation assets
-        run: |
-          test "$(find app/src/main/assets/pokemon-animated -maxdepth 1 -type f -name '*.gif' | wc -l)" -eq 9
-          python3 - <<'PY'
-          from pathlib import Path
-          root=Path('app/src/main/assets/pokemon-animated')
-          for i in range(906,915):
-              p=root/f'{i}.gif'; b=p.read_bytes()
-              assert b[:4] == b'GIF8', f'{i}: not GIF'
-              assert len(b) > 5000, f'{i}: suspiciously small animation ({len(b)} bytes)'
-              assert b.count(b'\x2c') >= 2, f'{i}: no evidence of multiple GIF image frames'
-              print(f'{i}: GIF OK • {len(b)} bytes')
-          PY
       - name: Validate application
         run: |
           python3 tools/validate_core1.py
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
-          python3 tools/validate_home_premium_f1.py
-          grep -q "versionName '7.19.1'" app/build.gradle
-          grep -q "version:'8.0-f3.10.2-local-frame-animation'" app/src/main/assets/pokemon-frame-animation-v8.js
-          grep -q 'actualFrameAnimation:true' app/src/main/assets/pokemon-frame-animation-v8.js
-          grep -q 'localAnimationAssets:true' app/src/main/assets/pokemon-frame-animation-v8.js
-          grep -q 'animationNetworkRequired:false' app/src/main/assets/pokemon-frame-animation-v8.js
-          node --check app/src/main/assets/pokemon-alive-beta-v8.js
-          node --check app/src/main/assets/pokemon-frame-animation-v8.js
+          grep -q "versionName '7.19.2'" app/build.gradle
+          grep -q 'F3.7-fullscreen-ptbr' app/src/main/assets/index.html
+          grep -q 'pokemon-about-v8.js' app/src/main/assets/index.html
+          ! grep -q 'pokemon-alive-beta-v8.js' app/src/main/assets/index.html
+          ! grep -q 'pokemon-3d-v8.js' app/src/main/assets/index.html
+          ! grep -q 'pokemon-frame-animation-v8.js' app/src/main/assets/index.html
+          ! grep -q 'model-viewer-f3101' app/src/main/assets/index.html
       - name: Seal validation marker
         run: python3 -c "from pathlib import Path;p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))"
       - name: Build APKs
@@ -75,11 +51,11 @@ jobs:
         run: |
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-            test "$(zipinfo -1 "$APK"|grep -E '^assets/pokemon-animated/(906|907|908|909|910|911|912|913|914)\.gif$'|wc -l)" -eq 9
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/index.html|grep -q 'frame-animation-f3102'
-            unzip -p "$APK" assets/pokemon-frame-animation-v8.js|grep -q "version:'8.0-f3.10.2-local-frame-animation'"
-            ! unzip -p "$APK" assets/index.html|grep -q 'model-viewer-f3101'
+            unzip -p "$APK" assets/index.html|grep -q 'pokemon-about-v8.js'
+            ! unzip -p "$APK" assets/index.html|grep -q 'pokemon-alive-beta-v8.js'
+            ! unzip -p "$APK" assets/index.html|grep -q 'pokemon-3d-v8.js'
+            ! unzip -p "$APK" assets/index.html|grep -q 'pokemon-frame-animation-v8.js'
           done
       - name: Prepare production keystore
         run: |
@@ -94,13 +70,14 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1)
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/pokemon-animated/(906|907|908|909|910|911|912|913|914)\.gif$'|wc -l)" -eq 9
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-frame-animation-v8.js|grep -q "version:'8.0-f3.10.2-local-frame-animation'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-frame-animation-v8.css|grep -q 'ld3102-animated'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
+          ! unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'pokemon-alive-beta-v8.js'
+          ! unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'pokemon-3d-v8.js'
+          ! unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'pokemon-frame-animation-v8.js'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.19.1-F3.10.2-LOCAL-ANIMATION-Signed
+          name: LivingDexHub-v7.19.2-STATIC-ARTWORK-ROLLBACK-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
