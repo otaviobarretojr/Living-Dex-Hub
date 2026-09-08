@@ -42,17 +42,16 @@ jobs:
           python3 tools/audit_offline_pokemon_core.py
           python3 tools/audit_runtime_budget.py
           node tools/journey_reliability_harness.js
-          grep -q "versionName '7.22.0'" app/build.gradle
-          grep -q 'versionCode 144' app/build.gradle
+          grep -q "versionName '7.22.1'" app/build.gradle
+          grep -q 'versionCode 145' app/build.gradle
           for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js collection-reliability-v8.js product-ux-v8.js; do node --check "app/src/main/assets/$F"; done
           grep -q 'typeFilter:true' app/src/main/assets/product-ux-v8.js
           grep -q 'typeFilterValues:18' app/src/main/assets/product-ux-v8.js
           grep -q 'F2.6-strict-primary-box-isolation' app/src/main/assets/index.html
           grep -q 'F4.6-bundled-1025' app/src/main/assets/index.html
-          ! grep -q 'OnBackInvokedDispatcher' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          ! grep -q 'WindowInsetsController' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
-          grep -q 'onBackPressed()' app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java
           for F in pokemon-alive-beta-v8.js pokemon-alive-beta-v8.css pokemon-3d-v8.js pokemon-3d-v8.css pokemon-frame-animation-v8.js pokemon-frame-animation-v8.css; do test ! -e "app/src/main/assets/$F"; done
+      - name: Final Android release audit
+        run: python3 tools/android_release_audit.py
       - name: Seal validation marker
         run: python3 -c "from pathlib import Path;p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))"
       - name: Build APKs
@@ -87,7 +86,7 @@ jobs:
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.22.0-PHASE5-Signed
+          name: LivingDexHub-v7.22.1-PHASE5-RC-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
