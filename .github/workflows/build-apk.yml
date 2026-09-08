@@ -3,71 +3,101 @@ on:
   workflow_dispatch:
   push:
     branches: [ main, master ]
-    paths: ['app/**','tools/**','data/**','build.gradle','settings.gradle','.github/workflows/build-apk.yml']
+    paths: ['app/**','tools/**','data/**','docs/**','build.gradle','settings.gradle','.github/workflows/build-apk.yml']
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions: { contents: read }
+    permissions: { contents: write }
     env:
       RELEASE_KEYSTORE_BASE64: ${{ secrets.LIVINGDEX_KEYSTORE_BASE64 }}
       RELEASE_STORE_PASSWORD: ${{ secrets.LIVINGDEX_KEYSTORE_PASSWORD }}
       RELEASE_KEY_ALIAS: livingdex
       RELEASE_KEY_PASSWORD: ${{ secrets.LIVINGDEX_KEY_PASSWORD }}
+      CANONICAL_FILE: app/src/main/assets/canonical/index.v7_14.xz.b64
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
       - uses: actions/setup-java@v5
         with: { distribution: temurin, java-version: '17' }
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: '8.10.2' }
-      - name: Restore canonical app HTML
+
+      - name: Restore production baseline
         run: |
-          python3 - <<'PY'
+          if [ -f "$CANONICAL_FILE" ]; then
+            base64 --decode "$CANONICAL_FILE" | xz -d > app/src/main/assets/index.html
+            echo "CANONICAL_RESTORED=1" >> "$GITHUB_ENV"
+            echo "Using consolidated v7.14 canonical baseline"
+          else
+            python3 - <<'PY'
           import gzip,base64,pathlib
           root=pathlib.Path('app/src/main/assets')
           parts=[root/'index.part00',root/'index.part01x0',root/'index.part01x1',root/'index.part01x2',root/'index.part01x3',root/'index.part02',root/'index.part03',root/'index.part04']
           (root/'index.html').write_bytes(gzip.decompress(base64.b64decode(''.join(p.read_text().strip() for p in parts))))
           PY
-      - name: Assemble Living Dex Hub
+            echo "CANONICAL_RESTORED=0" >> "$GITHUB_ENV"
+            echo "Canonical baseline not committed yet; bootstrapping from validated historical chain"
+          fi
+
+      - name: Bootstrap historical chain once
+        if: env.CANONICAL_RESTORED == '0'
         run: |
           for f in build_embedded_dex_pack.py inject_embedded_dex_pack.py sync_pokemon_assets.py sync_ui_media_v4_5.py finalize_core1.py patch_core1_runtime_qa.py rework_ui_v1.py rework_ui_v1_2.py rework_ui_v1_3.py rework_ui_v1_4.py rework_ui_v1_5.py patch_quick_toggle_v1_5_1.py rework_ui_v1_6.py rework_journey_v1_7.py rework_journey_v1_8.py rework_journey_v1_9.py patch_journey_v1_9_ceruledge.py rework_map_v2_0.py rework_navigation_v2_1.py rework_audio_v2_2.py fix_game_dex_v2_2_1.py rework_general_library_v2_3.py fix_general_dex_routing_v2_3_1.py fix_home_journey_v2_3_2.py cleanup_explanatory_copy_v2_4.py audio_always_on_v2_5.py rework_visual_v3.py polish_visual_v3_1.py clean_home_v3_1_1.py rework_reference_v4.py fix_reference_v4_runtime_qa.py rework_reference_structure_v4_1.py polish_menu_fonts_v4_1.py rework_dedicated_journey_pages_v4_2.py patch_ref42_runtime_qa.py rework_map_interaction_v4_3.py patch_ref43_runtime_qa.py polish_secondary_screens_v4_4.py rework_reference_faithful_v4_5.py polish_current_game_star_v4_5_1.py rework_library_reference_v4_6.py prepare_paldea_map_asset_v4_9.py rework_paldea_correct_order_v4_9.py add_map_import_v5_0.py rework_home_reference_v5_1.py fix_duplicate_home_journey_v5_1_1.py rework_journey_hub_v5_2.py rework_professional_v6.py rework_living_dex_only_v7.py clean_home_living_dex_v7_0_1.py add_box_view_v7_1.py fix_box_visibility_v7_1_1.py rework_box_focus_v7_2.py box_all_games_v7_3.py fix_game_selector_feedback_v7_3_1.py fix_game_selector_commit_v7_3_2.py migrate_box_library_v7_4.py rework_pokemon_detail_v7_5.py remove_box_quick_add_v7_5_1.py rework_pokemon_evolution_v7_6.py rework_home_box_sync_v7_7.py box_official_only_v7_8.py fix_duplicate_bottom_nav_v7_8_1.py link_box_home_progress_v7_8_2.py remove_legacy_library_tabs_v7_8_3.py rework_bottom_menu_v7_9.py system_improvements_v7_10.py audit_integrity_ux_v7_11.py personal_music_library_v7_12.py hide_bottom_nav_box_v7_12_1.py remove_box_footer_stats_v7_12_2.py compact_box_viewport_v7_12_3.py clean_pokemon_detail_v7_12_4.py fix_pokemon_detail_overlay_v7_12_5.py audit_dex_evolution_v7_13.py; do python3 tools/$f; done
-      - name: Validate application and all Pokedexes
+
+      - name: Apply canonical runtime
+        run: python3 tools/canonicalize_runtime_v7_14.py
+
+      - name: Validate application and canonical baseline
         run: |
           python3 tools/validate_core1.py
           python3 tools/validate_all_dexes_v7_13.py
-          grep -q 'living-dex-detail-overlay-fix" content="7.12.5"' app/src/main/assets/index.html
+          python3 tools/validate_canonical_v7_14.py
+          grep -q 'living-dex-canonical-baseline" content="7.14.0"' app/src/main/assets/index.html
+          grep -q 'window.ld714CanonicalAudit=function' app/src/main/assets/index.html
           grep -q 'living-dex-full-audit" content="7.13.0"' app/src/main/assets/index.html
-          grep -q 'window.ld713Audit=function' app/src/main/assets/index.html
           grep -q 'LD713_SPECIAL_EVOLUTION_HINTS' app/src/main/assets/index.html
-          grep -q 'Gimmighoul Coins' app/src/main/assets/index.html
-          grep -q 'Linking Cord' app/src/main/assets/index.html
-          grep -q "versionName '7.13.0'" app/build.gradle
+          grep -q "versionName '7.14.0'" app/build.gradle
           python3 - <<'PY'
           import pathlib,re
           s=pathlib.Path('app/src/main/assets/index.html').read_text()
-          assert 'living-dex-detail-cleanup" content="7.12.4"' in s
+          assert "const LD714_PUBLIC_SURFACES=['home','box']" in s
           assert 'living-dex-detail-overlay-fix" content="7.12.5"' in s
-          assert 'living-dex-full-audit" content="7.13.0"' in s
-          assert "modal.querySelectorAll('.ld7124-hidden').forEach(el=>el.classList.remove('ld7124-hidden'))" in s
+          assert 'living-dex-personal-music" content="7.12.0"' in s
+          assert '#games,#dex,#gameDex,#nationalDex,#library,#livingDex,#global,#missing,#families,#planner,#forms,#storage,#settings{display:none!important}' in s
           pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)))
           PY
           node --check /tmp/livingdex.js
+
+      - name: Persist canonical baseline once
+        if: env.CANONICAL_RESTORED == '0'
+        run: |
+          mkdir -p "$(dirname "$CANONICAL_FILE")"
+          xz -9e -c app/src/main/assets/index.html | base64 -w0 > "$CANONICAL_FILE"
+          git config user.name "livingdex-ci"
+          git config user.email "livingdex-ci@users.noreply.github.com"
+          git add "$CANONICAL_FILE"
+          git commit -m "build: persist canonical v7.14 runtime baseline"
+          git push
+
       - name: Seal validation marker
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))
           PY
+
       - name: Build APKs
         run: gradle :app:assembleDebug :app:assembleRelease --stacktrace
+
       - name: Verify APK payloads
         run: |
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-full-audit" content="7.13.0"'
-            unzip -p "$APK" assets/index.html|grep -q 'window.ld713Audit=function'
-            unzip -p "$APK" assets/index.html|grep -q 'LD713_SPECIAL_EVOLUTION_HINTS'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-canonical-baseline" content="7.14.0"'
+            unzip -p "$APK" assets/index.html|grep -q 'window.ld714CanonicalAudit=function'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           done
+
       - name: Prepare production keystore
         run: |
           test -n "$RELEASE_KEYSTORE_BASE64"
@@ -75,22 +105,24 @@ jobs:
           test -n "$RELEASE_KEY_PASSWORD"
           echo "$RELEASE_KEYSTORE_BASE64"|base64 --decode > "$RUNNER_TEMP/livingdex-production.jks"
           chmod 600 "$RUNNER_TEMP/livingdex-production.jks"
+
       - name: Build signed production release
         env: { RELEASE_STORE_FILE: '${{ runner.temp }}/livingdex-production.jks' }
         run: rm -f app/build/outputs/apk/release/app-release.apk && gradle :app:assembleRelease --rerun-tasks --stacktrace && test -f app/build/outputs/apk/release/app-release.apk
+
       - name: Verify production APK
         run: |
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1)
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-full-audit" content="7.13.0"'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'window.ld713Audit=function'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'LD713_SPECIAL_EVOLUTION_HINTS'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-canonical-baseline" content="7.14.0"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'window.ld714CanonicalAudit=function'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
+
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.13.0-Production-Signed
+          name: LivingDexHub-v7.14.0-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
