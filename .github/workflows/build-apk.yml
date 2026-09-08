@@ -28,7 +28,7 @@ jobs:
           python3 tools/sync_pokemon_assets.py
           python3 tools/sync_ui_media_v4_5.py
           python3 tools/ensure_pokemon_manifest_v7_14.py
-      - name: Apply canonical and F3.3 layers
+      - name: Apply canonical and F3.4 layers
         run: |
           python3 tools/canonicalize_runtime_v7_14.py
           python3 tools/apply_home_premium_f1.py
@@ -38,10 +38,13 @@ jobs:
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
-          grep -q "versionName '7.18.0'" app/build.gradle
-          grep -q "version:'8.0-f3.3'" app/src/main/assets/pokemon-detail-v8.js
+          grep -q "versionName '7.18.1'" app/build.gradle
+          grep -q "version:'8.0-f3.4'" app/src/main/assets/pokemon-detail-v8.js
           grep -q 'adaptiveTypeTheme:true' app/src/main/assets/pokemon-detail-v8.js
-          grep -q 'narrativeAbout:true' app/src/main/assets/pokemon-detail-v8.js
+          grep -q 'contextualOfficialEntry:true' app/src/main/assets/pokemon-detail-v8.js
+          grep -q 'versionAwareLore:true' app/src/main/assets/pokemon-detail-v8.js
+          grep -q 'localLoreCache:true' app/src/main/assets/pokemon-detail-v8.js
+          grep -q 'noInventedLoreFallback:true' app/src/main/assets/pokemon-detail-v8.js
           grep -q 'noDataDuplication:true' app/src/main/assets/pokemon-detail-v8.js
           node --check app/src/main/assets/pokemon-detail-v8.js
       - name: Seal validation marker
@@ -53,7 +56,7 @@ jobs:
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/pokemon-detail-v8.js|grep -q "version:'8.0-f3.3'"
+            unzip -p "$APK" assets/pokemon-detail-v8.js|grep -q "version:'8.0-f3.4'"
           done
       - name: Prepare production keystore
         run: |
@@ -68,11 +71,11 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1)
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-detail-v8.js|grep -q "version:'8.0-f3.3'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-detail-v8.js|grep -q "version:'8.0-f3.4'"
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.18.0-F3.3-Production-Signed
+          name: LivingDexHub-v7.18.1-F3.4-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
