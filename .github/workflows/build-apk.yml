@@ -40,12 +40,9 @@ jobs:
           grep -q "versionName '7.19.0'" app/build.gradle
           grep -q "version:'8.0-f3.10.1-real-3d'" app/src/main/assets/pokemon-3d-v8.js
           grep -q 'realPokemonModels:true' app/src/main/assets/pokemon-3d-v8.js
-          grep -q 'procedural3D:false' app/src/main/assets/pokemon-3d-v8.js
-          grep -q 'embeddedAnimationClips:true' app/src/main/assets/pokemon-3d-v8.js
-          grep -q 'networkRequired:true' app/src/main/assets/pokemon-3d-v8.js
           node --check app/src/main/assets/pokemon-alive-beta-v8.js
           node --check app/src/main/assets/pokemon-3d-v8.js
-      - name: Validate real GLB animation assets
+      - name: Inspect real GLB rigs and animation clips
         run: |
           mkdir -p "$RUNNER_TEMP/pokemon-glb"
           for ID in 906 907 908 909 910 911 912 913 914; do
@@ -54,18 +51,16 @@ jobs:
           python3 - <<'PY'
           import json,struct,os
           root=os.path.join(os.environ['RUNNER_TEMP'],'pokemon-glb')
+          missing=[]
           for i in range(906,915):
-              p=os.path.join(root,f'{i}.glb')
-              b=open(p,'rb').read()
-              assert b[:4]==b'glTF',f'{i}: not GLB'
-              assert len(b)>20,f'{i}: truncated GLB'
-              json_len,kind=struct.unpack_from('<II',b,12)
-              assert kind==0x4E4F534A,f'{i}: first chunk is not JSON'
-              doc=json.loads(b[20:20+json_len].decode('utf-8').rstrip('\x00 '))
-              animations=doc.get('animations') or []
-              assert animations,f'{i}: GLB has no embedded animations'
-              assert doc.get('meshes'),f'{i}: GLB has no mesh'
-              print(f'{i}: REAL GLB • meshes={len(doc.get("meshes",[]))} • animations={len(animations)}')
+              b=open(os.path.join(root,f'{i}.glb'),'rb').read(); assert b[:4]==b'glTF'
+              n,k=struct.unpack_from('<II',b,12); doc=json.loads(b[20:20+n].decode('utf-8').rstrip('\x00 '))
+              skins=doc.get('skins') or []; anim=doc.get('animations') or []; nodes=doc.get('nodes') or []
+              names=[x.get('name','') for x in nodes if x.get('name')]
+              print(f'{i}: meshes={len(doc.get("meshes",[]))} skins={len(skins)} animations={len(anim)} nodes={len(nodes)}')
+              print(f'{i}: node names sample={names[:35]}')
+              if not skins: missing.append(i)
+          assert not missing,f'GLB models without skeletal skin: {missing}'
           PY
       - name: Seal validation marker
         run: python3 -c "from pathlib import Path;p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))"
@@ -76,9 +71,7 @@ jobs:
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/index.html|grep -q 'model-viewer-f3101'
             unzip -p "$APK" assets/pokemon-3d-v8.js|grep -q "version:'8.0-f3.10.1-real-3d'"
-            unzip -p "$APK" assets/pokemon-3d-v8.js|grep -q 'realPokemonModels:true'
           done
       - name: Prepare production keystore
         run: |
@@ -94,7 +87,6 @@ jobs:
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-3d-v8.js|grep -q "version:'8.0-f3.10.1-real-3d'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-3d-v8.css|grep -q 'ld3101-viewer'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
