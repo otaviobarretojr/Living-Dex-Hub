@@ -1,0 +1,47 @@
+/* Living Dex Hub — F1.1 full-screen mobile shell + fixed bottom dock */
+:root{--ld8-dock-h:66px}
+html,body{width:100%!important;min-width:100%!important;min-height:100%!important;margin:0!important;padding:0!important;background:var(--ld-bg-0,#071019)!important;overflow-x:hidden!important}
+body{padding-bottom:0!important}
+.wrap{width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:0!important;background:var(--ld-bg-0,#071019)!important;box-sizing:border-box!important}
+.wrap>.top,.wrap>.nav,.wrap>.mobile-nav,.wrap>.mobile-more,.wrap>.mobile-more-backdrop,.wrap>.statusbar,.wrap>.footer{display:none!important}
+.view{width:100%!important;max-width:none!important;margin:0!important;box-sizing:border-box!important}
+#home{width:100%!important;min-height:100dvh!important;margin:0!important;padding:0!important;background:var(--ld-bg-0,#071019)!important}
+#ld8Home{width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;box-sizing:border-box!important;padding:max(12px,env(safe-area-inset-top)) 16px calc(var(--ld8-dock-h) + 28px + env(safe-area-inset-bottom))!important}
+
+/* Canonical two-destination dock: attached to the viewport, not floating. */
+.mnav.ld79-nav{
+ position:fixed!important;
+ left:0!important;right:0!important;bottom:0!important;
+ width:100%!important;max-width:none!important;
+ height:calc(var(--ld8-dock-h) + env(safe-area-inset-bottom))!important;
+ margin:0!important;padding:7px 12px calc(7px + env(safe-area-inset-bottom))!important;
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;
+ border:0!important;border-top:1px solid rgba(255,255,255,.09)!important;border-radius:0!important;
+ background:rgba(7,16,25,.96)!important;
+ box-shadow:0 -12px 34px rgba(0,0,0,.28)!important;
+ backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+ transform:none!important;z-index:10000!important;box-sizing:border-box!important
+}
+.mnav.ld79-nav .ld79-item{
+ position:relative!important;min-width:0!important;height:52px!important;padding:0 12px!important;
+ border:0!important;border-radius:15px!important;background:transparent!important;box-shadow:none!important;
+ color:var(--ld-text-3,#71808E)!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;
+ font:750 12px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important;
+ transition:background 160ms var(--ld-ease,cubic-bezier(.2,.8,.2,1)),color 160ms var(--ld-ease,cubic-bezier(.2,.8,.2,1)),transform 120ms var(--ld-ease,cubic-bezier(.2,.8,.2,1))!important
+}
+.mnav.ld79-nav .ld79-item.active{background:rgba(255,57,70,.11)!important;color:#fff!important}
+.mnav.ld79-nav .ld79-item.active:after{content:"";position:absolute;left:50%;bottom:3px;width:28px;height:3px;transform:translateX(-50%);border-radius:999px;background:var(--ld-action,#FF3946);box-shadow:0 0 12px rgba(255,57,70,.45)}
+.mnav.ld79-nav .ld79-item:active{transform:scale(.975)!important}
+.mnav.ld79-nav .ld79-icon{width:21px!important;height:21px!important;flex:0 0 21px!important}
+.mnav.ld79-nav .ld79-label{font-size:12px!important;white-space:nowrap!important}
+.ld71-nav,.mobile-nav{display:none!important}
+
+/* Dynamic Box view also occupies the full phone canvas. */
+#ld71BoxView{width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;box-sizing:border-box!important}
+body.ld7121-box{background:var(--ld-bg-0,#071019)!important;padding:0!important}
+body.ld7121-box .wrap{min-height:100dvh!important}
+
+@media(max-width:380px){#ld8Home{padding-left:13px!important;padding-right:13px!important}.mnav.ld79-nav{padding-left:9px!important;padding-right:9px!important}}
+@media(min-width:700px){.mnav.ld79-nav{left:0!important;right:0!important;width:100%!important;transform:none!important}.mnav.ld79-nav .ld79-item{max-width:280px!important;width:100%!important;justify-self:center!important}}
+@media(prefers-reduced-motion:reduce){.mnav.ld79-nav .ld79-item{transition:none!important}}
