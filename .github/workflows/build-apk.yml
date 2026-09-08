@@ -27,7 +27,7 @@ jobs:
           python3 tools/sync_pokemon_assets.py
           python3 tools/sync_ui_media_v4_5.py
           python3 tools/ensure_pokemon_manifest_v7_14.py
-      - name: Apply canonical through F3.8.2 experimental
+      - name: Apply canonical through F3.9
         run: |
           python3 tools/canonicalize_runtime_v7_14.py
           python3 tools/apply_home_premium_f1.py
@@ -37,13 +37,12 @@ jobs:
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
-          grep -q "versionName '7.18.7'" app/build.gradle
-          grep -q "version:'8.0-f3.8.2-experimental'" app/src/main/assets/pokemon-alive-beta-v8.js
-          grep -q 'elementalSignatureFx:true' app/src/main/assets/pokemon-alive-beta-v8.js
-          grep -q 'grassLeafFx:true' app/src/main/assets/pokemon-alive-beta-v8.js
-          grep -q 'fireEmberFx:true' app/src/main/assets/pokemon-alive-beta-v8.js
-          grep -q 'waterSplashFx:true' app/src/main/assets/pokemon-alive-beta-v8.js
-          grep -q 'cryOnOpen:true' app/src/main/assets/pokemon-alive-beta-v8.js
+          grep -q "versionName '7.18.8'" app/build.gradle
+          grep -q "version:'8.0-f3.9-experimental'" app/src/main/assets/pokemon-alive-beta-v8.js
+          grep -q 'livingStateEngine:true' app/src/main/assets/pokemon-alive-beta-v8.js
+          grep -q 'animatedGroundShadow:true' app/src/main/assets/pokemon-alive-beta-v8.js
+          grep -q 'ld39Look' app/src/main/assets/pokemon-alive-beta-v8.css
+          grep -q 'ld39Step' app/src/main/assets/pokemon-alive-beta-v8.css
           node --check app/src/main/assets/pokemon-alive-beta-v8.js
       - name: Seal validation marker
         run: python3 -c "from pathlib import Path;p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))"
@@ -54,7 +53,7 @@ jobs:
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/pokemon-alive-beta-v8.js|grep -q "version:'8.0-f3.8.2-experimental'"
+            unzip -p "$APK" assets/pokemon-alive-beta-v8.js|grep -q "version:'8.0-f3.9-experimental'"
           done
       - name: Prepare production keystore
         run: |
@@ -69,12 +68,12 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1)
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-alive-beta-v8.js|grep -q "version:'8.0-f3.8.2-experimental'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-alive-beta-v8.css|grep -q 'ld382Ember'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-alive-beta-v8.js|grep -q "version:'8.0-f3.9-experimental'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-alive-beta-v8.css|grep -q 'ld39Shadow'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.18.7-F3.8.2-EXPERIMENTAL-Signed
+          name: LivingDexHub-v7.18.8-F3.9-LIVING-ANIMATION-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
