@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 45
-v7.16.5 F2.4: retorno da Box para a Home passa a ser direto; botão voltar encerra a Box, remove estilos/classes de overlay e restaura o jogo principal e o dock sem usar a navegação legada.
+Living Dex Hub Android Build 46
+v7.16.6 F2.5: jogo principal e contexto da Box passam a ter fluxos independentes; seletores dedicados e troca da Box recarrega imediatamente a Pokédex consultada sem alterar a jornada principal.
