@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [ main, master ]
-    paths: ['app/**','tools/canonicalize_runtime_v7_14.py','tools/ensure_pokemon_manifest_v7_14.py','tools/validate_core1.py','tools/validate_all_dexes_v7_13.py','tools/validate_canonical_v7_14.py','data/**','docs/**','build.gradle','settings.gradle','.github/workflows/build-apk.yml']
+    paths: ['app/**','tools/canonicalize_runtime_v7_14.py','tools/sync_pokemon_assets.py','tools/sync_ui_media_v4_5.py','tools/ensure_pokemon_manifest_v7_14.py','tools/validate_core1.py','tools/validate_all_dexes_v7_13.py','tools/validate_canonical_v7_14.py','data/**','docs/**','build.gradle','settings.gradle','.github/workflows/build-apk.yml']
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,8 +29,11 @@ jobs:
           base64 --decode "$CANONICAL_FILE" | xz -d > app/src/main/assets/index.html
           grep -q 'living-dex-canonical-baseline" content="7.14.0"' app/src/main/assets/index.html
 
-      - name: Rebuild deterministic local asset manifest
-        run: python3 tools/ensure_pokemon_manifest_v7_14.py
+      - name: Sync active runtime media
+        run: |
+          python3 tools/sync_pokemon_assets.py
+          python3 tools/sync_ui_media_v4_5.py
+          python3 tools/ensure_pokemon_manifest_v7_14.py
 
       - name: Apply idempotent canonical guard
         run: python3 tools/canonicalize_runtime_v7_14.py
