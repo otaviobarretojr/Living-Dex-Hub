@@ -2,9 +2,10 @@
 (()=>{'use strict';
 let activeTab='about',lastContext='';
 function qs(s,r=document){return r.querySelector(s)}
-function gameLabel(){return String(window.currentGame?.name||'Pokédex')}
-function gameId(){return String(window.currentGame?.id||window.ld813BoxContextId?.()||'')}
-function registered(){try{if(typeof window.ld711Registered==='function')return !!window.ld711Registered(window.currentPokemon?.id);if(typeof window.ld75Registered==='function')return !!window.ld75Registered(window.currentPokemon?.id);return !!window.state?.caught?.[Number(window.currentPokemon?.id)]}catch(e){return false}}
+function gameLabel(){try{return String(currentGame?.name||window.currentGame?.name||'Pokédex')}catch(e){return String(window.currentGame?.name||'Pokédex')}}
+function gameId(){try{return String(currentGame?.id||window.currentGame?.id||window.ld813BoxContextId?.()||'')}catch(e){return String(window.currentGame?.id||window.ld813BoxContextId?.()||'')}}
+function pokemonId(){try{return Number(currentPokemon?.id||window.currentPokemon?.id||0)}catch(e){return Number(window.currentPokemon?.id||0)}}
+function registered(){const id=pokemonId();if(!id)return false;try{if(typeof window.ld711Registered==='function')return !!window.ld711Registered(id);if(typeof window.ld75Registered==='function')return !!window.ld75Registered(id);return !!window.state?.caught?.[id]}catch(e){return false}}
 function ensure(){
  const modal=document.getElementById('modal'),sheet=modal?.querySelector('.sheet'),profile=modal?.querySelector('.poke-profile');if(!modal||!sheet||!profile)return false;
  modal.classList.add('ld8f3-modal');
@@ -25,5 +26,5 @@ const oldClose=window.closeModal;if(typeof oldClose==='function')window.closeMod
 window.addEventListener('ld:box-game-changed',()=>{if(document.getElementById('modal')?.classList.contains('show'))setTimeout(sync,0)});
 document.addEventListener('click',e=>{if(e.target.closest?.('#ld75BoxBtn'))setTimeout(sync,40)},true);
 setTimeout(ensure,200);
-window.ld8f3Audit=()=>{const modal=document.getElementById('modal'),evo=document.getElementById('ld76Evolution');return {version:'8.0-f3.0',mounted:!!document.getElementById('ld8f3Tabs'),modalReady:!!modal,detailOpen:!!modal?.classList.contains('show'),contextGame:lastContext||gameId(),currentGame:gameId(),tab:activeTab,evolutionPreserved:!!evo,boxActionPreserved:!!document.getElementById('ld75BoxBtn'),legacyObservationsHidden:[...(modal?.querySelectorAll('textarea')||[])].every(x=>getComputedStyle(x).display==='none'),primaryBoxContextUntouched:true}};
+window.ld8f3Audit=()=>{const modal=document.getElementById('modal'),evo=document.getElementById('ld76Evolution');return {version:'8.0-f3.0',mounted:!!document.getElementById('ld8f3Tabs'),modalReady:!!modal,detailOpen:!!modal?.classList.contains('show'),pokemonId:pokemonId(),contextGame:lastContext||gameId(),currentGame:gameId(),tab:activeTab,evolutionPreserved:!!evo,boxActionPreserved:!!document.getElementById('ld75BoxBtn'),legacyObservationsHidden:[...(modal?.querySelectorAll('textarea')||[])].every(x=>getComputedStyle(x).display==='none'),primaryBoxContextUntouched:true}};
 })();
