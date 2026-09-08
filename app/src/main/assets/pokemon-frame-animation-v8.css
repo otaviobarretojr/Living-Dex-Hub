@@ -1,0 +1,14 @@
+/* Living Dex Hub — F3.10.2 local frame animation */
+#modal .poke-hero.ld3102-frame{position:relative;overflow:hidden;isolation:isolate}
+#modal .poke-hero.ld3102-frame>img:not(.ld3102-animated){transition:opacity .18s ease;z-index:4}
+#modal .poke-hero.ld3102-frame.ld3102-loaded>img:not(.ld3102-animated){opacity:0!important;pointer-events:none!important}
+#modal .ld3102-animated{position:absolute;z-index:6;inset:3% 4% 1%;width:92%;height:96%;object-fit:contain;object-position:center;display:block;user-select:none;-webkit-user-drag:none;filter:drop-shadow(0 12px 12px rgba(35,45,58,.16));transform-origin:50% 80%;touch-action:manipulation}
+#modal .poke-hero.ld3102-frame::before{content:'Animação real • toque para interagir';position:absolute;z-index:10;top:10px;left:50%;transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.82);backdrop-filter:blur(10px);border:1px solid rgba(120,140,165,.18);font-size:8px;font-weight:850;color:#64748b;letter-spacing:.02em;pointer-events:none;white-space:nowrap;opacity:.92}
+#modal .poke-hero.ld3102-frame:not(.ld3102-loaded)::before{content:'Carregando animação…'}
+#modal .poke-hero.ld3102-frame.ld3102-loaded::after{content:'';position:absolute;z-index:3;left:50%;bottom:12%;width:126px;height:22px;transform:translateX(-50%);border-radius:50%;background:rgba(42,54,70,.12);filter:blur(7px);pointer-events:none;animation:ld3102Shadow 2.7s ease-in-out infinite}
+#modal .poke-hero.ld3102-frame.ld3102-react .ld3102-animated{animation:ld3102React .68s cubic-bezier(.2,.8,.2,1) 1}
+#modal .poke-hero.ld3102-frame.ld3102-react::after{animation:ld3102Impact .7s ease-out 1}
+@keyframes ld3102Shadow{0%,100%{transform:translateX(-50%) scale(1);opacity:.62}50%{transform:translateX(-50%) scale(.9);opacity:.42}}
+@keyframes ld3102React{0%{transform:translateY(0) scale(1)}28%{transform:translateY(-8px) scale(1.035)}55%{transform:translateY(2px) scale(.99)}100%{transform:translateY(0) scale(1)}}
+@keyframes ld3102Impact{0%{transform:translateX(-50%) scale(.75);opacity:.28}45%{transform:translateX(-50%) scale(1.18);opacity:.72}100%{transform:translateX(-50%) scale(1);opacity:.58}}
+@media(prefers-reduced-motion:reduce){#modal .ld3102-animated{display:none!important}#modal .poke-hero.ld3102-frame::before,#modal .poke-hero.ld3102-frame::after{display:none!important}}
