@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 32
-v7.12.1 final HEAD validation: bottom navigation visible only on Home and hidden inside Box.
+Living Dex Hub Android Build 33
+v7.12.2 final HEAD validation: redundant Registered/Missing/Total footer removed from every Box in every supported game.
