@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 30
-Mobile Biblioteca Pokemon responsive rework.
+Living Dex Hub Android Build 31
+v7.11.0 final HEAD validation: authoritative per-game Box, Home sync, detail UX and consolidated CI.
