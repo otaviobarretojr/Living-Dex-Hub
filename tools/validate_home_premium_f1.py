@@ -75,7 +75,7 @@ checks={
  'journey harness present':(R/'tools/journey_reliability_harness.js').exists() and 'JOURNEY RELIABILITY: PASS' in (R/'tools/journey_reliability_harness.js').read_text(encoding='utf-8'),
  'startup-safe Android wrapper':'OnBackInvokedDispatcher' not in ANDROID and 'WindowInsetsController' not in ANDROID and 'onBackPressed()' in ANDROID,
  'Android WebView safety':'MIXED_CONTENT_NEVER_ALLOW' in ANDROID and 'setSafeBrowsingEnabled(true)' in ANDROID,
- 'Android low-risk hardening':'setWebContentsDebuggingEnabled(BuildConfig.DEBUG)' in ANDROID and 'setCacheMode(WebSettings.LOAD_DEFAULT)' in ANDROID,
+ 'Android low-risk hardening':'setWebContentsDebuggingEnabled(false)' in ANDROID and 'setCacheMode(WebSettings.LOAD_DEFAULT)' in ANDROID,
  'release version':"versionName '7.21.0'" in GRADLE and 'versionCode 143' in GRADLE,
  'only current static runtime':all(x not in H for x in legacy),
  'legacy files physically removed':all(not (A/x).exists() for x in legacy),
