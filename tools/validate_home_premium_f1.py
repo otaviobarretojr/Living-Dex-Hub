@@ -12,15 +12,17 @@ checks={
 'load order':html.find('src="game-context-v8.js"') < html.find('src="game-selector-v8.js"') < html.find('src="home-v8.js"'),
 'primary persistent':"PRIMARY_KEY='ld8.primaryGame'" in ctx,
 'box persistent':"BOX_KEY='ld8.boxContextGame'" in ctx,
-'commit primary first':'primaryCommittedFirst:true' in ctx,
+'commit primary first':'setPrimaryRaw(id);saveKey(BOX_KEY,id)' in ctx,
 'primary event':"ld:primary-game-changed" in ctx,
 'consult independent':'ld813ConsultGame=consultBox' in ctx,
 'box hook':'window.ld71Open=async function()' in ctx,
+'direct loader':'ld813LoadContextDirect=loadContextDirect' in ctx and 'directContextLoader:true' in ctx,
+'no legacy openGame':'openGame(' not in ctx and 'ld73LoadGame' not in ctx,
 'direct box opener':'ld813DirectOpenBox=directOpenBox' in ctx and 'directBoxOpen:true' in ctx,
-'box class activation':"box.classList.add('active')" in ctx,
-'selectors closed before box':'closeAllSelectors();' in ctx and 'ld72GameSheet' in ctx,
+'box forced visible':"box.style.display='block'" in ctx and "box.style.visibility='visible'" in ctx,
+'selectors hard hidden':"el.style.display='none'" in ctx,
 'detail runtime':'detailContextUsesRuntime:true' in ctx,
-'context version':"version:'8.0-f2.2'" in ctx,
+'context version':"version:'8.0-f2.3'" in ctx,
 'selector setter':'ld813SetPrimaryGame' in sel,
 'library function':'ld82OpenGameLibrary' in sel,
 'fullscreen library':'.ld82-selector.library-mode' in css and 'min-height:100dvh' in css,
@@ -34,5 +36,5 @@ checks={
 }
 failed=[k for k,v in checks.items() if not v]
 for k,v in checks.items():print(('OK  ' if v else 'FAIL')+k)
-if failed:raise SystemExit('F2.2 validation failed: '+', '.join(failed))
-print(f'PHASE F2.2 DIRECT BOX: {len(checks)}/{len(checks)} checks OK')
+if failed:raise SystemExit('F2.3 validation failed: '+', '.join(failed))
+print(f'PHASE F2.3 RECURSION-FREE BOX: {len(checks)}/{len(checks)} checks OK')
