@@ -23,7 +23,7 @@ checks={
  'F4 product marker':'living-dex-product-ux" content="F4.2-home-box-polish"' in H,
  'home F4':'home-v8.js' in H and "version:'8.0-f4.1'" in HV,
  'compact Home':'compactHero:true' in HV and '.ld8-hero{position:relative;height:258px' in HC,
- 'actionable game cards':'gameCardsActionable:true' in HV and 'consultGame' in HV and 'ld813SetBoxGame' in HV,
+ 'actionable game cards':'gameCardsActionable:' in HV and 'button.ld8-game[data-ld8-game]' in HV and 'consultGame' in HV and 'ld813SetBoxGame' in HV,
  'consult preserves primary':'consultPreservesPrimary:true' in HV and "version:'8.0-f2.5.1'" in X,
  'missing progress':'missingCount:true' in HV and 'Faltam ' in HV,
  'safe Home actions':'musicSafeFallback:true' in HV and 'ld82OpenGameOverview' in HV,
