@@ -50,15 +50,14 @@ checks={
  'fullscreen mobile':'100dvh' in AC,
  'box action preserved':'boxActionPreserved' in J and 'Na Box' in C,
  'primary vs consultation preserved':'primaryBoxContextUntouched:true' in J and 'primaryBoxContextUntouched:true' in AB,
- 'modern Android bars':'WindowInsetsController' in ANDROID and 'setSystemBarsAppearance' in ANDROID,
- 'modern Android back':'OnBackInvokedDispatcher' in ANDROID and 'handleBackAction' in ANDROID,
+ 'startup-safe Android wrapper':'OnBackInvokedDispatcher' not in ANDROID and 'WindowInsetsController' not in ANDROID and 'onBackPressed()' in ANDROID,
  'Android WebView safety':'MIXED_CONTENT_NEVER_ALLOW' in ANDROID and 'setSafeBrowsingEnabled(true)' in ANDROID,
- 'release version':"versionName '7.20.0'" in GRADLE and 'versionCode 139' in GRADLE,
+ 'release version':"versionName '7.20.1'" in GRADLE and 'versionCode 140' in GRADLE,
  'only current static runtime':all(x not in H for x in legacy),
  'legacy files physically removed':all(not (A/x).exists() for x in legacy),
  '1025 canonical Pokemon art':len(pngs)==1025,
 }
 failed=[k for k,v in checks.items() if not v]
 for k,v in checks.items(): print(('OK   ' if v else 'FAIL ')+k)
-if failed: raise SystemExit('PRODUCT UX validation failed: '+', '.join(failed))
-print(f'PRODUCT UX BASELINE: {len(checks)}/{len(checks)} checks OK • v7.20.0 • Home F4.1 • Box F4.2 • Detail F3.4.1 • 1025 images')
+if failed: raise SystemExit('PRODUCT UX HOTFIX validation failed: '+', '.join(failed))
+print(f'PRODUCT UX HOTFIX: {len(checks)}/{len(checks)} checks OK • v7.20.1 • startup-safe Android wrapper • Home F4.1 • Box F4.2 • Detail F3.4.1 • 1025 images')
