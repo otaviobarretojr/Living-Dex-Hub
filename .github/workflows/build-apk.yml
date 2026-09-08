@@ -28,7 +28,7 @@ jobs:
           python3 tools/sync_pokemon_assets.py
           python3 tools/sync_ui_media_v4_5.py
           python3 tools/ensure_pokemon_manifest_v7_14.py
-      - name: Apply canonical through F3.8 beta layers
+      - name: Apply canonical through F3.8.1 beta layers
         run: |
           python3 tools/canonicalize_runtime_v7_14.py
           python3 tools/apply_home_premium_f1.py
@@ -38,12 +38,15 @@ jobs:
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
-          grep -q "versionName '7.18.5'" app/build.gradle
+          grep -q "versionName '7.18.6'" app/build.gradle
           grep -q "version:'8.0-f3.7'" app/src/main/assets/pokemon-about-v8.js
-          grep -q "version:'8.0-f3.8-beta'" app/src/main/assets/pokemon-alive-beta-v8.js
-          grep -q 'cryOnTapOnly:true' app/src/main/assets/pokemon-alive-beta-v8.js
-          grep -q 'noAutoplay:true' app/src/main/assets/pokemon-alive-beta-v8.js
-          grep -q 'officialCryEndpoint:true' app/src/main/assets/pokemon-alive-beta-v8.js
+          grep -q "version:'8.0-f3.8.1-beta'" app/src/main/assets/pokemon-alive-beta-v8.js
+          grep -q 'cryOnOpen:true' app/src/main/assets/pokemon-alive-beta-v8.js
+          grep -q 'cryOnTap:true' app/src/main/assets/pokemon-alive-beta-v8.js
+          grep -q "motionProfiles:\['feline','heavy','bird'\]" app/src/main/assets/pokemon-alive-beta-v8.js
+          grep -q 'ld8f381Feline' app/src/main/assets/pokemon-alive-beta-v8.css
+          grep -q 'ld8f381Heavy' app/src/main/assets/pokemon-alive-beta-v8.css
+          grep -q 'ld8f381Bird' app/src/main/assets/pokemon-alive-beta-v8.css
           node --check app/src/main/assets/pokemon-detail-v8.js
           node --check app/src/main/assets/pokemon-evolution-v8.js
           node --check app/src/main/assets/pokemon-data-v8.js
@@ -59,8 +62,8 @@ jobs:
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
             unzip -p "$APK" assets/pokemon-about-v8.js|grep -q "version:'8.0-f3.7'"
-            unzip -p "$APK" assets/pokemon-alive-beta-v8.js|grep -q "version:'8.0-f3.8-beta'"
-            unzip -p "$APK" assets/pokemon-alive-beta-v8.css|grep -q 'ld8f38Idle'
+            unzip -p "$APK" assets/pokemon-alive-beta-v8.js|grep -q "version:'8.0-f3.8.1-beta'"
+            unzip -p "$APK" assets/pokemon-alive-beta-v8.js|grep -q 'cryOnOpen:true'
           done
       - name: Prepare production keystore
         run: |
@@ -75,12 +78,12 @@ jobs:
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1)
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-alive-beta-v8.js|grep -q "version:'8.0-f3.8-beta'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-alive-beta-v8.js|grep -q 'cryOnTapOnly:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-alive-beta-v8.js|grep -q "version:'8.0-f3.8.1-beta'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-alive-beta-v8.js|grep -q 'cryOnOpen:true'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.18.5-F3.8-BETA-Pokemon-Alive-Signed
+          name: LivingDexHub-v7.18.6-F3.8.1-BETA-Pokemon-Alive-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
