@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 38
-v7.14.0 final HEAD validation: canonical production baseline, historical patch chain removed from CI, obsolete split runtime sources removed, active media sync isolated, legacy views quarantined.
+Living Dex Hub Android Build 39
+v7.15.0 Phase 1 preview: premium Home based on the approved Design Master, six real game cards, contextual hero, real Box-linked progress, canonical v7.14 functional baseline preserved.
