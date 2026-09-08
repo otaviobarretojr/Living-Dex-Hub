@@ -27,7 +27,7 @@ jobs:
           python3 tools/sync_pokemon_assets.py
           python3 tools/sync_ui_media_v4_5.py
           python3 tools/ensure_pokemon_manifest_v7_14.py
-      - name: Apply static detail rollback
+      - name: Apply stable static detail baseline
         run: |
           python3 tools/canonicalize_runtime_v7_14.py
           python3 tools/apply_home_premium_f1.py
@@ -36,13 +36,16 @@ jobs:
           python3 tools/validate_core1.py
           python3 tools/validate_all_dexes_v7_13.py
           python3 tools/validate_canonical_v7_14.py
+          python3 tools/validate_home_premium_f1.py
           grep -q "versionName '7.19.2'" app/build.gradle
-          grep -q 'F3.7-fullscreen-ptbr' app/src/main/assets/index.html
-          grep -q 'pokemon-about-v8.js' app/src/main/assets/index.html
-          ! grep -q 'pokemon-alive-beta-v8.js' app/src/main/assets/index.html
-          ! grep -q 'pokemon-3d-v8.js' app/src/main/assets/index.html
-          ! grep -q 'pokemon-frame-animation-v8.js' app/src/main/assets/index.html
-          ! grep -q 'model-viewer-f3101' app/src/main/assets/index.html
+          node --check app/src/main/assets/game-context-v8.js
+          node --check app/src/main/assets/game-selector-v8.js
+          node --check app/src/main/assets/home-v8.js
+          node --check app/src/main/assets/pokemon-detail-v8.js
+          node --check app/src/main/assets/pokemon-evolution-v8.js
+          node --check app/src/main/assets/pokemon-data-v8.js
+          node --check app/src/main/assets/pokemon-about-v8.js
+          for F in pokemon-alive-beta-v8.js pokemon-alive-beta-v8.css pokemon-3d-v8.js pokemon-3d-v8.css pokemon-frame-animation-v8.js pokemon-frame-animation-v8.css; do test ! -e "app/src/main/assets/$F"; done
       - name: Seal validation marker
         run: python3 -c "from pathlib import Path;p=Path('app/src/main/assets/index.html');s=p.read_text();p.write_text(s.replace('const BUILD_QA_VALIDATED=false;','const BUILD_QA_VALIDATED=true;',1))"
       - name: Build APKs
@@ -53,9 +56,11 @@ jobs:
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
             unzip -p "$APK" assets/index.html|grep -q 'pokemon-about-v8.js'
+            unzip -p "$APK" assets/pokemon-about-v8.js|grep -q "version:'8.0-f3.7.1'"
             ! unzip -p "$APK" assets/index.html|grep -q 'pokemon-alive-beta-v8.js'
             ! unzip -p "$APK" assets/index.html|grep -q 'pokemon-3d-v8.js'
             ! unzip -p "$APK" assets/index.html|grep -q 'pokemon-frame-animation-v8.js'
+            ! zipinfo -1 "$APK"|grep -Eq '^assets/(pokemon-alive-beta-v8|pokemon-3d-v8|pokemon-frame-animation-v8)\.(js|css)$'
           done
       - name: Prepare production keystore
         run: |
@@ -71,13 +76,12 @@ jobs:
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-          ! unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'pokemon-alive-beta-v8.js'
-          ! unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'pokemon-3d-v8.js'
-          ! unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'pokemon-frame-animation-v8.js'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-about-v8.js|grep -q "version:'8.0-f3.7.1'"
+          ! zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -Eq '^assets/(pokemon-alive-beta-v8|pokemon-3d-v8|pokemon-frame-animation-v8)\.(js|css)$'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.19.2-STATIC-ARTWORK-ROLLBACK-Signed
+          name: LivingDexHub-v7.19.2-STABLE-BASELINE-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
