@@ -69,8 +69,10 @@ jobs:
           python3 tools/validate_canonical_v7_14.py
           python3 tools/validate_home_premium_f1.py
           grep -q 'living-dex-game-selector" content="F2-explicit-primary"' app/src/main/assets/index.html
-          grep -q "versionName '7.16.0'" app/build.gradle
+          grep -q "versionName '7.16.1'" app/build.gradle
           for F in design-system-v8.css home-v8.css home-v8.js game-context-v8.js game-selector-v8.css game-selector-v8.js shell-v8.css; do test -f "app/src/main/assets/$F"; done
+          grep -q 'z-index:12050' app/src/main/assets/game-selector-v8.css
+          grep -q "version:'8.0-f2.0.1'" app/src/main/assets/game-context-v8.js
           node --check app/src/main/assets/home-v8.js
           node --check app/src/main/assets/game-context-v8.js
           node --check app/src/main/assets/game-selector-v8.js
@@ -97,8 +99,8 @@ jobs:
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'living-dex-game-selector" content="F2-explicit-primary"'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            zipinfo -1 "$APK"|grep -q '^assets/game-selector-v8.css$'
-            zipinfo -1 "$APK"|grep -q '^assets/game-selector-v8.js$'
+            unzip -p "$APK" assets/game-selector-v8.css|grep -q 'z-index:12050'
+            unzip -p "$APK" assets/game-context-v8.js|grep -q "version:'8.0-f2.0.1'"
           done
       - name: Prepare production keystore
         run: |
@@ -115,12 +117,12 @@ jobs:
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-game-selector" content="F2-explicit-primary"'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-          zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/game-selector-v8.css$'
-          zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/game-selector-v8.js$'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/game-selector-v8.css|grep -q 'z-index:12050'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/game-context-v8.js|grep -q "version:'8.0-f2.0.1'"
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.16.0-F2-Production-Signed
+          name: LivingDexHub-v7.16.1-F2-Hotfix-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
