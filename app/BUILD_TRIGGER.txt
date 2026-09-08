@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 43
-v7.16.3 F2.2: Continuar e aba Box passam a abrir a Box diretamente após carregar o contexto; qualquer seletor aberto é fechado antes da Box e não pode reaparecer por cima da navegação.
+Living Dex Hub Android Build 45
+v7.16.5 F2.4: retorno da Box para a Home passa a ser direto; botão voltar encerra a Box, remove estilos/classes de overlay e restaura o jogo principal e o dock sem usar a navegação legada.
