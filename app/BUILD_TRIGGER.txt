@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 35
-v7.12.4 final HEAD validation: observations and Jornada/Time/Mapa CTA removed from every Pokemon detail across all supported games.
+Living Dex Hub Android Build 36
+v7.12.5 final HEAD validation: Pokemon detail sheet restored after v7.12.4 cleanup; observations and Jornada/Time/Mapa remain hidden without hiding the modal content.
