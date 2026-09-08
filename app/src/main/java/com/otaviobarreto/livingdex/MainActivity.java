@@ -1,6 +1,7 @@
 package com.otaviobarreto.livingdex;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -56,10 +57,31 @@ public class MainActivity extends Activity {
                 if (filePathCallback != null) filePathCallback.onReceiveValue(null);
                 filePathCallback = callback;
                 try {
-                    Intent intent = params != null ? params.createIntent() : new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    intent.setType("image/*");
-                    intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/png", "image/jpeg", "image/webp"});
+                    String[] accepts = params != null ? params.getAcceptTypes() : null;
+                    boolean wantsAudio = false;
+                    if (accepts != null) {
+                        for (String accept : accepts) {
+                            if (accept != null && (accept.startsWith("audio/") || accept.toLowerCase().contains("audio"))) {
+                                wantsAudio = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                     intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    if (wantsAudio) {
+                        intent.setType("audio/*");
+                        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                                "audio/mpeg", "audio/mp4", "audio/ogg", "audio/opus", "audio/wav", "audio/x-wav", "audio/aac", "audio/flac"
+                        });
+                        if (params != null && params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE) {
+                            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                        }
+                    } else {
+                        intent.setType("image/*");
+                        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/png", "image/jpeg", "image/webp"});
+                    }
                     startActivityForResult(intent, FILE_CHOOSER_REQUEST);
                     return true;
                 } catch (Exception e) {
@@ -90,8 +112,16 @@ public class MainActivity extends Activity {
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == FILE_CHOOSER_REQUEST) {
             Uri[] results = null;
-            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
-                results = new Uri[]{data.getData()};
+            if (resultCode == RESULT_OK && data != null) {
+                ClipData clipData = data.getClipData();
+                if (clipData != null && clipData.getItemCount() > 0) {
+                    results = new Uri[clipData.getItemCount()];
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        results[i] = clipData.getItemAt(i).getUri();
+                    }
+                } else if (data.getData() != null) {
+                    results = new Uri[]{data.getData()};
+                }
             }
             if (filePathCallback != null) filePathCallback.onReceiveValue(results);
             filePathCallback = null;
