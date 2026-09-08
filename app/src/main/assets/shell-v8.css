@@ -1,9 +1,18 @@
-/* Living Dex Hub — F1.1 full-screen mobile shell + fixed bottom dock */
+/* Living Dex Hub — F1.2 full-screen mobile shell + fixed bottom dock + legacy chrome quarantine */
 :root{--ld8-dock-h:66px}
 html,body{width:100%!important;min-width:100%!important;min-height:100%!important;margin:0!important;padding:0!important;background:var(--ld-bg-0,#071019)!important;overflow-x:hidden!important}
 body{padding-bottom:0!important}
 .wrap{width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:0!important;background:var(--ld-bg-0,#071019)!important;box-sizing:border-box!important}
 .wrap>.top,.wrap>.nav,.wrap>.mobile-nav,.wrap>.mobile-more,.wrap>.mobile-more-backdrop,.wrap>.statusbar,.wrap>.footer{display:none!important}
+
+/* The v8 shell is authoritative. Historical app bars and audio quick-actions may still be
+   created by compatibility scripts, but they must never become visible again. */
+#v3Appbar,#r4Appbar,.v3-appbar,.v4-appbar,#ldhAudioQuick,#ldh712MusicQuick,.audio-quick{
+ display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;
+ width:0!important;height:0!important;min-width:0!important;min-height:0!important;
+ margin:0!important;padding:0!important;border:0!important;overflow:hidden!important
+}
+
 .view{width:100%!important;max-width:none!important;margin:0!important;box-sizing:border-box!important}
 #home{width:100%!important;min-height:100dvh!important;margin:0!important;padding:0!important;background:var(--ld-bg-0,#071019)!important}
 #ld8Home{width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;box-sizing:border-box!important;padding:max(12px,env(safe-area-inset-top)) 16px calc(var(--ld8-dock-h) + 28px + env(safe-area-inset-bottom))!important}
