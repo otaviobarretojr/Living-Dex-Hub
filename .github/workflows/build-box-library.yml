@@ -26,22 +26,19 @@ jobs:
           root=pathlib.Path('app/src/main/assets');parts=[root/'index.part00',root/'index.part01x0',root/'index.part01x1',root/'index.part01x2',root/'index.part01x3',root/'index.part02',root/'index.part03',root/'index.part04']
           (root/'index.html').write_bytes(gzip.decompress(base64.b64decode(''.join(p.read_text().strip() for p in parts))))
           PY
-      - name: Assemble evolution-first Pokemon detail
+      - name: Assemble home Box-sync rework
         run: |
-          for f in build_embedded_dex_pack.py inject_embedded_dex_pack.py sync_pokemon_assets.py sync_ui_media_v4_5.py finalize_core1.py patch_core1_runtime_qa.py rework_ui_v1.py rework_ui_v1_2.py rework_ui_v1_3.py rework_ui_v1_4.py rework_ui_v1_5.py patch_quick_toggle_v1_5_1.py rework_ui_v1_6.py rework_journey_v1_7.py rework_journey_v1_8.py rework_journey_v1_9.py patch_journey_v1_9_ceruledge.py rework_map_v2_0.py rework_navigation_v2_1.py rework_audio_v2_2.py fix_game_dex_v2_2_1.py rework_general_library_v2_3.py fix_general_dex_routing_v2_3_1.py fix_home_journey_v2_3_2.py cleanup_explanatory_copy_v2_4.py audio_always_on_v2_5.py rework_visual_v3.py polish_visual_v3_1.py clean_home_v3_1_1.py rework_reference_v4.py fix_reference_v4_runtime_qa.py rework_reference_structure_v4_1.py polish_menu_fonts_v4_1.py rework_dedicated_journey_pages_v4_2.py patch_ref42_runtime_qa.py rework_map_interaction_v4_3.py patch_ref43_runtime_qa.py polish_secondary_screens_v4_4.py rework_reference_faithful_v4_5.py polish_current_game_star_v4_5_1.py rework_library_reference_v4_6.py prepare_paldea_map_asset_v4_9.py rework_paldea_correct_order_v4_9.py add_map_import_v5_0.py rework_home_reference_v5_1.py fix_duplicate_home_journey_v5_1_1.py rework_journey_hub_v5_2.py rework_professional_v6.py rework_living_dex_only_v7.py clean_home_living_dex_v7_0_1.py add_box_view_v7_1.py fix_box_visibility_v7_1_1.py rework_box_focus_v7_2.py box_all_games_v7_3.py fix_game_selector_feedback_v7_3_1.py fix_game_selector_commit_v7_3_2.py migrate_box_library_v7_4.py rework_pokemon_detail_v7_5.py remove_box_quick_add_v7_5_1.py rework_pokemon_evolution_v7_6.py; do python3 tools/$f; done
-      - name: Validate evolution-first detail
+          for f in build_embedded_dex_pack.py inject_embedded_dex_pack.py sync_pokemon_assets.py sync_ui_media_v4_5.py finalize_core1.py patch_core1_runtime_qa.py rework_ui_v1.py rework_ui_v1_2.py rework_ui_v1_3.py rework_ui_v1_4.py rework_ui_v1_5.py patch_quick_toggle_v1_5_1.py rework_ui_v1_6.py rework_journey_v1_7.py rework_journey_v1_8.py rework_journey_v1_9.py patch_journey_v1_9_ceruledge.py rework_map_v2_0.py rework_navigation_v2_1.py rework_audio_v2_2.py fix_game_dex_v2_2_1.py rework_general_library_v2_3.py fix_general_dex_routing_v2_3_1.py fix_home_journey_v2_3_2.py cleanup_explanatory_copy_v2_4.py audio_always_on_v2_5.py rework_visual_v3.py polish_visual_v3_1.py clean_home_v3_1_1.py rework_reference_v4.py fix_reference_v4_runtime_qa.py rework_reference_structure_v4_1.py polish_menu_fonts_v4_1.py rework_dedicated_journey_pages_v4_2.py patch_ref42_runtime_qa.py rework_map_interaction_v4_3.py patch_ref43_runtime_qa.py polish_secondary_screens_v4_4.py rework_reference_faithful_v4_5.py polish_current_game_star_v4_5_1.py rework_library_reference_v4_6.py prepare_paldea_map_asset_v4_9.py rework_paldea_correct_order_v4_9.py add_map_import_v5_0.py rework_home_reference_v5_1.py fix_duplicate_home_journey_v5_1_1.py rework_journey_hub_v5_2.py rework_professional_v6.py rework_living_dex_only_v7.py clean_home_living_dex_v7_0_1.py add_box_view_v7_1.py fix_box_visibility_v7_1_1.py rework_box_focus_v7_2.py box_all_games_v7_3.py fix_game_selector_feedback_v7_3_1.py fix_game_selector_commit_v7_3_2.py migrate_box_library_v7_4.py rework_pokemon_detail_v7_5.py remove_box_quick_add_v7_5_1.py rework_pokemon_evolution_v7_6.py rework_home_box_sync_v7_7.py; do python3 tools/$f; done
+      - name: Validate home Box-sync rework
         run: |
           python3 tools/validate_core1.py
-          grep -q 'living-dex-pokemon-detail" content="7.5.0"' app/src/main/assets/index.html
-          grep -q 'living-dex-box-clean-card" content="7.5.1"' app/src/main/assets/index.html
           grep -q 'living-dex-pokemon-evolution" content="7.6.0"' app/src/main/assets/index.html
-          grep -q 'function ld76RenderEvolution' app/src/main/assets/index.html
-          grep -q 'function ld76EvolutionMethod' app/src/main/assets/index.html
-          grep -q '#modal .ld75-obtain' app/src/main/assets/index.html
-          grep -q '#modal #acquisitionBox' app/src/main/assets/index.html
-          grep -q '#modal #profileTypes .type' app/src/main/assets/index.html
+          grep -q 'living-dex-home-box-sync" content="7.7.0"' app/src/main/assets/index.html
+          grep -q 'function home77Progress' app/src/main/assets/index.html
+          grep -q 'function home77Art' app/src/main/assets/index.html
+          grep -q 'Toque para abrir a Box' app/src/main/assets/index.html
           grep -q 'grid-template-columns:repeat(6,minmax(0,1fr))' app/src/main/assets/index.html
-          grep -q "versionName '7.6.0'" app/build.gradle
+          grep -q "versionName '7.7.0'" app/build.gradle
           python3 - <<'PY'
           import pathlib,re
           s=pathlib.Path('app/src/main/assets/index.html').read_text();pathlib.Path('/tmp/livingdex.js').write_text('\n'.join(re.findall(r'<script[^>]*>(.*?)</script>',s,flags=re.S)))
@@ -59,8 +56,8 @@ jobs:
         run: |
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
-            unzip -p "$APK" assets/index.html|grep -q 'living-dex-pokemon-evolution" content="7.6.0"'
-            unzip -p "$APK" assets/index.html|grep -q 'ld76RenderEvolution'
+            unzip -p "$APK" assets/index.html|grep -q 'living-dex-home-box-sync" content="7.7.0"'
+            unzip -p "$APK" assets/index.html|grep -q 'home77Progress'
             unzip -p "$APK" assets/index.html|grep -q 'grid-template-columns:repeat(6,minmax(0,1fr))'
           done
       - name: Prepare production keystore
@@ -71,11 +68,11 @@ jobs:
       - name: Verify production APK
         run: |
           A=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f|sort -V|tail -1); "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-pokemon-evolution" content="7.6.0"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'living-dex-home-box-sync" content="7.7.0"'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.6.0-Production-Signed
+          name: LivingDexHub-v7.7.0-Production-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
