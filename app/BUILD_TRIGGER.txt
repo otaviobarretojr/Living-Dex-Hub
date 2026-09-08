@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 41
-v7.15.2 F1.2: cabeçalhos e ícones globais legados ocultos definitivamente; apenas o novo header Pokédex v8, ação de música atual e dock inferior Início + Box permanecem visíveis.
+Living Dex Hub Android Build 42
+v7.15.3 F1.3: jogo principal separado do contexto de consulta; Home/Continuar usam jogo principal, Box pode consultar outro jogo sem alterar a jornada, e o detalhe herda o jogo realmente aberto na Box.
