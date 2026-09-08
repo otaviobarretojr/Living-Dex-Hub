@@ -30,7 +30,7 @@ checks={
  'box context persistent key':"BOX_KEY='ld8.boxContextGame'" in ctx,
  'explicit primary setter':'window.ld813SetPrimaryGame=selectPrimary' in ctx,
  'box context getter':'window.ld813BoxContextId=boxId' in ctx,
- 'selector mode split':"mode==='primary'" in ctx and "selectorMode='box'" in ctx,
+ 'selector mode split':"mode==='primary'" in ctx and "openSelector('box')" in ctx,
  'state restored to primary':'restorePrimary()' in ctx,
  'detail context runtime preserved':'currentGame?.id' in ctx and 'detailContextUsesRuntime' in ctx,
  'hero component':'.ld8-hero{' in css,
