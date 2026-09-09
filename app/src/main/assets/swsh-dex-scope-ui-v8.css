@@ -1,0 +1,6 @@
+/* Living Dex Hub — F7.4 Sword/Shield dex-scope badges */
+.ld8ld-dex-scopes{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 12px;padding:10px 12px;border:1px solid rgba(100,116,139,.18);border-radius:14px;background:rgba(248,250,252,.82)}
+.ld8ld-dex-scopes>small{font-size:10px;font-weight:800;letter-spacing:.12em;color:#64748b}
+.ld8ld-dex-scopes>div{display:flex;gap:6px;flex-wrap:wrap}
+.ld8ld-dex-scopes span{display:inline-flex;align-items:center;min-height:26px;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:800;background:#fff;border:1px solid rgba(100,116,139,.2);color:#334155}
+@media(max-width:520px){.ld8ld-dex-scopes{align-items:flex-start;flex-direction:column;gap:7px}.ld8ld-dex-scopes>div{width:100%}}
