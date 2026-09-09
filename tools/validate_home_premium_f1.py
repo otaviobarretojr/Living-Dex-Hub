@@ -2,16 +2,36 @@ from pathlib import Path
 import json
 R=Path(__file__).resolve().parents[1];A=R/'app/src/main/assets'
 def rd(n): return (A/n).read_text(encoding='utf-8')
-H=rd('index.html');J=rd('pokemon-detail-v8.js');X=rd('game-context-v8.js');S=rd('game-selector-v8.js');E=rd('pokemon-evolution-v8.js');D=rd('pokemon-data-v8.js');AB=rd('pokemon-about-v8.js');AC=rd('pokemon-about-v8.css');THEME=rd('pokemon-reference-theme-v8.css');OFF=rd('pokemon-offline-core-v8.js');COL=rd('collection-reliability-v8.js');HV=rd('home-v8.js');HC=rd('home-v8.css');UX=rd('product-ux-v8.js');UXC=rd('product-ux-v8.css')
+H=rd('index.html');J=rd('pokemon-detail-v8.js');X=rd('game-context-v8.js');E=rd('pokemon-evolution-v8.js');D=rd('pokemon-data-v8.js');AB=rd('pokemon-about-v8.js');AC=rd('pokemon-about-v8.css');THEME=rd('pokemon-reference-theme-v8.css');OFF=rd('pokemon-offline-core-v8.js');COL=rd('collection-reliability-v8.js');HV=rd('home-v8.js');UX=rd('product-ux-v8.js')
 ANDROID=(R/'app/src/main/java/com/otaviobarreto/livingdex/MainActivity.java').read_text(encoding='utf-8');GRADLE=(R/'app/build.gradle').read_text(encoding='utf-8')
-legacy=['pokemon-alive-beta-v8.js','pokemon-alive-beta-v8.css','pokemon-3d-v8.js','pokemon-3d-v8.css','pokemon-frame-animation-v8.js','pokemon-frame-animation-v8.css'];pngs=list((A/'assets/pokemon').glob('*.png'));types=['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];offline=json.loads((A/'pokemon-offline-core-v8.json').read_text(encoding='utf-8'));off_p=offline.get('pokemon',{});feedback=UX.split('function hookFeedback()',1)[1].split('function hookRenders()',1)[0];loadbox=X.split('async function loadBoxRuntime',1)[1].split('function boxIsOpen',1)[0]
+legacy=['pokemon-alive-beta-v8.js','pokemon-alive-beta-v8.css','pokemon-3d-v8.js','pokemon-3d-v8.css','pokemon-frame-animation-v8.js','pokemon-frame-animation-v8.css'];pngs=list((A/'assets/pokemon').glob('*.png'));types=['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];offline=json.loads((A/'pokemon-offline-core-v8.json').read_text(encoding='utf-8'));off_p=offline.get('pokemon',{});loadbox=X.split('async function loadBoxRuntime',1)[1].split('function boxIsOpen',1)[0];embedded=A/'pokemon-offline-core-data-v8.js'
 checks={
-'canonical baseline':'living-dex-canonical-baseline\" content=\"7.14.0\"' in H,'home F4':"version:'8.0-f4.1'" in HV,'strict context F2.6':"version:'8.0-f2.6'" in X and 'primaryStateNeverUsesConsultation:true' in X,'consultation never writes active id':'writePrimaryState(id)' not in loadbox,'collection business event':"const EVENT='ld:box-entry-changed'" in COL and 'postMutationStateVerified:true' in COL,
-'Box status filters':"boxFilters:['all','owned','missing']" in UX,'F5.5.1 Box controls':"version:'8.0-f5.5.1'" in UX,'duplicate internal search removed':'duplicateBoxSearchRemoved:true' in UX and 'ld842Search' not in UX,'type filter removed':'typeFilter:false' in UX and 'ld842Type' not in UX,'event feedback':"addEventListener('ld:box-entry-changed'" in UX,
-'offline runtime F5.6':"version:'8.0-f5.6'" in OFF and 'explicitProvenance:true' in OFF and 'noFakeOfficialPortuguese:true' in OFF,'offline JSON 1025':offline.get('count')==1025 and len(off_p)==1025 and all(str(i) in off_p for i in range(1,1026)),'offline technical coverage':sum(bool(p.get('types')) and len(p.get('stats') or [])==6 for p in off_p.values())>=1000,'offline evolution graph':all((not p.get('evolvesFrom') or str(p.get('evolvesFrom')) in off_p) for p in off_p.values()),
-'evolution offline':"version:'8.0-f3.5.1'" in E,'data offline':"version:'8.0-f3.6.1'" in D,'about F5.6':"version:'8.0-f5.6'" in AB and 'explicitEntryProvenance:true' in AB and 'officialEntryNeverFaked:true' in AB and 'factualSummaryLabeled:true' in AB,'transparent ability fallback':"Tradução em português não disponível" in OFF and 'abilityFallbackTransparent:true' in AB and 'Habilidade especial' not in OFF,'no network lore fallback':'pokeapi.co/api/v2/pokemon-species' not in AB,'no invented lore':'noInventedLore:true' in AB and 'noInventedLore:true' in OFF,
-'detail stable':"version:'8.0-f3.4.2'" in J and 'localizedTypeThemeStable:true' in J,'adaptive 18 types':all(f'data-primary-type=\"{t}\"' in THEME for t in types),'fullscreen mobile':'100dvh' in AC,'journey harness':(R/'tools/journey_reliability_harness.js').exists(),'android release audit':(R/'tools/android_release_audit.py').exists(),'startup-safe Android':'OnBackInvokedDispatcher' not in ANDROID and 'WindowInsetsController' not in ANDROID and 'onBackPressed()' in ANDROID,'Android WebView safety':'MIXED_CONTENT_NEVER_ALLOW' in ANDROID and 'setSafeBrowsingEnabled(true)' in ANDROID,'release version':"versionName '7.22.6'" in GRADLE and 'versionCode 150' in GRADLE,'legacy removed':all(not (A/x).exists() for x in legacy),'1025 art':len(pngs)==1025}
+'canonical baseline':'living-dex-canonical-baseline\" content=\"7.14.0\"' in H,
+'home F4':"version:'8.0-f4.1'" in HV,
+'strict context F2.6':"version:'8.0-f2.6'" in X and 'primaryStateNeverUsesConsultation:true' in X,
+'consultation never writes active id':'writePrimaryState(id)' not in loadbox,
+'collection event':"const EVENT='ld:box-entry-changed'" in COL,
+'Box filters preserved':"boxFilters:['all','owned','missing']" in UX and 'ld842Search' not in UX,
+'offline runtime F5.7':"version:'8.0-f5.7'" in OFF and 'embeddedData:' in OFF and 'fileSchemeSafe:true' in OFF,
+'embedded data generated':embedded.exists() and embedded.stat().st_size>100000 and 'window.__LD8_OFFLINE_DATA__=' in embedded.read_text(encoding='utf-8',errors='ignore')[:200],
+'embedded data injected before runtime':H.count('pokemon-offline-core-data-v8.js')==1 and H.count('pokemon-offline-core-v8.js')==1 and H.index('pokemon-offline-core-data-v8.js')<H.index('pokemon-offline-core-v8.js'),
+'offline JSON 1025':offline.get('count')==1025 and len(off_p)==1025 and all(str(i) in off_p for i in range(1,1026)),
+'offline technical coverage':sum(bool(p.get('types')) and len(p.get('stats') or [])==6 for p in off_p.values())>=1000,
+'evolution offline':"version:'8.0-f3.5.1'" in E,
+'data offline':"version:'8.0-f3.6.1'" in D,
+'about F5.6':"version:'8.0-f5.6'" in AB and 'officialEntryNeverFaked:true' in AB and 'factualSummaryLabeled:true' in AB,
+'no invented lore':'noInventedLore:true' in AB and 'noInventedLore:true' in OFF,
+'detail F5.7':"version:'8.0-f5.7'" in J and 'localHeroArtForced:true' in J and 'fileSchemeSafeArt:true' in J,
+'local hero path':"assets/pokemon/" in J and 'document.baseURI' in J and 'repairHeroImage()' in J,
+'adaptive 18 types':all(f'data-primary-type=\"{t}\"' in THEME for t in types),
+'fullscreen mobile':'100dvh' in AC,
+'startup-safe Android':'OnBackInvokedDispatcher' not in ANDROID and 'WindowInsetsController' not in ANDROID and 'onBackPressed()' in ANDROID,
+'Android WebView safety':'MIXED_CONTENT_NEVER_ALLOW' in ANDROID and 'setSafeBrowsingEnabled(true)' in ANDROID,
+'release version':"versionName '7.22.7'" in GRADLE and 'versionCode 151' in GRADLE,
+'legacy removed':all(not (A/x).exists() for x in legacy),
+'1025 art':len(pngs)==1025 and (A/'assets/pokemon/915.png').exists()
+}
 failed=[k for k,v in checks.items() if not v]
 for k,v in checks.items():print(('OK   ' if v else 'FAIL ')+k)
-if failed:raise SystemExit('V7.22.6 validation failed: '+', '.join(failed))
-print(f'V7.22.6: {len(checks)}/{len(checks)} checks OK • About provenance explicit • no fake PT official text • transparent ability fallback')
+if failed:raise SystemExit('V7.22.7 validation failed: '+', '.join(failed))
+print(f'V7.22.7: {len(checks)}/{len(checks)} checks OK • embedded offline data • file-scheme-safe hero art • Lechonk asset present')
