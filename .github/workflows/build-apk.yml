@@ -42,11 +42,14 @@ jobs:
           python3 tools/audit_offline_pokemon_core.py
           python3 tools/audit_runtime_budget.py
           node tools/journey_reliability_harness.js
-          grep -q "versionName '7.22.1'" app/build.gradle
-          grep -q 'versionCode 145' app/build.gradle
+          node tools/box_type_filter_harness.js
+          grep -q "versionName '7.22.2'" app/build.gradle
+          grep -q 'versionCode 146' app/build.gradle
           for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js collection-reliability-v8.js product-ux-v8.js; do node --check "app/src/main/assets/$F"; done
-          grep -q 'typeFilter:true' app/src/main/assets/product-ux-v8.js
-          grep -q 'typeFilterValues:18' app/src/main/assets/product-ux-v8.js
+          grep -q "version:'8.0-f5.2'" app/src/main/assets/product-ux-v8.js
+          grep -q 'asyncOfflineTypeResolution:true' app/src/main/assets/product-ux-v8.js
+          grep -q 'reversibleAllTypes:true' app/src/main/assets/product-ux-v8.js
+          grep -q 'nationalIdFromArtwork:true' app/src/main/assets/product-ux-v8.js
           grep -q 'F2.6-strict-primary-box-isolation' app/src/main/assets/index.html
           grep -q 'F4.6-bundled-1025' app/src/main/assets/index.html
           for F in pokemon-alive-beta-v8.js pokemon-alive-beta-v8.css pokemon-3d-v8.js pokemon-3d-v8.css pokemon-frame-animation-v8.js pokemon-frame-animation-v8.css; do test ! -e "app/src/main/assets/$F"; done
@@ -61,8 +64,9 @@ jobs:
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/product-ux-v8.js|grep -q "version:'8.0-f5.1'"
-            unzip -p "$APK" assets/product-ux-v8.js|grep -q 'typeFilterValues:18'
+            unzip -p "$APK" assets/product-ux-v8.js|grep -q "version:'8.0-f5.2'"
+            unzip -p "$APK" assets/product-ux-v8.js|grep -q 'asyncOfflineTypeResolution:true'
+            unzip -p "$APK" assets/product-ux-v8.js|grep -q 'reversibleAllTypes:true'
             unzip -p "$APK" assets/pokemon-offline-core-v8.json|python3 -c "import sys,json;x=json.load(sys.stdin);assert x['count']==1025 and len(x['pokemon'])==1025"
             ! zipinfo -1 "$APK"|grep -Eq '^assets/(pokemon-alive-beta-v8|pokemon-3d-v8|pokemon-frame-animation-v8)\.(js|css)$'
           done
@@ -80,13 +84,14 @@ jobs:
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/product-ux-v8.js|grep -q "version:'8.0-f5.1'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/product-ux-v8.js|grep -q 'typeFilterValues:18'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/product-ux-v8.js|grep -q "version:'8.0-f5.2'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/product-ux-v8.js|grep -q 'asyncOfflineTypeResolution:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/product-ux-v8.js|grep -q 'reversibleAllTypes:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-offline-core-v8.json|python3 -c "import sys,json;x=json.load(sys.stdin);assert x['count']==1025 and len(x['pokemon'])==1025"
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.22.1-PHASE5-RC-Signed
+          name: LivingDexHub-v7.22.2-BOX-FILTER-HOTFIX-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
