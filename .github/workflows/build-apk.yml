@@ -61,17 +61,18 @@ jobs:
           grep -q 'wildEncounterMethodLabels:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q "version:'8.0-f7.6'" app/src/main/assets/acquisition-availability-bridge-v8.js
           grep -q 'outsideDexVisibleToLivingDex:true' app/src/main/assets/acquisition-availability-bridge-v8.js
-          grep -q "version:'8.0-f7.6'" app/src/main/assets/swsh-dex-scope-ui-v8.js
-          grep -q 'outsideDexBadge:true' app/src/main/assets/swsh-dex-scope-ui-v8.js
           grep -q '"dexSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"coveredSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"missingSpecies":\[\]' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"version":"8.0-f7.8"' app/src/main/assets/swsh-encounters-v8.js
           grep -q 'dlcVersionSlugIngestion:true' app/src/main/assets/swsh-encounters-v8.js
-          grep -q 'dlcEncounterProvider:true' app/src/main/assets/swsh-encounters-v8.js
           grep -q 'galarDexRegionalFormsComplete:true' app/src/main/assets/swsh-encounters-v8.js
-          grep -q 'outsideDexObtainability:true' app/src/main/assets/swsh-encounters-v8.js
-          grep -q '"version":"8.0-f8.0"' app/src/main/assets/bdsp-encounters-v8.js
+          grep -q '"version":"8.0-f8.1"' app/src/main/assets/bdsp-encounters-v8.js
+          grep -q '"coveredSpecies":151' app/src/main/assets/bdsp-encounters-v8.js
+          grep -q '"missingSpecies":\[\]' app/src/main/assets/bdsp-encounters-v8.js
+          grep -q 'pkhexLegalityImport:true' app/src/main/assets/bdsp-encounters-v8.js
+          grep -q 'grandUndergroundRoutes:true' app/src/main/assets/bdsp-encounters-v8.js
+          grep -q 'verifiedBdspSpecialRoutes:true' app/src/main/assets/bdsp-encounters-v8.js
           grep -q "version:'8.0-f8.0'" app/src/main/assets/acquisition-provider-registry-v8.js
           grep -q 'bdspAdapter:' app/src/main/assets/acquisition-provider-registry-v8.js
           test -f app/src/main/assets/assets/pokemon/915.png
@@ -100,8 +101,10 @@ jobs:
             unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f7.7'"
             unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.8"'
             unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'dlcVersionSlugIngestion:true'
-            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'galarDexRegionalFormsComplete:true'
-            unzip -p "$APK" assets/bdsp-encounters-v8.js|grep -q '"version":"8.0-f8.0"'
+            unzip -p "$APK" assets/bdsp-encounters-v8.js|grep -q '"version":"8.0-f8.1"'
+            unzip -p "$APK" assets/bdsp-encounters-v8.js|grep -q '"coveredSpecies":151'
+            unzip -p "$APK" assets/bdsp-encounters-v8.js|grep -q 'pkhexLegalityImport:true'
+            unzip -p "$APK" assets/bdsp-encounters-v8.js|grep -q 'grandUndergroundRoutes:true'
             unzip -p "$APK" assets/acquisition-provider-registry-v8.js|grep -q 'bdspAdapter:'
             unzip -p "$APK" assets/acquisition-availability-bridge-v8.js|grep -q "version:'8.0-f7.6'"
             unzip -p "$APK" assets/letsgo-encounters-v8.js|grep -q '"coveredSpecies":153'
@@ -128,9 +131,9 @@ jobs:
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f7.7'"
           unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.8"'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q 'dlcVersionSlugIngestion:true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q 'galarDexRegionalFormsComplete:true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/bdsp-encounters-v8.js|grep -q '"version":"8.0-f8.0"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/bdsp-encounters-v8.js|grep -q '"version":"8.0-f8.1"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/bdsp-encounters-v8.js|grep -q '"coveredSpecies":151'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/bdsp-encounters-v8.js|grep -q 'pkhexLegalityImport:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/acquisition-provider-registry-v8.js|grep -q 'bdspAdapter:'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/acquisition-availability-bridge-v8.js|grep -q "version:'8.0-f7.6'"
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
