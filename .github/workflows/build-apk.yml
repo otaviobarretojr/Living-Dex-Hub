@@ -50,7 +50,7 @@ jobs:
           python3 tools/audit_offline_pokemon_core.py
           python3 tools/audit_runtime_budget.py
           node tools/journey_reliability_harness.js
-          python3 tools/validate_swsh_f76.py
+          python3 tools/validate_swsh_f77.py
           python3 tools/audit_swsh_missing_routes.py
           grep -q "versionName '7.22.8'" app/build.gradle
           grep -q 'versionCode 152' app/build.gradle
@@ -74,9 +74,10 @@ jobs:
           grep -q '"dexSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"coveredSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"missingSpecies":\[\]' app/src/main/assets/letsgo-encounters-v8.js
-          grep -q '"version":"8.0-f7.6"' app/src/main/assets/swsh-encounters-v8.js
+          grep -q '"version":"8.0-f7.7"' app/src/main/assets/swsh-encounters-v8.js
+          grep -q 'regionalFormAware:true' app/src/main/assets/swsh-encounters-v8.js
+          grep -q 'galarDexRegionalFormsComplete:true' app/src/main/assets/swsh-encounters-v8.js
           grep -q 'outsideDexObtainability:true' app/src/main/assets/swsh-encounters-v8.js
-          grep -q 'dexMembershipSeparatedFromObtainability:true' app/src/main/assets/swsh-encounters-v8.js
           test -f app/src/main/assets/livingdex-global-v8.css
           test -f app/src/main/assets/livingdex-encounters-v8.css
           ! grep -q 'ld842Search' app/src/main/assets/product-ux-v8.js
@@ -102,9 +103,10 @@ jobs:
             unzip -p "$APK" assets/acquisition-availability-bridge-v8.js|grep -q "version:'8.0-f7.6'"
             unzip -p "$APK" assets/swsh-dex-scope-ui-v8.js|grep -q "version:'8.0-f7.6'"
             zipinfo -1 "$APK"|grep -q '^assets/swsh-dex-scope-ui-v8.css$'
-            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.6"'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.7"'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'regionalFormAware:true'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'galarDexRegionalFormsComplete:true'
             unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'outsideDexObtainability:true'
-            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'dexMembershipSeparatedFromObtainability:true'
             unzip -p "$APK" assets/letsgo-encounters-v8.js|grep -q '"coveredSpecies":153'
             unzip -p "$APK" assets/pokemon-offline-core-v8.json|python3 -c "import sys,json;x=json.load(sys.stdin);assert x['count']==1025 and len(x['pokemon'])==1025 and '915' in x['pokemon']"
           done
@@ -129,9 +131,10 @@ jobs:
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/acquisition-availability-bridge-v8.js|grep -q "version:'8.0-f7.6'"
           unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-dex-scope-ui-v8.js|grep -q "version:'8.0-f7.6'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.6"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.7"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q 'regionalFormAware:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q 'galarDexRegionalFormsComplete:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q 'outsideDexObtainability:true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q 'dexMembershipSeparatedFromObtainability:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/letsgo-encounters-v8.js|grep -q '"coveredSpecies":153'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
 
