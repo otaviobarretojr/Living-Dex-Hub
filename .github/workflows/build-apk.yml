@@ -57,8 +57,10 @@ jobs:
           grep -q 'official-artwork/' app/src/main/assets/pokemon-visual-quality-v8.js
           test -f app/src/main/assets/assets/pokemon/915.png
           grep -q "version:'8.0-f5.6'" app/src/main/assets/pokemon-about-v8.js
-          grep -q "version:'8.0-f6.6'" app/src/main/assets/livingdex-encounter-guide-v8.js
-          grep -q 'actionFirst:true' app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q "version:'8.0-f6.7'" app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q 'bestRouteResolver:true' app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q 'selectedVersionPriority:true' app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q 'alternativesCollapsed:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q '"dexSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"coveredSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"missingSpecies":\[\]' app/src/main/assets/letsgo-encounters-v8.js
@@ -83,8 +85,9 @@ jobs:
             unzip -p "$APK" assets/pokemon-visual-quality-v8.js|grep -q "version:'8.0-f5.8'"
             unzip -p "$APK" assets/pokemon-visual-quality-v8.js|grep -q 'officialArtworkPrimary:true'
             unzip -p "$APK" assets/pokemon-visual-quality-v8.js|grep -q 'localArtworkFallback:true'
-            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f6.6'"
-            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'actionFirst:true'
+            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f6.7'"
+            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'bestRouteResolver:true'
+            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'alternativesCollapsed:true'
             unzip -p "$APK" assets/letsgo-encounters-v8.js|grep -q '"dexSpecies":153'
             unzip -p "$APK" assets/letsgo-encounters-v8.js|grep -q '"coveredSpecies":153'
             unzip -p "$APK" assets/letsgo-encounters-v8.js|grep -q '"missingSpecies":\[\]'
@@ -110,7 +113,8 @@ jobs:
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-visual-quality-v8.js|grep -q "version:'8.0-f5.8'"
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-visual-quality-v8.js|grep -q 'officialArtworkPrimary:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-visual-quality-v8.js|grep -q 'localArtworkFallback:true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f6.6'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f6.7'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q 'bestRouteResolver:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/letsgo-encounters-v8.js|grep -q '"coveredSpecies":153'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-offline-core-v8.json|python3 -c "import sys,json;x=json.load(sys.stdin);assert x['count']==1025 and len(x['pokemon'])==1025 and '915' in x['pokemon']"
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
