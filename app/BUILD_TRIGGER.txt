@@ -1,2 +1,2 @@
-Living Dex Hub Android Build 47
-v7.17.0 F3: Pokémon Detail 2.0 em tela cheia com visual premium, contexto herdado da Box, status por jogo, abas Sobre/Evolução/Dados e preservação das ações oficiais de adicionar/remover da Box.
+Living Dex Hub Android Build 48
+F6.0: Living Dex global como terceira área principal, National Dex 1.025 espécies, progresso compartilhado com Box, filtros por geração e separação entre disponíveis nos jogos do usuário e Pokémon que exigem busca externa.
