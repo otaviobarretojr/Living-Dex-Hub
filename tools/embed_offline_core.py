@@ -17,5 +17,5 @@ print(f'Embedded offline core: 1025/1025 • {OUT.stat().st_size} bytes')
 # Build richer game acquisition caches in the same offline-data stage.
 # Each builder preserves its committed fallback and returns success when the
 # public endpoint is unavailable, so release builds do not depend on network.
-for script in ('build_letsgo_encounters.py','build_swsh_encounters.py','enrich_swsh_dlc_scopes.py','enrich_swsh_special_routes.py','enrich_swsh_outside_dex.py','enrich_swsh_regional_forms.py','enrich_swsh_dlc_encounters.py'):
+for script in ('build_letsgo_encounters.py','build_swsh_encounters.py','enrich_swsh_dlc_scopes.py','enrich_swsh_special_routes.py','enrich_swsh_outside_dex.py','enrich_swsh_regional_forms.py','enrich_swsh_dlc_encounters.py','build_bdsp_encounters.py'):
     subprocess.run([sys.executable, str(ROOT/'tools'/script)], check=True)
