@@ -48,12 +48,15 @@ jobs:
           python3 tools/audit_swsh_missing_routes.py
           python3 tools/validate_bdsp_f80.py
           python3 tools/validate_livingdex_f113.py
+          python3 tools/validate_livingdex_f115.py
           grep -q "versionName '7.22.8'" app/build.gradle
           grep -q 'versionCode 152' app/build.gradle
-          for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-data-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js pokemon-visual-quality-v8.js collection-reliability-v8.js product-ux-v8.js livingdex-global-v8.js letsgo-encounters-v8.js swsh-encounters-v8.js bdsp-encounters-v8.js pla-encounters-v8.js sv-encounters-v8.js za-encounters-v8.js acquisition-provider-registry-v8.js acquisition-availability-bridge-v8.js livingdex-encounter-guide-v8.js swsh-dex-scope-ui-v8.js; do node --check "app/src/main/assets/$F"; done
+          for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-data-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js pokemon-visual-quality-v8.js collection-reliability-v8.js product-ux-v8.js livingdex-global-v8.js livingdex-experience-v8.js letsgo-encounters-v8.js swsh-encounters-v8.js bdsp-encounters-v8.js pla-encounters-v8.js sv-encounters-v8.js za-encounters-v8.js acquisition-provider-registry-v8.js acquisition-availability-bridge-v8.js livingdex-encounter-guide-v8.js swsh-dex-scope-ui-v8.js; do node --check "app/src/main/assets/$F"; done
           grep -q "version:'8.0-f11.3'" app/src/main/assets/livingdex-encounter-guide-v8.js
-          grep -q 'multiOwnedGameRanking:true' app/src/main/assets/livingdex-encounter-guide-v8.js
-          grep -q 'bestGameResolver:true' app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q "version:'8.0-f11.5'" app/src/main/assets/livingdex-experience-v8.js
+          grep -q 'f114VisualRework:true' app/src/main/assets/livingdex-experience-v8.js
+          grep -q 'f115PokemonDetail:true' app/src/main/assets/livingdex-experience-v8.js
+          grep -q 'routeSnapshot:true' app/src/main/assets/livingdex-experience-v8.js
           grep -q 'data-ld79=.livingdex.' app/src/main/assets/livingdex-global-v8.js
           grep -q 'Living Dex' app/src/main/assets/livingdex-global-v8.js
           grep -q 'repeat(3,minmax(0,1fr))' app/src/main/assets/livingdex-global-v8.css
@@ -67,6 +70,7 @@ jobs:
           test -f app/src/main/assets/assets/pokemon/915.png
           test -f app/src/main/assets/livingdex-global-v8.css
           test -f app/src/main/assets/livingdex-encounters-v8.css
+          test -f app/src/main/assets/livingdex-experience-v8.css
           ! grep -q 'ld842Search' app/src/main/assets/product-ux-v8.js
       - name: Final Android release audit
         run: python3 tools/android_release_audit.py
@@ -80,7 +84,9 @@ jobs:
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
             unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f11.3'"
-            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'multiOwnedGameRanking:true'
+            unzip -p "$APK" assets/livingdex-experience-v8.js|grep -q "version:'8.0-f11.5'"
+            unzip -p "$APK" assets/livingdex-experience-v8.js|grep -q 'routeSnapshot:true'
+            unzip -p "$APK" assets/collection-reliability-v8.js|grep -q 'livingdex-experience-v8.js'
             unzip -p "$APK" assets/livingdex-global-v8.js|grep -q 'data-ld79=.livingdex.'
             unzip -p "$APK" assets/livingdex-global-v8.js|grep -q 'Living Dex'
             unzip -p "$APK" assets/livingdex-global-v8.css|grep -q 'repeat(3,minmax(0,1fr))'
@@ -106,7 +112,8 @@ jobs:
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f11.3'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q 'bestGameResolver:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-experience-v8.js|grep -q "version:'8.0-f11.5'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-experience-v8.js|grep -q 'recommendedGameVisible:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-global-v8.js|grep -q 'data-ld79=.livingdex.'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-global-v8.js|grep -q 'Living Dex'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-global-v8.css|grep -q 'repeat(3,minmax(0,1fr))'
@@ -114,7 +121,7 @@ jobs:
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.22.8-F11.3-Signed
+          name: LivingDexHub-v7.22.8-F11.5-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
