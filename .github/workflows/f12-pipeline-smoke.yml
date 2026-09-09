@@ -1,0 +1,58 @@
+name: F12 Android Pipeline Smoke Test
+
+on:
+  push:
+    branches: [ f12.25-beta ]
+    paths:
+      - '.github/workflows/f12-pipeline-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Restore current canonical runtime
+        run: base64 --decode app/src/main/assets/canonical/index.v7_14.xz.b64 | xz -d > app/src/main/assets/index.html
+
+      - name: Prepare current runtime assets
+        run: |
+          python3 tools/sync_pokemon_assets.py
+          python3 tools/sync_ui_media_v4_5.py
+          python3 tools/ensure_pokemon_manifest_v7_14.py
+          python3 tools/build_offline_pokemon_core.py
+          python3 tools/embed_offline_core.py
+          python3 tools/canonicalize_runtime_v7_14.py
+          python3 tools/apply_home_premium_f1.py
+
+      - name: Compile Android debug APK
+        run: gradle :app:assembleDebug --stacktrace
+
+      - name: Verify APK exists
+        run: |
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/app-debug.apk.sha256
+
+      - name: Upload pipeline proof APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LivingDexHub-Pipeline-Smoke-Test
+          path: |
+            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/debug/app-debug.apk.sha256
+          if-no-files-found: error
