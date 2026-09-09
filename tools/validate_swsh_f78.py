@@ -35,7 +35,8 @@ assert 'dlcEncounterProvider:true' in text
 assert 'regionalFormAware:true' in text
 assert 'outsideDexObtainability:true' in text
 guide=(ROOT/'app/src/main/assets/livingdex-encounter-guide-v8.js').read_text(encoding='utf-8')
-assert "version:'8.0-f7.7'" in guide
+assert "version:'8.0-f11.1'" in guide
 assert 'regionalFormLabels:true' in guide
 assert 'wildEncounterMethodLabels:true' in guide
+assert 'allVersionLabelsPt:true' in guide
 print('SWSH F7.8 VALIDATION: PASS • '+', '.join(f"{s}={dexes[s]['coveredSpecies']}/{dexes[s]['dexSpecies']}" for s in expected)+f" • tracked={covered}/584 • dlc_added={added} • routes_added={routes} • remaining={len(data.get('missingSpecies') or [])} • outside=48 • total_obtainable={data['totalObtainableSpecies']}")
