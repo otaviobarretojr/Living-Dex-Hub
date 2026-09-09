@@ -1,4 +1,4 @@
-/* Living Dex Hub — F9.0 generic acquisition provider registry */
+/* Living Dex Hub — F8.0 generic acquisition provider registry + Legends Arceus adapter */
 (()=>{'use strict';
 const providers=new Map();
 function normalizeId(v){return String(v||'').trim().toLowerCase()}
@@ -17,6 +17,6 @@ function get(gameId,pokemonId){return provider(gameId)?.get?.(pokemonId)||null}
 function list(){ensureBuiltins();return [...providers.entries()].map(([gameId,p])=>({gameId,label:p.label||gameId,versions:[...(p.versions||[])],ready:true}))}
 function currentGameId(){try{const x=window.ld813ConsultGameId?.()||window.ld813BoxContextId?.()||window.currentGame?.id||'';if(x)return normalizeId(x)}catch(e){}return''}
 function resolveForPokemon(pokemonId,preferredGameId){ensureBuiltins();const first=normalizeId(preferredGameId||currentGameId());if(first){const p=provider(first),data=p?.get?.(pokemonId);if(data)return{gameId:first,provider:p,data}}for(const [gameId,p] of providers){const data=p.get?.(pokemonId);if(data)return{gameId,provider:p,data}}return null}
-window.ld8AcquisitionProviders={register,unregister,provider,get,list,currentGameId,resolveForPokemon,ensureBuiltins,audit:()=>{ensureBuiltins();return{version:'8.0-f9.0',genericRegistry:true,providerCount:providers.size,providers:[...providers.keys()],letsGoAdapter:providers.has('letsgo'),swordShieldAdapter:providers.has('swsh'),bdspAdapter:providers.has('bdsp'),legendsArceusAdapter:providers.has('arceus'),multiGameReady:true}}};
+window.ld8AcquisitionProviders={register,unregister,provider,get,list,currentGameId,resolveForPokemon,ensureBuiltins,audit:()=>{ensureBuiltins();return{version:'8.0-f8.0',genericRegistry:true,providerCount:providers.size,providers:[...providers.keys()],letsGoAdapter:providers.has('letsgo'),swordShieldAdapter:providers.has('swsh'),bdspAdapter:providers.has('bdsp'),legendsArceusAdapter:providers.has('arceus'),multiGameReady:true}}};
 ensureBuiltins();setTimeout(ensureBuiltins,0);setTimeout(ensureBuiltins,250);
 })();
