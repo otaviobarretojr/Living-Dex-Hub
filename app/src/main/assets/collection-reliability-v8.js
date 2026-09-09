@@ -11,9 +11,10 @@ install();setTimeout(install,120);setTimeout(install,600);document.addEventListe
 window.ld845Registered=registered;window.ld845EmitCollectionChange=emit;window.ld845Audit=()=>({version:'8.0-f4.5',eventName:EVENT,businessEvent:true,postMutationStateVerified:true,deduplicatedEvents:true,detailCommitWrapped:!!window.ld75CommitBox?.__ld845,legacyToggleWrapped:typeof window.toggleCaught!=='function'||!!window.toggleCaught.__ld845,primaryBoxContextUntouched:true});
 })();
 
-/* F6.3 loader — Living Dex + verified encounter guidance. */
+/* F6.4 loader — Living Dex + offline encounter guidance. */
 (()=>{'use strict';
 function script(src,key){if(document.querySelector(`script[data-${key}]`))return;const s=document.createElement('script');s.src=src;s.dataset[key]='1';document.body.appendChild(s)}
-function load(){if(typeof document?.createElement!=='function'||!document.head||!document.body)return false;if(!document.querySelector('link[data-ld8-livingdex]')){const l=document.createElement('link');l.rel='stylesheet';l.href='livingdex-global-v8.css';l.dataset.ld8Livingdex='f6';document.head.appendChild(l)}script('letsgo-encounters-v8.js','ld8LetsgoEncounters');script('livingdex-global-v8.js','ld8Livingdex');script('livingdex-encounter-guide-v8.js','ld8EncounterGuide');return true}
+function style(href,key){if(document.querySelector(`link[data-${key}]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.dataset[key]='1';document.head.appendChild(l)}
+function load(){if(typeof document?.createElement!=='function'||!document.head||!document.body)return false;style('livingdex-global-v8.css','ld8LivingdexCss');style('livingdex-encounters-v8.css','ld8EncounterCss');script('letsgo-encounters-v8.js','ld8LetsgoEncounters');script('livingdex-global-v8.js','ld8Livingdex');script('livingdex-encounter-guide-v8.js','ld8EncounterGuide');return true}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
 })();
