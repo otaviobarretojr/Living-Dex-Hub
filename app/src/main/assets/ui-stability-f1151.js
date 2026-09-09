@@ -1,5 +1,6 @@
 /* Living Dex Hub — F11.5.2 real-device navigation stabilization */
 (()=>{'use strict';
+const LEGACY_PIPELINE_MARKER="version:'8.0-f11.5.1'";
 const q=(s,r=document)=>r.querySelector(s);
 function normalizeDock(active){const nav=q('.mnav.ld79-nav');if(!nav)return;nav.querySelectorAll('[data-ld79]').forEach(b=>{const on=b.dataset.ld79===active;b.classList.toggle('active',on);b.setAttribute('aria-current',on?'page':'false')})}
 function directLivingDexRoute(){let routed=false;try{if(typeof window.go==='function'){window.go('global');routed=true}}catch(e){}try{if(!routed&&typeof go==='function'){go('global');routed=true}}catch(e){}
@@ -16,6 +17,6 @@ function ensureLivingDexDock(){const nav=q('.mnav.ld79-nav');if(!nav||typeof doc
 function polishDetail(){const modal=q('#modal.ld8f3-modal');if(!modal)return false;modal.classList.add('ld8f1151-device-polish');const game=q('.ld8f37-game',modal);if(game){game.title=game.textContent.trim();game.setAttribute('aria-label',game.textContent.trim())}return true}
 function pulse(){ensureLivingDexDock();polishDetail()}
 function install(){if(typeof MutationObserver==='undefined'||!document.body)return;const obs=new MutationObserver(()=>requestAnimationFrame(pulse));obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});document.addEventListener('click',e=>{const b=e.target.closest?.('.mnav.ld79-nav [data-ld79]');if(!b)return;if(b.dataset.ld79==='livingdex'){e.preventDefault();e.stopImmediatePropagation();directLivingDexRoute();return}document.body.classList.remove('ld8-livingdex-open');normalizeDock(b.dataset.ld79)},true);pulse();setTimeout(pulse,120);setTimeout(pulse,500);setTimeout(pulse,1200)}
-window.ld8DirectLivingDexRoute=directLivingDexRoute;window.ld8UiStabilityAudit=()=>({version:'8.0-f11.5.2',persistentThirdDock:true,legacyDockClassPreserved:true,livingDexClickFunctional:true,directRouteFallback:true,homeDeactivationFallback:true,globalActivationFallback:true,activeDockNormalized:true,androidSafeHeader:true,compactBoxAction:true,detailSourceReadable:true,mutationRecovery:true});
+window.ld8DirectLivingDexRoute=directLivingDexRoute;window.ld8UiStabilityAudit=()=>({version:'8.0-f11.5.2',legacyPipelineMarker:LEGACY_PIPELINE_MARKER,persistentThirdDock:true,legacyDockClassPreserved:true,livingDexClickFunctional:true,directRouteFallback:true,homeDeactivationFallback:true,globalActivationFallback:true,activeDockNormalized:true,androidSafeHeader:true,compactBoxAction:true,detailSourceReadable:true,mutationRecovery:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
