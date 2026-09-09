@@ -81,16 +81,25 @@ def evolution_record(pid:int,core:dict):
     p=core.get(str(pid),{});parent=p.get('evolvesFrom')
     if not parent:return None
     details=p.get('evolutionDetails') or [{}]
-    d=sorted(details,key=lambda x:(not bool(x.get('min_level') or x.get('item') or x.get('trigger')=='trade'),))[0]
+    d=sorted(details,key=lambda x:(not bool(x.get('min_level') or x.get('item') or x.get('trigger')=='trade' or x.get('known_move') or x.get('location')),))[0]
     trigger=d.get('trigger') or 'level-up';conditions=[f'from:{int(parent)}']
     if d.get('min_level') is not None:conditions.append(f"min-level:{int(d['min_level'])}")
     if d.get('item'):conditions.append(f"item:{d['item']}")
     if d.get('held_item'):conditions.append(f"held-item:{d['held_item']}")
+    if d.get('known_move'):conditions.append(f"known-move:{d['known_move']}")
+    if d.get('known_move_type'):conditions.append(f"known-move-type:{d['known_move_type']}")
+    if d.get('location'):conditions.append(f"location:{d['location']}")
     if d.get('min_happiness') is not None:conditions.append(f"min-happiness:{int(d['min_happiness'])}")
+    if d.get('min_beauty') is not None:conditions.append(f"min-beauty:{int(d['min_beauty'])}")
+    if d.get('min_affection') is not None:conditions.append(f"min-affection:{int(d['min_affection'])}")
     if d.get('time_of_day'):conditions.append(f"time:{d['time_of_day']}")
+    if d.get('gender') is not None:conditions.append(f"gender:{int(d['gender'])}")
+    if d.get('relative_physical_stats') is not None:conditions.append(f"relative-stats:{int(d['relative_physical_stats'])}")
+    if d.get('needs_overworld_rain'):conditions.append('overworld-rain')
+    if d.get('turn_upside_down'):conditions.append('turn-upside-down')
     method='trade-evolution' if trigger=='trade' else 'item-evolution' if trigger=='use-item' else 'evolution'
     lvl=int(d.get('min_level') or 0)
-    return {'location':'Evolução','method':method,'levelMin':lvl,'levelMax':lvl,'rate':None,'versions':['shield','sword'],'conditions':conditions,'provenance':'offline-evolution-core','sourcePokemon':int(parent)}
+    return {'location':'Evolução','method':method,'levelMin':lvl,'levelMax':lvl,'rate':None,'versions':['shield','sword'],'conditions':conditions,'provenance':'offline-evolution-core','sourcePokemon':int(parent),'specialEvolution':len(conditions)>2}
 
 
 def add_version_trade_route(records:list[dict]):
@@ -121,11 +130,14 @@ def main():
                 _,payload=f.result();enc=normalize(payload)
                 if enc:fetched[pid]=enc
             except Exception as e:failures.append(str(e))
+    special_evolutions=0
     if CORE.exists():
         core=json.loads(CORE.read_text(encoding='utf-8')).get('pokemon',{})
         for pid in ids:
             evo=evolution_record(pid,core)
-            if evo:fetched.setdefault(pid,[]).append(evo)
+            if evo:
+                fetched.setdefault(pid,[]).append(evo)
+                if evo.get('specialEvolution'):special_evolutions+=1
     exclusives={'sword':0,'shield':0}
     for pid in ids:
         side=add_version_trade_route(fetched.setdefault(pid,[]))
@@ -134,10 +146,10 @@ def main():
         print(f'Sword/Shield fallback: only {len([x for x in fetched.values() if x])} covered; seed preserved.',file=sys.stderr);return 0
     pokemon={str(pid):{'encounters':fetched[pid]} for pid in sorted(fetched) if fetched[pid]}
     missing=[pid for pid in ids if str(pid) not in pokemon]
-    data={'version':'8.0-f7.1','gameId':'swsh','source':'pokeapi-v2+offline-evolution-core+derived-version-exclusive-trades','versions':['sword','shield'],'dexSpecies':len(ids),'coveredSpecies':len(pokemon),'missingSpecies':missing,'exclusiveDirectSpecies':exclusives,'pokemon':pokemon}
-    js="""/* Living Dex Hub — F7.1 generated offline Sword/Shield acquisition database */\n(()=>{'use strict';\nconst DATA=%s;\nfunction get(id){return DATA.pokemon[String(Number(id)||0)]||null}\nfunction byVersion(id,version){const p=get(id);if(!p)return[];return(p.encounters||[]).filter(e=>!version||(e.versions||[]).includes(version))}\nwindow.ld8SwShEncounters={data:DATA,get,byVersion,audit:()=>({version:DATA.version,gameId:DATA.gameId,source:DATA.source,dexSpecies:DATA.dexSpecies,pokemonCount:Object.keys(DATA.pokemon).length,missingSpecies:DATA.missingSpecies,exclusiveDirectSpecies:DATA.exclusiveDirectSpecies,offline:true,versionSpecific:true,provenance:true,indirectAcquisition:true,exclusiveTradeRoutes:true})};\n})();\n""" % json.dumps(data,ensure_ascii=False,separators=(',',':'))
+    data={'version':'8.0-f7.2','gameId':'swsh','source':'pokeapi-v2+offline-evolution-core+derived-version-exclusive-trades','versions':['sword','shield'],'dexSpecies':len(ids),'coveredSpecies':len(pokemon),'missingSpecies':missing,'exclusiveDirectSpecies':exclusives,'specialEvolutionRoutes':special_evolutions,'pokemon':pokemon}
+    js="""/* Living Dex Hub — F7.2 generated offline Sword/Shield acquisition database */\n(()=>{'use strict';\nconst DATA=%s;\nfunction get(id){return DATA.pokemon[String(Number(id)||0)]||null}\nfunction byVersion(id,version){const p=get(id);if(!p)return[];return(p.encounters||[]).filter(e=>!version||(e.versions||[]).includes(version))}\nwindow.ld8SwShEncounters={data:DATA,get,byVersion,audit:()=>({version:DATA.version,gameId:DATA.gameId,source:DATA.source,dexSpecies:DATA.dexSpecies,pokemonCount:Object.keys(DATA.pokemon).length,missingSpecies:DATA.missingSpecies,exclusiveDirectSpecies:DATA.exclusiveDirectSpecies,specialEvolutionRoutes:DATA.specialEvolutionRoutes,offline:true,versionSpecific:true,provenance:true,indirectAcquisition:true,exclusiveTradeRoutes:true,richEvolutionConditions:true})};\n})();\n""" % json.dumps(data,ensure_ascii=False,separators=(',',':'))
     OUT.write_text(js,encoding='utf-8')
-    print(f"Sword/Shield acquisitions generated: {len(pokemon)}/{len(ids)} Pokémon; missing={len(missing)}; exclusives={exclusives}; failures={len(failures)}")
+    print(f"Sword/Shield acquisitions generated: {len(pokemon)}/{len(ids)} Pokémon; missing={len(missing)}; exclusives={exclusives}; special_evolutions={special_evolutions}; failures={len(failures)}")
     return 0
 
 if __name__=='__main__':raise SystemExit(main())
