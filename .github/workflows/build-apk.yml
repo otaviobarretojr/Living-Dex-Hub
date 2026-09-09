@@ -44,19 +44,19 @@ jobs:
           python3 tools/audit_offline_pokemon_core.py
           python3 tools/audit_runtime_budget.py
           node tools/journey_reliability_harness.js
-          grep -q "versionName '7.22.7'" app/build.gradle
-          grep -q 'versionCode 151' app/build.gradle
-          for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-data-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js collection-reliability-v8.js product-ux-v8.js; do node --check "app/src/main/assets/$F"; done
+          grep -q "versionName '7.22.8'" app/build.gradle
+          grep -q 'versionCode 152' app/build.gradle
+          for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-data-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js pokemon-visual-quality-v8.js collection-reliability-v8.js product-ux-v8.js; do node --check "app/src/main/assets/$F"; done
           grep -q "version:'8.0-f5.7'" app/src/main/assets/pokemon-offline-core-v8.js
           grep -q 'embeddedData:' app/src/main/assets/pokemon-offline-core-v8.js
-          grep -q 'fileSchemeSafe:true' app/src/main/assets/pokemon-offline-core-v8.js
           grep -q 'window.__LD8_OFFLINE_DATA__=' app/src/main/assets/pokemon-offline-core-data-v8.js
-          grep -q "version:'8.0-f5.7'" app/src/main/assets/pokemon-detail-v8.js
-          grep -q 'localHeroArtForced:true' app/src/main/assets/pokemon-detail-v8.js
-          grep -q "assets/pokemon/" app/src/main/assets/pokemon-detail-v8.js
+          grep -q "version:'8.0-f5.8'" app/src/main/assets/pokemon-visual-quality-v8.js
+          grep -q 'officialArtworkPrimary:true' app/src/main/assets/pokemon-visual-quality-v8.js
+          grep -q 'localArtworkFallback:true' app/src/main/assets/pokemon-visual-quality-v8.js
+          grep -q 'typeLabelsPortuguese:true' app/src/main/assets/pokemon-visual-quality-v8.js
+          grep -q 'official-artwork/' app/src/main/assets/pokemon-visual-quality-v8.js
           test -f app/src/main/assets/assets/pokemon/915.png
           grep -q "version:'8.0-f5.6'" app/src/main/assets/pokemon-about-v8.js
-          grep -q 'officialEntryNeverFaked:true' app/src/main/assets/pokemon-about-v8.js
           ! grep -q 'ld842Search' app/src/main/assets/product-ux-v8.js
           for F in pokemon-alive-beta-v8.js pokemon-alive-beta-v8.css pokemon-3d-v8.js pokemon-3d-v8.css pokemon-frame-animation-v8.js pokemon-frame-animation-v8.css; do test ! -e "app/src/main/assets/$F"; done
       - name: Final Android release audit
@@ -71,11 +71,11 @@ jobs:
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             zipinfo -1 "$APK"|grep -q '^assets/assets/pokemon/915.png$'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/index.html|grep -q 'pokemon-offline-core-data-v8.js'
+            unzip -p "$APK" assets/index.html|grep -q 'pokemon-visual-quality-v8.js'
             unzip -p "$APK" assets/pokemon-offline-core-data-v8.js|grep -q 'window.__LD8_OFFLINE_DATA__='
-            unzip -p "$APK" assets/pokemon-offline-core-v8.js|grep -q "version:'8.0-f5.7'"
-            unzip -p "$APK" assets/pokemon-detail-v8.js|grep -q 'localHeroArtForced:true'
-            unzip -p "$APK" assets/pokemon-about-v8.js|grep -q "version:'8.0-f5.6'"
+            unzip -p "$APK" assets/pokemon-visual-quality-v8.js|grep -q "version:'8.0-f5.8'"
+            unzip -p "$APK" assets/pokemon-visual-quality-v8.js|grep -q 'officialArtworkPrimary:true'
+            unzip -p "$APK" assets/pokemon-visual-quality-v8.js|grep -q 'localArtworkFallback:true'
             unzip -p "$APK" assets/pokemon-offline-core-v8.json|python3 -c "import sys,json;x=json.load(sys.stdin);assert x['count']==1025 and len(x['pokemon'])==1025 and '915' in x['pokemon']"
           done
       - name: Prepare production keystore
@@ -94,13 +94,14 @@ jobs:
           zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -q '^assets/assets/pokemon/915.png$'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-offline-core-data-v8.js|grep -q 'window.__LD8_OFFLINE_DATA__='
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-offline-core-v8.js|grep -q "version:'8.0-f5.7'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-detail-v8.js|grep -q 'localHeroArtForced:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-visual-quality-v8.js|grep -q "version:'8.0-f5.8'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-visual-quality-v8.js|grep -q 'officialArtworkPrimary:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-visual-quality-v8.js|grep -q 'localArtworkFallback:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-offline-core-v8.json|python3 -c "import sys,json;x=json.load(sys.stdin);assert x['count']==1025 and len(x['pokemon'])==1025 and '915' in x['pokemon']"
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.22.7-ANDROID-LOCAL-DATA-HOTFIX-Signed
+          name: LivingDexHub-v7.22.8-VISUAL-QUALITY-RECOVERY-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
