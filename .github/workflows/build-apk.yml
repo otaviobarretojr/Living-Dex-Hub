@@ -53,21 +53,24 @@ jobs:
           grep -q "versionName '7.22.8'" app/build.gradle
           grep -q 'versionCode 152' app/build.gradle
           for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-data-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js pokemon-visual-quality-v8.js collection-reliability-v8.js product-ux-v8.js livingdex-global-v8.js livingdex-experience-v8.js national-livingdex-v8.js ui-stability-f1151.js letsgo-encounters-v8.js swsh-encounters-v8.js bdsp-encounters-v8.js pla-encounters-v8.js sv-encounters-v8.js za-encounters-v8.js acquisition-provider-registry-v8.js acquisition-availability-bridge-v8.js livingdex-encounter-guide-v8.js swsh-dex-scope-ui-v8.js; do node --check "app/src/main/assets/$F"; done
-          grep -q "version:'8.0-f11.6.1'" app/src/main/assets/national-livingdex-v8.js
-          grep -q 'standalonePage:true' app/src/main/assets/national-livingdex-v8.js
-          grep -q 'providerAvailability:true' app/src/main/assets/national-livingdex-v8.js
+          grep -q "version:'8.0-f11.7'" app/src/main/assets/national-livingdex-v8.js
+          grep -q 'lightThemeOnly:true' app/src/main/assets/national-livingdex-v8.js
+          grep -q 'noDarkTheme:true' app/src/main/assets/national-livingdex-v8.js
+          grep -q 'fullscreenPokemonDetail:true' app/src/main/assets/national-livingdex-v8.js
+          grep -q 'bottomSheetRemoved:true' app/src/main/assets/national-livingdex-v8.js
           grep -q 'correctPokemonAssetPath:true' app/src/main/assets/national-livingdex-v8.js
           grep -q 'internalDock:true' app/src/main/assets/national-livingdex-v8.js
           grep -q 'explicitHomeExit:true' app/src/main/assets/national-livingdex-v8.js
           grep -q 'explicitBoxExit:true' app/src/main/assets/national-livingdex-v8.js
           grep -q 'src="assets/pokemon/' app/src/main/assets/national-livingdex-v8.js
-          grep -q 'data-nd-nav="home"' app/src/main/assets/national-livingdex-v8.js
-          grep -q 'data-nd-nav="box"' app/src/main/assets/national-livingdex-v8.js
+          grep -q 'id="ld8ndDetail"' app/src/main/assets/national-livingdex-v8.js
           grep -q 'Onde está disponível' app/src/main/assets/national-livingdex-v8.js
-          grep -q 'standaloneNationalDexRoute:true' app/src/main/assets/ui-stability-f1151.js
+          ! grep -q 'ld8nd-sheet' app/src/main/assets/national-livingdex-v8.js
           grep -q 'national-livingdex-v8.js' app/src/main/assets/collection-reliability-v8.js
           grep -q 'national-livingdex-v8.css' app/src/main/assets/collection-reliability-v8.js
-          grep -q 'ld8nd-own-nav' app/src/main/assets/national-livingdex-v8.css
+          grep -q 'ld8nd-detail{position:fixed' app/src/main/assets/national-livingdex-v8.css
+          ! grep -q '#07111b' app/src/main/assets/national-livingdex-v8.css
+          ! grep -q '#0a1622' app/src/main/assets/national-livingdex-v8.css
           test -f app/src/main/assets/assets/pokemon/915.png
       - name: Final Android release audit
         run: python3 tools/android_release_audit.py
@@ -80,10 +83,12 @@ jobs:
           for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release-unsigned.apk; do
             test "$(zipinfo -1 "$APK"|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-            unzip -p "$APK" assets/national-livingdex-v8.js|grep -q "version:'8.0-f11.6.1'"
-            unzip -p "$APK" assets/national-livingdex-v8.js|grep -q 'correctPokemonAssetPath:true'
-            unzip -p "$APK" assets/national-livingdex-v8.js|grep -q 'explicitBoxExit:true'
-            unzip -p "$APK" assets/national-livingdex-v8.css|grep -q 'ld8nd-own-nav'
+            unzip -p "$APK" assets/national-livingdex-v8.js|grep -q "version:'8.0-f11.7'"
+            unzip -p "$APK" assets/national-livingdex-v8.js|grep -q 'lightThemeOnly:true'
+            unzip -p "$APK" assets/national-livingdex-v8.js|grep -q 'fullscreenPokemonDetail:true'
+            unzip -p "$APK" assets/national-livingdex-v8.js|grep -q 'bottomSheetRemoved:true'
+            unzip -p "$APK" assets/national-livingdex-v8.css|grep -q 'ld8nd-detail{position:fixed'
+            ! unzip -p "$APK" assets/national-livingdex-v8.css|grep -q '#07111b'
             unzip -p "$APK" assets/collection-reliability-v8.js|grep -q 'national-livingdex-v8.js'
             unzip -p "$APK" assets/pokemon-offline-core-v8.json|python3 -c "import sys,json;x=json.load(sys.stdin);assert x['count']==1025 and len(x['pokemon'])==1025 and '915' in x['pokemon']"
           done
@@ -103,15 +108,16 @@ jobs:
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/national-livingdex-v8.js|grep -q "version:'8.0-f11.6.1'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/national-livingdex-v8.js|grep -q 'internalDock:true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/national-livingdex-v8.js|grep -q 'explicitHomeExit:true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/national-livingdex-v8.js|grep -q 'explicitBoxExit:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/national-livingdex-v8.js|grep -q "version:'8.0-f11.7'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/national-livingdex-v8.js|grep -q 'lightThemeOnly:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/national-livingdex-v8.js|grep -q 'fullscreenPokemonDetail:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/national-livingdex-v8.js|grep -q 'bottomSheetRemoved:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/national-livingdex-v8.css|grep -q 'ld8nd-detail{position:fixed'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/za-encounters-v8.js|grep -q '"coveredSpecies":364'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: LivingDexHub-v7.22.8-F11.6.1-NationalDex-NavFix-Signed
+          name: LivingDexHub-v7.22.8-F11.7-LightFullscreen-Signed
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
