@@ -10,3 +10,9 @@ function install(){wrapCommit();wrapToggleCaught()}
 install();setTimeout(install,120);setTimeout(install,600);document.addEventListener('DOMContentLoaded',install,{once:true});
 window.ld845Registered=registered;window.ld845EmitCollectionChange=emit;window.ld845Audit=()=>({version:'8.0-f4.5',eventName:EVENT,businessEvent:true,postMutationStateVerified:true,deduplicatedEvents:true,detailCommitWrapped:!!window.ld75CommitBox?.__ld845,legacyToggleWrapped:typeof window.toggleCaught!=='function'||!!window.toggleCaught.__ld845,primaryBoxContextUntouched:true});
 })();
+
+/* F6.0 loader — Living Dex is a first-class destination while preserving the shared collection. */
+(()=>{'use strict';
+function load(){if(!document.querySelector('link[data-ld8-livingdex]')){const l=document.createElement('link');l.rel='stylesheet';l.href='livingdex-global-v8.css';l.dataset.ld8Livingdex='f6';document.head.appendChild(l)}if(!document.querySelector('script[data-ld8-livingdex]')){const s=document.createElement('script');s.src='livingdex-global-v8.js';s.dataset.ld8Livingdex='f6';document.body.appendChild(s)}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
+})();
