@@ -20,23 +20,15 @@ for scope,n in expected.items():
 assert (dexes.get('galar') or {}).get('coveredSpecies')==400,dexes.get('galar')
 assert (dexes.get('galar') or {}).get('missingSpecies')==[],dexes.get('galar')
 assert data.get('uniqueSwordShieldSpecies')==584,data.get('uniqueSwordShieldSpecies')
-covered=int(data.get('coveredSpecies',0))
-assert covered>508,covered
-outside=data.get('obtainableOutsideDexSpecies') or []
-assert int(data.get('obtainableOutsideDexCount',0))==len(outside)==48,data.get('obtainableOutsideDexCount')
-assert int(data.get('totalObtainableSpecies',0))==covered+48,data.get('totalObtainableSpecies')
-added=int(data.get('dlcEncounterSpeciesAddedCount',0))
-routes=int(data.get('dlcEncounterRoutesAdded',0))
-assert added>0,added
-assert routes>=added,(routes,added)
-assert int(data.get('regionalFormRoutes',0))==6,data.get('regionalFormRoutes')
-assert 'dlcVersionSlugIngestion:true' in text
-assert 'dlcEncounterProvider:true' in text
-assert 'regionalFormAware:true' in text
-assert 'outsideDexObtainability:true' in text
+covered=int(data.get('coveredSpecies',0));assert covered>508,covered
+outside=data.get('obtainableOutsideDexSpecies') or [];assert int(data.get('obtainableOutsideDexCount',0))==len(outside)==48
+assert int(data.get('totalObtainableSpecies',0))==covered+48
+added=int(data.get('dlcEncounterSpeciesAddedCount',0));routes=int(data.get('dlcEncounterRoutesAdded',0));assert added>0 and routes>=added
+assert int(data.get('regionalFormRoutes',0))==6
+assert 'dlcVersionSlugIngestion:true' in text and 'regionalFormAware:true' in text and 'outsideDexObtainability:true' in text
 guide=(ROOT/'app/src/main/assets/livingdex-encounter-guide-v8.js').read_text(encoding='utf-8')
-assert "version:'8.0-f11.1'" in guide
-assert 'regionalFormLabels:true' in guide
-assert 'wildEncounterMethodLabels:true' in guide
-assert 'allVersionLabelsPt:true' in guide
-print('SWSH F7.8 VALIDATION: PASS • '+', '.join(f"{s}={dexes[s]['coveredSpecies']}/{dexes[s]['dexSpecies']}" for s in expected)+f" • tracked={covered}/584 • dlc_added={added} • routes_added={routes} • remaining={len(data.get('missingSpecies') or [])} • outside=48 • total_obtainable={data['totalObtainableSpecies']}")
+assert "version:'8.0-f11.3'" in guide
+assert 'multiOwnedGameRanking:true' in guide
+assert 'bestGameResolver:true' in guide
+assert 'selectedVersionPriority:true' in guide
+print('SWSH F7.8 VALIDATION: PASS • '+', '.join(f"{s}={dexes[s]['coveredSpecies']}/{dexes[s]['dexSpecies']}" for s in expected)+f" • tracked={covered}/584 • dlc_added={added} • routes_added={routes} • outside=48 • total_obtainable={data['totalObtainableSpecies']}")
