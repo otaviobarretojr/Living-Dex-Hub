@@ -9,12 +9,14 @@ assert "version:'8.0-f11.6'" in ui
 for marker in ['persistentThirdDock:true','legacyDockClassPreserved:true','livingDexClickFunctional:true','standaloneNationalDexRoute:true','legacyGlobalBypassed:true','activeDockNormalized:true']:
     assert marker in ui, marker
 assert "window.ld8NationalDexOpen" in ui
-assert "version:'8.0-f11.6'" in page
-for marker in ['standalonePage:true','nationalOrder:true','total:TOTAL','offlineCore:true','allPokemonCards:true','providerAvailability:true','ownedGamePriority:true','fullDetailBridge:true','legacyGlobalIndependent:true']:
+assert "version:'8.0-f11.6.1'" in page
+for marker in ['standalonePage:true','nationalOrder:true','total:TOTAL','offlineCore:true','allPokemonCards:true','providerAvailability:true','ownedGamePriority:true','fullDetailBridge:true','legacyGlobalIndependent:true','correctPokemonAssetPath:true','internalDock:true','explicitHomeExit:true','explicitBoxExit:true']:
     assert marker in page, marker
 assert 'for(let id=1;id<=TOTAL;id++)' in page
 assert 'Onde está disponível' in page
-assert 'assets/assets/pokemon/${id}.png' in page
+assert 'src="assets/pokemon/${id}.png"' in page
+assert 'data-nd-nav="home"' in page and 'data-nd-nav="box"' in page
+assert 'navigateHome()' in page and 'navigateBox()' in page
 assert 'national-livingdex-v8.js' in loader and 'national-livingdex-v8.css' in loader
-assert 'position:fixed' in css and '.ld8nd-grid' in css
-print('UI F11.6 VALIDATION: PASS • standalone National Dex • 1025 ordered species • provider availability • direct dock route')
+assert 'position:fixed' in css and '.ld8nd-grid' in css and '.ld8nd-own-nav' in css
+print('UI F11.6.1 VALIDATION: PASS • standalone National Dex • correct sprites • internal nav • explicit Home/Box exits')
