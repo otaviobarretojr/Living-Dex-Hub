@@ -27,7 +27,6 @@ reg=(ROOT/'app/src/main/assets/acquisition-provider-registry-v8.js').read_text(e
 assert "version:'8.0-f11.0'" in reg and 'legendsZaAdapter:' in reg
 loader=(ROOT/'app/src/main/assets/collection-reliability-v8.js').read_text(encoding='utf-8')
 assert "script('za-encounters-v8.js','za-data')" in loader
-# F11.1 UX audit: Living Dex must be a persistent third item in the bottom dock.
 living=(ROOT/'app/src/main/assets/livingdex-global-v8.js').read_text(encoding='utf-8')
 css=(ROOT/'app/src/main/assets/livingdex-global-v8.css').read_text(encoding='utf-8')
 guide=(ROOT/'app/src/main/assets/livingdex-encounter-guide-v8.js').read_text(encoding='utf-8')
@@ -36,6 +35,8 @@ assert "b.dataset.ld79='livingdex'" in living
 assert 'Living Dex</span>' in living
 assert "grid-template-columns','repeat(3,minmax(0,1fr))'" in living
 assert '.mnav.ld79-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important}' in css
-assert "version:'8.0-f11.1'" in guide
-assert 'allVersionLabelsPt:true' in guide and 'scarletVioletVersionPriority:true' in guide and 'bdspVersionPriority:true' in guide
-print(f"ZA F11.1 VALIDATION: PASS • Lumiose=232/232 • Hyperspace=132/132 • tracked=364/364 • bottomDock=Home+Box+LivingDex • acquisitionUX=multi-game/PT-BR")
+assert "version:'8.0-f11.3'" in guide
+assert 'multiOwnedGameRanking:true' in guide
+assert 'bestGameResolver:true' in guide
+assert 'selectedVersionPriority:true' in guide
+print('ZA F11.3 VALIDATION: PASS • Lumiose=232/232 • Hyperspace=132/132 • tracked=364/364 • bottomDock=Home+Box+LivingDex • smart acquisition guide')
