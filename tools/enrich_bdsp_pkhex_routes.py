@@ -59,7 +59,6 @@ def route(location,method,level,versions=('diamond','pearl'),conditions=(),note=
  if note:d['note']=note
  return d
 
-# Species/routes explicitly represented in PKHeX Encounters8b.cs.
 SPECIAL={
  63:[route('Oreburgh City · troca NPC','npc-trade',9,note='Abra obtido por troca com NPC.')],
  129:[route('Snowpoint City · troca NPC','npc-trade',45,note='Magikarp obtido por troca com NPC.')],
@@ -83,6 +82,13 @@ def load_data(text):
  if not m:raise ValueError('DATA payload not found')
  return json.loads(m.group(1))
 
+def dex_species(entry):
+ if isinstance(entry,(list,tuple)):
+  return int(entry[0]) if entry else 0
+ if isinstance(entry,dict):
+  return int(entry.get('species') or entry.get('id') or 0)
+ return int(entry or 0)
+
 def dedup_add(bucket:list,rec:dict):
  key=(rec.get('location'),rec.get('method'),rec.get('levelMin'),rec.get('levelMax'),tuple(rec.get('versions') or []),tuple(rec.get('conditions') or []),rec.get('provenance'))
  for x in bucket:
@@ -94,10 +100,10 @@ def main():
  text=OUT.read_text(encoding='utf-8');data=load_data(text);pokemon=data.setdefault('pokemon',{})
  sinnoh=set(str(x) for x in data.get('sinnohSpecies',[]) or [])
  if not sinnoh:
-  # F8.0 payload tracks missing + covered but not membership; reconstruct from embedded dex pack.
   pack=json.loads((ROOT/'data/embedded-dex-pack.json').read_text(encoding='utf-8'))
   entries=(pack.get('dexes') or {}).get('bdsp:sinnoh') or []
-  sinnoh={str(int((e.get('species') if isinstance(e,dict) else e))) for e in entries}
+  sinnoh={str(sid) for sid in (dex_species(e) for e in entries) if sid}
+ if len(sinnoh)!=151:raise ValueError(f'unexpected embedded Sinnoh membership {len(sinnoh)}')
  added_species=set();wild_routes=0;failures=[]
  for version,items in FILES.items():
   for filename,underground in items:
