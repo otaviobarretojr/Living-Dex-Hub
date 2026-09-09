@@ -4,6 +4,8 @@
 F8.0 starts with the 151-entry Sinnoh Pokédex. Membership comes from PokeAPI's
 original-sinnoh dex, wild encounters from the brilliant-diamond/shining-pearl
 version slugs, and indirect routes from the existing offline evolution core.
+Partial coverage is intentionally emitted so CI can audit and close unsupported
+special-acquisition gaps instead of hiding them behind a seed fallback.
 """
 from __future__ import annotations
 import json,re,sys,urllib.request
@@ -58,8 +60,7 @@ def evolution_record(pid,core):
  for key,prefix in [('min_level','min-level'),('item','item'),('held_item','held-item'),('known_move','known-move'),('location','location'),('time_of_day','time')]:
   if d.get(key) not in (None,''):c.append(f'{prefix}:{d[key]}')
  if d.get('min_happiness') is not None:c.append(f"min-happiness:{int(d['min_happiness'])}")
- method='trade-evolution' if trigger=='trade' else 'item-evolution' if trigger=='use-item' else 'evolution'
- lvl=int(d.get('min_level') or 0)
+ method='trade-evolution' if trigger=='trade' else 'item-evolution' if trigger=='use-item' else 'evolution';lvl=int(d.get('min_level') or 0)
  return {'location':'Evolução','method':method,'levelMin':lvl,'levelMax':lvl,'rate':None,'versions':['diamond','pearl'],'conditions':c,'provenance':'offline-evolution-core','sourcePokemon':int(parent)}
 def add_trade(records):
  direct=[r for r in records if r.get('provenance')=='pokeapi-v2'];seen=set()
@@ -76,8 +77,7 @@ def main():
   fut={ex.submit(fetch,p):p for p in ids}
   for f in as_completed(fut):
    p=fut[f]
-   try:
-    _,raw=f.result();fetched[p]=normalize(raw)
+   try:_,raw=f.result();fetched[p]=normalize(raw)
    except Exception as e:failures.append(str(e));fetched[p]=[]
  core=json.loads(CORE.read_text(encoding='utf-8')).get('pokemon',{}) if CORE.exists() else {}
  for p in ids:
@@ -89,10 +89,9 @@ def main():
   side=add_trade(fetched[p])
   if side:exclusives[side]+=1
  pokemon={str(p):{'encounters':fetched[p]} for p in ids if fetched[p]};missing=[p for p in ids if not fetched[p]]
- if len(pokemon)<100:print('BDSP fallback: insufficient coverage',len(pokemon),file=sys.stderr);return 0
- data={'version':'8.0-f8.0','gameId':'bdsp','source':'pokeapi-v2+offline-evolution-core+verified-starters+derived-version-exclusive-trades','versions':['diamond','pearl'],'dexSpecies':151,'coveredSpecies':len(pokemon),'missingSpecies':missing,'exclusiveDirectSpecies':exclusives,'pokemon':pokemon}
+ data={'version':'8.0-f8.0','gameId':'bdsp','source':'pokeapi-v2+offline-evolution-core+verified-starters+derived-version-exclusive-trades','versions':['diamond','pearl'],'dexSpecies':151,'coveredSpecies':len(pokemon),'missingSpecies':missing,'exclusiveDirectSpecies':exclusives,'partialCoverage':bool(missing),'pokemon':pokemon}
  payload=json.dumps(data,ensure_ascii=False,separators=(',',':'))
- js="/* Living Dex Hub — F8.0 generated offline BDSP acquisition database */\n(()=>{'use strict';\nconst DATA="+payload+";\nfunction get(id){return DATA.pokemon[String(Number(id)||0)]||null}\nfunction byVersion(id,version){const p=get(id);if(!p)return[];return(p.encounters||[]).filter(e=>!version||(e.versions||[]).includes(version))}\nwindow.ld8BdspEncounters={data:DATA,get,byVersion,audit:()=>({version:DATA.version,gameId:DATA.gameId,dexSpecies:DATA.dexSpecies,pokemonCount:Object.keys(DATA.pokemon).length,missingSpecies:DATA.missingSpecies,exclusiveDirectSpecies:DATA.exclusiveDirectSpecies,offline:true,versionSpecific:true,indirectAcquisition:true,exclusiveTradeRoutes:true})};\n})();\n"
+ js="/* Living Dex Hub — F8.0 generated offline BDSP acquisition database */\n(()=>{'use strict';\nconst DATA="+payload+";\nfunction get(id){return DATA.pokemon[String(Number(id)||0)]||null}\nfunction byVersion(id,version){const p=get(id);if(!p)return[];return(p.encounters||[]).filter(e=>!version||(e.versions||[]).includes(version))}\nwindow.ld8BdspEncounters={data:DATA,get,byVersion,audit:()=>({version:DATA.version,gameId:DATA.gameId,dexSpecies:DATA.dexSpecies,pokemonCount:Object.keys(DATA.pokemon).length,missingSpecies:DATA.missingSpecies,exclusiveDirectSpecies:DATA.exclusiveDirectSpecies,partialCoverage:DATA.partialCoverage,offline:true,versionSpecific:true,indirectAcquisition:true,exclusiveTradeRoutes:true})};\n})();\n"
  OUT.write_text(js,encoding='utf-8');print(f"BDSP acquisitions generated: {len(pokemon)}/151; missing={len(missing)}; exclusives={exclusives}; failures={len(failures)}")
  return 0
 if __name__=='__main__':raise SystemExit(main())
