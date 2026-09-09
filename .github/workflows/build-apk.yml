@@ -61,7 +61,7 @@ jobs:
           grep -q 'genericRegistry:true' app/src/main/assets/acquisition-provider-registry-v8.js
           grep -q 'swordShieldAdapter:' app/src/main/assets/acquisition-provider-registry-v8.js
           grep -q 'multiGameReady:true' app/src/main/assets/acquisition-provider-registry-v8.js
-          grep -q "version:'8.0-f7.1'" app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q "version:'8.0-f7.2'" app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q 'providerRegistry:' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q 'architectureGeneric:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q 'currentGameProviderPriority:true' app/src/main/assets/livingdex-encounter-guide-v8.js
@@ -71,15 +71,18 @@ jobs:
           grep -q 'versionCompatibilityBadge:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q 'otherVersionPenalty:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q 'exclusiveTradeRouteLabels:true' app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q 'richEvolutionConditionsPt:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q 'alternativesCollapsed:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q '"dexSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"coveredSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"missingSpecies":\[\]' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"gameId":"swsh"' app/src/main/assets/swsh-encounters-v8.js
-          grep -q '"version":"8.0-f7.1"' app/src/main/assets/swsh-encounters-v8.js
+          grep -q '"version":"8.0-f7.2"' app/src/main/assets/swsh-encounters-v8.js
           grep -q '"dexSpecies":400' app/src/main/assets/swsh-encounters-v8.js
           grep -q '"exclusiveDirectSpecies":' app/src/main/assets/swsh-encounters-v8.js
+          grep -q '"specialEvolutionRoutes":' app/src/main/assets/swsh-encounters-v8.js
           grep -q 'exclusiveTradeRoutes:true' app/src/main/assets/swsh-encounters-v8.js
+          grep -q 'richEvolutionConditions:true' app/src/main/assets/swsh-encounters-v8.js
           test -f app/src/main/assets/livingdex-global-v8.css
           test -f app/src/main/assets/livingdex-encounters-v8.css
           ! grep -q 'ld842Search' app/src/main/assets/product-ux-v8.js
@@ -105,20 +108,23 @@ jobs:
             zipinfo -1 "$APK"|grep -q '^assets/swsh-encounters-v8.js$'
             unzip -p "$APK" assets/acquisition-provider-registry-v8.js|grep -q "version:'8.0-f7.0'"
             unzip -p "$APK" assets/acquisition-provider-registry-v8.js|grep -q 'swordShieldAdapter:'
-            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f7.1'"
+            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f7.2'"
             unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'architectureGeneric:true'
             unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'currentGameProviderPriority:true'
             unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'collectionAwareRanking:true'
             unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'versionCompatibilityBadge:true'
             unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'exclusiveTradeRouteLabels:true'
+            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'richEvolutionConditionsPt:true'
             unzip -p "$APK" assets/letsgo-encounters-v8.js|grep -q '"dexSpecies":153'
             unzip -p "$APK" assets/letsgo-encounters-v8.js|grep -q '"coveredSpecies":153'
             unzip -p "$APK" assets/letsgo-encounters-v8.js|grep -q '"missingSpecies":\[\]'
             unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"gameId":"swsh"'
-            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.1"'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.2"'
             unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"dexSpecies":400'
             unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"exclusiveDirectSpecies":'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"specialEvolutionRoutes":'
             unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'exclusiveTradeRoutes:true'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'richEvolutionConditions:true'
             zipinfo -1 "$APK"|grep -q '^assets/livingdex-encounters-v8.css$'
             unzip -p "$APK" assets/pokemon-offline-core-v8.json|python3 -c "import sys,json;x=json.load(sys.stdin);assert x['count']==1025 and len(x['pokemon'])==1025 and '915' in x['pokemon']"
           done
@@ -143,13 +149,15 @@ jobs:
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-visual-quality-v8.js|grep -q 'localArtworkFallback:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/acquisition-provider-registry-v8.js|grep -q "version:'8.0-f7.0'"
           unzip -p app/build/outputs/apk/release/app-release.apk assets/acquisition-provider-registry-v8.js|grep -q 'swordShieldAdapter:'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f7.1'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f7.2'"
           unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q 'currentGameProviderPriority:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q 'exclusiveTradeRouteLabels:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q 'richEvolutionConditionsPt:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/letsgo-encounters-v8.js|grep -q '"coveredSpecies":153'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.1"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.2"'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"dexSpecies":400'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q 'exclusiveTradeRoutes:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"specialEvolutionRoutes":'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q 'richEvolutionConditions:true'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/pokemon-offline-core-v8.json|python3 -c "import sys,json;x=json.load(sys.stdin);assert x['count']==1025 and len(x['pokemon'])==1025 and '915' in x['pokemon']"
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
       - uses: actions/upload-artifact@v4
