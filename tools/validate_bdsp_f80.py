@@ -19,8 +19,7 @@ reg=(ROOT/'app/src/main/assets/acquisition-provider-registry-v8.js').read_text(e
 loader=(ROOT/'app/src/main/assets/collection-reliability-v8.js').read_text(encoding='utf-8');assert "script('bdsp-encounters-v8.js','bdsp-data')" in loader;assert "script('sv-encounters-v8.js','sv-data')" in loader;assert "script('za-encounters-v8.js','za-data')" in loader
 assert 'pkhexLegalityImport:true' in text and 'completeSinnohDex:' in text
 print(f"BDSP F8.1 VALIDATION: PASS • Sinnoh={covered}/151 • missing=0 • pkhex_wild={data['pkhexWildRoutesAdded']} • pkhex_special={data['pkhexSpecialRoutesAdded']}")
-# Compatibility chain: keep newer providers and global Living Dex UX gated in the
-# workflow's existing structural validation stage.
 subprocess.run([sys.executable,str(ROOT/'tools/validate_sv_f100.py')],check=True)
 subprocess.run([sys.executable,str(ROOT/'tools/validate_za_f110.py')],check=True)
 subprocess.run([sys.executable,str(ROOT/'tools/validate_livingdex_f112.py')],check=True)
+subprocess.run([sys.executable,str(ROOT/'tools/validate_livingdex_f113.py')],check=True)
