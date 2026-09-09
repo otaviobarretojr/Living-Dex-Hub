@@ -56,9 +56,13 @@ jobs:
           grep -q "versionName '7.22.8'" app/build.gradle
           grep -q 'versionCode 152' app/build.gradle
           for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-data-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js pokemon-visual-quality-v8.js collection-reliability-v8.js product-ux-v8.js livingdex-global-v8.js letsgo-encounters-v8.js swsh-encounters-v8.js bdsp-encounters-v8.js pla-encounters-v8.js sv-encounters-v8.js za-encounters-v8.js acquisition-provider-registry-v8.js acquisition-availability-bridge-v8.js livingdex-encounter-guide-v8.js swsh-dex-scope-ui-v8.js; do node --check "app/src/main/assets/$F"; done
-          grep -q "version:'8.0-f7.7'" app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q "version:'8.0-f11.1'" app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q 'allVersionLabelsPt:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q 'regionalFormLabels:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q 'wildEncounterMethodLabels:true' app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q 'data-ld79=.livingdex.' app/src/main/assets/livingdex-global-v8.js
+          grep -q 'Living Dex' app/src/main/assets/livingdex-global-v8.js
+          grep -q 'repeat(3,minmax(0,1fr))' app/src/main/assets/livingdex-global-v8.css
           grep -q "version:'8.0-f7.6'" app/src/main/assets/acquisition-availability-bridge-v8.js
           grep -q 'outsideDexVisibleToLivingDex:true' app/src/main/assets/acquisition-availability-bridge-v8.js
           grep -q '"dexSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
@@ -102,7 +106,10 @@ jobs:
             zipinfo -1 "$APK"|grep -q '^assets/assets/pokemon/915.png$'
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
             unzip -p "$APK" assets/pokemon-offline-core-data-v8.js|grep -q 'window.__LD8_OFFLINE_DATA__='
-            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f7.7'"
+            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f11.1'"
+            unzip -p "$APK" assets/livingdex-global-v8.js|grep -q 'data-ld79=.livingdex.'
+            unzip -p "$APK" assets/livingdex-global-v8.js|grep -q 'Living Dex'
+            unzip -p "$APK" assets/livingdex-global-v8.css|grep -q 'repeat(3,minmax(0,1fr))'
             unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.8"'
             unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'dlcVersionSlugIngestion:true'
             unzip -p "$APK" assets/bdsp-encounters-v8.js|grep -q '"version":"8.0-f8.1"'
@@ -136,7 +143,10 @@ jobs:
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f7.7'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f11.1'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-global-v8.js|grep -q 'data-ld79=.livingdex.'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-global-v8.js|grep -q 'Living Dex'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-global-v8.css|grep -q 'repeat(3,minmax(0,1fr))'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.8"'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/bdsp-encounters-v8.js|grep -q '"version":"8.0-f8.1"'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/bdsp-encounters-v8.js|grep -q '"coveredSpecies":151'
