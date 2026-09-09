@@ -51,6 +51,7 @@ jobs:
           python3 tools/audit_runtime_budget.py
           node tools/journey_reliability_harness.js
           python3 tools/validate_swsh_f76.py
+          python3 tools/audit_swsh_missing_routes.py
           grep -q "versionName '7.22.8'" app/build.gradle
           grep -q 'versionCode 152' app/build.gradle
           for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-data-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js pokemon-visual-quality-v8.js collection-reliability-v8.js product-ux-v8.js livingdex-global-v8.js letsgo-encounters-v8.js swsh-encounters-v8.js acquisition-provider-registry-v8.js acquisition-availability-bridge-v8.js livingdex-encounter-guide-v8.js swsh-dex-scope-ui-v8.js; do node --check "app/src/main/assets/$F"; done
