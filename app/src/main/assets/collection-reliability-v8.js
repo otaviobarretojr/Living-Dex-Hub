@@ -11,10 +11,10 @@ install();setTimeout(install,120);setTimeout(install,600);document.addEventListe
 window.ld845Registered=registered;window.ld845EmitCollectionChange=emit;window.ld845Audit=()=>({version:'8.0-f4.5',eventName:EVENT,businessEvent:true,postMutationStateVerified:true,deduplicatedEvents:true,detailCommitWrapped:!!window.ld75CommitBox?.__ld845,legacyToggleWrapped:typeof window.toggleCaught!=='function'||!!window.toggleCaught.__ld845,primaryBoxContextUntouched:true});
 })();
 
-/* F6.4 loader — Living Dex + offline encounter guidance. */
+/* F6.10 loader — Living Dex + generic acquisition provider architecture. */
 (()=>{'use strict';
-function script(src,key){if(document.querySelector(`script[data-${key}]`))return;const s=document.createElement('script');s.src=src;s.dataset[key]='1';document.body.appendChild(s)}
-function style(href,key){if(document.querySelector(`link[data-${key}]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.dataset[key]='1';document.head.appendChild(l)}
-function load(){if(typeof document?.createElement!=='function'||!document.head||!document.body)return false;style('livingdex-global-v8.css','ld8LivingdexCss');style('livingdex-encounters-v8.css','ld8EncounterCss');script('letsgo-encounters-v8.js','ld8LetsgoEncounters');script('livingdex-global-v8.js','ld8Livingdex');script('livingdex-encounter-guide-v8.js','ld8EncounterGuide');return true}
+function script(src,key){if(document.querySelector(`script[data-ld8-module="${key}"]`))return;const s=document.createElement('script');s.src=src;s.async=false;s.setAttribute('data-ld8-module',key);document.body.appendChild(s)}
+function style(href,key){if(document.querySelector(`link[data-ld8-style="${key}"]`))return;const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.setAttribute('data-ld8-style',key);document.head.appendChild(l)}
+function load(){if(typeof document?.createElement!=='function'||!document.head||!document.body)return false;style('livingdex-global-v8.css','livingdex-global');style('livingdex-encounters-v8.css','acquisition-guide');script('letsgo-encounters-v8.js','letsgo-encounters');script('acquisition-provider-registry-v8.js','acquisition-provider-registry');script('livingdex-global-v8.js','livingdex-global');script('livingdex-encounter-guide-v8.js','livingdex-acquisition-guide');return true}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
 })();
