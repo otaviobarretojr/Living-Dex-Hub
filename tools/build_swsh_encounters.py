@@ -4,8 +4,9 @@
 Species membership comes from PokeAPI's Galar Pokédex endpoint. Wild encounters are
 filtered to Sword/Shield; indirect evolution routes come from the existing offline
 Pokémon core. Version-exclusive direct encounters automatically receive a trade route
-for the opposite version. If public data is unavailable, the committed fallback asset
-is kept.
+for the opposite version. Verified special acquisition routes cover starters, fossils,
+story/post-game legendaries, and Type: Null. If public data is unavailable, the
+committed fallback asset is kept.
 """
 from __future__ import annotations
 
@@ -18,6 +19,22 @@ OUT=ROOT/'app/src/main/assets/swsh-encounters-v8.js'
 CORE=ROOT/'app/src/main/assets/pokemon-offline-core-v8.json'
 VERSIONS={'sword':'sword','shield':'shield'}
 MIN_SUBSTANTIAL=180
+
+# Verified game-mechanic routes that encounter endpoints cannot represent well.
+# Records are added only when the species belongs to the base Galar Pokédex.
+MANUAL={
+    810:[{'location':'Postwick · escolha inicial','method':'gift','levelMin':5,'levelMax':5,'rate':None,'versions':['sword','shield'],'conditions':['choose-one-starter'],'provenance':'verified-game-mechanic','note':'Grookey é uma das três escolhas iniciais. Se outro inicial já foi escolhido neste save, obtenha por troca.'}],
+    813:[{'location':'Postwick · escolha inicial','method':'gift','levelMin':5,'levelMax':5,'rate':None,'versions':['sword','shield'],'conditions':['choose-one-starter'],'provenance':'verified-game-mechanic','note':'Scorbunny é uma das três escolhas iniciais. Se outro inicial já foi escolhido neste save, obtenha por troca.'}],
+    816:[{'location':'Postwick · escolha inicial','method':'gift','levelMin':5,'levelMax':5,'rate':None,'versions':['sword','shield'],'conditions':['choose-one-starter'],'provenance':'verified-game-mechanic','note':'Sobble é uma das três escolhas iniciais. Se outro inicial já foi escolhido neste save, obtenha por troca.'}],
+    880:[{'location':'Route 6 · Cara Liss','method':'fossil-revival','levelMin':10,'levelMax':10,'rate':None,'versions':['sword','shield'],'conditions':['fossil:fossilized-bird','fossil:fossilized-drake'],'provenance':'verified-game-mechanic','note':'Reviva combinando Fossilized Bird + Fossilized Drake.'}],
+    881:[{'location':'Route 6 · Cara Liss','method':'fossil-revival','levelMin':10,'levelMax':10,'rate':None,'versions':['sword','shield'],'conditions':['fossil:fossilized-bird','fossil:fossilized-dino'],'provenance':'verified-game-mechanic','note':'Reviva combinando Fossilized Bird + Fossilized Dino.'}],
+    882:[{'location':'Route 6 · Cara Liss','method':'fossil-revival','levelMin':10,'levelMax':10,'rate':None,'versions':['sword','shield'],'conditions':['fossil:fossilized-fish','fossil:fossilized-drake'],'provenance':'verified-game-mechanic','note':'Reviva combinando Fossilized Fish + Fossilized Drake.'}],
+    883:[{'location':'Route 6 · Cara Liss','method':'fossil-revival','levelMin':10,'levelMax':10,'rate':None,'versions':['sword','shield'],'conditions':['fossil:fossilized-fish','fossil:fossilized-dino'],'provenance':'verified-game-mechanic','note':'Reviva combinando Fossilized Fish + Fossilized Dino.'}],
+    772:[{'location':'Battle Tower','method':'gift','levelMin':50,'levelMax':50,'rate':None,'versions':['sword','shield'],'conditions':['postgame-champion'],'provenance':'verified-game-mechanic','note':'Recebido de um funcionário da League na Battle Tower após se tornar Champion.'}],
+    888:[{'location':'Energy Plant · pós-jogo','method':'legendary-capture','levelMin':70,'levelMax':70,'rate':None,'versions':['sword'],'conditions':['postgame-story','one-per-save'],'provenance':'verified-game-mechanic','note':'Zacian é a captura lendária exclusiva de Pokémon Sword no pós-jogo.'}],
+    889:[{'location':'Energy Plant · pós-jogo','method':'legendary-capture','levelMin':70,'levelMax':70,'rate':None,'versions':['shield'],'conditions':['postgame-story','one-per-save'],'provenance':'verified-game-mechanic','note':'Zamazenta é a captura lendária exclusiva de Pokémon Shield no pós-jogo.'}],
+    890:[{'location':'Hammerlocke Stadium · história','method':'story-capture','levelMin':60,'levelMax':60,'rate':None,'versions':['sword','shield'],'conditions':['main-story','guaranteed-capture'],'provenance':'verified-game-mechanic','note':'Eternatus é capturado obrigatoriamente durante a história principal; a captura é garantida.'}],
+}
 
 
 def request_json(url:str):
@@ -115,6 +132,14 @@ def add_version_trade_route(records:list[dict]):
     return ''
 
 
+def add_manual_routes(pid:int,records:list[dict]):
+    added=0
+    for rec in MANUAL.get(pid,[]):
+        if rec not in records:
+            records.append(dict(rec));added+=1
+    return added
+
+
 def main():
     try:ids=load_galar_ids()
     except Exception as e:
@@ -138,6 +163,8 @@ def main():
             if evo:
                 fetched.setdefault(pid,[]).append(evo)
                 if evo.get('specialEvolution'):special_evolutions+=1
+    manual_routes=0
+    for pid in ids:manual_routes+=add_manual_routes(pid,fetched.setdefault(pid,[]))
     exclusives={'sword':0,'shield':0}
     for pid in ids:
         side=add_version_trade_route(fetched.setdefault(pid,[]))
@@ -146,10 +173,10 @@ def main():
         print(f'Sword/Shield fallback: only {len([x for x in fetched.values() if x])} covered; seed preserved.',file=sys.stderr);return 0
     pokemon={str(pid):{'encounters':fetched[pid]} for pid in sorted(fetched) if fetched[pid]}
     missing=[pid for pid in ids if str(pid) not in pokemon]
-    data={'version':'8.0-f7.2','gameId':'swsh','source':'pokeapi-v2+offline-evolution-core+derived-version-exclusive-trades','versions':['sword','shield'],'dexSpecies':len(ids),'coveredSpecies':len(pokemon),'missingSpecies':missing,'exclusiveDirectSpecies':exclusives,'specialEvolutionRoutes':special_evolutions,'pokemon':pokemon}
-    js="""/* Living Dex Hub — F7.2 generated offline Sword/Shield acquisition database */\n(()=>{'use strict';\nconst DATA=%s;\nfunction get(id){return DATA.pokemon[String(Number(id)||0)]||null}\nfunction byVersion(id,version){const p=get(id);if(!p)return[];return(p.encounters||[]).filter(e=>!version||(e.versions||[]).includes(version))}\nwindow.ld8SwShEncounters={data:DATA,get,byVersion,audit:()=>({version:DATA.version,gameId:DATA.gameId,source:DATA.source,dexSpecies:DATA.dexSpecies,pokemonCount:Object.keys(DATA.pokemon).length,missingSpecies:DATA.missingSpecies,exclusiveDirectSpecies:DATA.exclusiveDirectSpecies,specialEvolutionRoutes:DATA.specialEvolutionRoutes,offline:true,versionSpecific:true,provenance:true,indirectAcquisition:true,exclusiveTradeRoutes:true,richEvolutionConditions:true})};\n})();\n""" % json.dumps(data,ensure_ascii=False,separators=(',',':'))
+    data={'version':'8.0-f7.3','gameId':'swsh','source':'pokeapi-v2+offline-evolution-core+derived-version-exclusive-trades+verified-special-routes','versions':['sword','shield'],'dexSpecies':len(ids),'coveredSpecies':len(pokemon),'missingSpecies':missing,'exclusiveDirectSpecies':exclusives,'specialEvolutionRoutes':special_evolutions,'verifiedSpecialRoutes':manual_routes,'pokemon':pokemon}
+    js="""/* Living Dex Hub — F7.3 generated offline Sword/Shield acquisition database */\n(()=>{'use strict';\nconst DATA=%s;\nfunction get(id){return DATA.pokemon[String(Number(id)||0)]||null}\nfunction byVersion(id,version){const p=get(id);if(!p)return[];return(p.encounters||[]).filter(e=>!version||(e.versions||[]).includes(version))}\nwindow.ld8SwShEncounters={data:DATA,get,byVersion,audit:()=>({version:DATA.version,gameId:DATA.gameId,source:DATA.source,dexSpecies:DATA.dexSpecies,pokemonCount:Object.keys(DATA.pokemon).length,missingSpecies:DATA.missingSpecies,exclusiveDirectSpecies:DATA.exclusiveDirectSpecies,specialEvolutionRoutes:DATA.specialEvolutionRoutes,verifiedSpecialRoutes:DATA.verifiedSpecialRoutes,offline:true,versionSpecific:true,provenance:true,indirectAcquisition:true,exclusiveTradeRoutes:true,richEvolutionConditions:true,verifiedSpecialAcquisition:true})};\n})();\n""" % json.dumps(data,ensure_ascii=False,separators=(',',':'))
     OUT.write_text(js,encoding='utf-8')
-    print(f"Sword/Shield acquisitions generated: {len(pokemon)}/{len(ids)} Pokémon; missing={len(missing)}; exclusives={exclusives}; special_evolutions={special_evolutions}; failures={len(failures)}")
+    print(f"Sword/Shield acquisitions generated: {len(pokemon)}/{len(ids)} Pokémon; missing={len(missing)}; exclusives={exclusives}; special_evolutions={special_evolutions}; verified_special={manual_routes}; failures={len(failures)}")
     return 0
 
 if __name__=='__main__':raise SystemExit(main())
