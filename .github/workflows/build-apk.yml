@@ -10,7 +10,7 @@ jobs:
     permissions: { contents: read }
     env:
       RELEASE_KEYSTORE_BASE64: ${{ secrets.LIVINGDEX_KEYSTORE_BASE64 }}
-      RELEASE_STORE_PASSWORD: ${{ secrets.LIVINGDEX_STORE_PASSWORD }}
+      RELEASE_STORE_PASSWORD: ${{ secrets.LIVINGDEX_KEYSTORE_PASSWORD }}
       RELEASE_KEY_ALIAS: livingdex
       RELEASE_KEY_PASSWORD: ${{ secrets.LIVINGDEX_KEY_PASSWORD }}
       CANONICAL_FILE: app/src/main/assets/canonical/index.v7_14.xz.b64
