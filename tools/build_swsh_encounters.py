@@ -3,7 +3,9 @@
 
 Species membership comes from PokeAPI's Galar Pokédex endpoint. Wild encounters are
 filtered to Sword/Shield; indirect evolution routes come from the existing offline
-Pokémon core. If public data is unavailable, the committed fallback asset is kept.
+Pokémon core. Version-exclusive direct encounters automatically receive a trade route
+for the opposite version. If public data is unavailable, the committed fallback asset
+is kept.
 """
 from __future__ import annotations
 
@@ -91,6 +93,19 @@ def evolution_record(pid:int,core:dict):
     return {'location':'Evolução','method':method,'levelMin':lvl,'levelMax':lvl,'rate':None,'versions':['shield','sword'],'conditions':conditions,'provenance':'offline-evolution-core','sourcePokemon':int(parent)}
 
 
+def add_version_trade_route(records:list[dict]):
+    direct=[r for r in records if r.get('provenance')=='pokeapi-v2']
+    seen=set()
+    for r in direct:seen.update(r.get('versions') or [])
+    if seen=={'sword'}:
+        records.append({'location':'Troca entre versões','method':'trade','levelMin':0,'levelMax':0,'rate':None,'versions':['shield'],'conditions':['source-version:sword'],'provenance':'derived-version-exclusive','note':'Sem encontro direto registrado em Shield; obtenha por troca a partir de Sword.'})
+        return 'sword'
+    if seen=={'shield'}:
+        records.append({'location':'Troca entre versões','method':'trade','levelMin':0,'levelMax':0,'rate':None,'versions':['sword'],'conditions':['source-version:shield'],'provenance':'derived-version-exclusive','note':'Sem encontro direto registrado em Sword; obtenha por troca a partir de Shield.'})
+        return 'shield'
+    return ''
+
+
 def main():
     try:ids=load_galar_ids()
     except Exception as e:
@@ -111,14 +126,18 @@ def main():
         for pid in ids:
             evo=evolution_record(pid,core)
             if evo:fetched.setdefault(pid,[]).append(evo)
-    if len(fetched)<MIN_SUBSTANTIAL:
-        print(f'Sword/Shield fallback: only {len(fetched)} covered; seed preserved.',file=sys.stderr);return 0
+    exclusives={'sword':0,'shield':0}
+    for pid in ids:
+        side=add_version_trade_route(fetched.setdefault(pid,[]))
+        if side:exclusives[side]+=1
+    if len([x for x in fetched.values() if x])<MIN_SUBSTANTIAL:
+        print(f'Sword/Shield fallback: only {len([x for x in fetched.values() if x])} covered; seed preserved.',file=sys.stderr);return 0
     pokemon={str(pid):{'encounters':fetched[pid]} for pid in sorted(fetched) if fetched[pid]}
     missing=[pid for pid in ids if str(pid) not in pokemon]
-    data={'version':'8.0-f7.0','gameId':'swsh','source':'pokeapi-v2+offline-evolution-core','versions':['sword','shield'],'dexSpecies':len(ids),'coveredSpecies':len(pokemon),'missingSpecies':missing,'pokemon':pokemon}
-    js="""/* Living Dex Hub — F7.0 generated offline Sword/Shield acquisition database */\n(()=>{'use strict';\nconst DATA=%s;\nfunction get(id){return DATA.pokemon[String(Number(id)||0)]||null}\nfunction byVersion(id,version){const p=get(id);if(!p)return[];return(p.encounters||[]).filter(e=>!version||(e.versions||[]).includes(version))}\nwindow.ld8SwShEncounters={data:DATA,get,byVersion,audit:()=>({version:DATA.version,gameId:DATA.gameId,source:DATA.source,dexSpecies:DATA.dexSpecies,pokemonCount:Object.keys(DATA.pokemon).length,missingSpecies:DATA.missingSpecies,offline:true,versionSpecific:true,provenance:true,indirectAcquisition:true})};\n})();\n""" % json.dumps(data,ensure_ascii=False,separators=(',',':'))
+    data={'version':'8.0-f7.1','gameId':'swsh','source':'pokeapi-v2+offline-evolution-core+derived-version-exclusive-trades','versions':['sword','shield'],'dexSpecies':len(ids),'coveredSpecies':len(pokemon),'missingSpecies':missing,'exclusiveDirectSpecies':exclusives,'pokemon':pokemon}
+    js="""/* Living Dex Hub — F7.1 generated offline Sword/Shield acquisition database */\n(()=>{'use strict';\nconst DATA=%s;\nfunction get(id){return DATA.pokemon[String(Number(id)||0)]||null}\nfunction byVersion(id,version){const p=get(id);if(!p)return[];return(p.encounters||[]).filter(e=>!version||(e.versions||[]).includes(version))}\nwindow.ld8SwShEncounters={data:DATA,get,byVersion,audit:()=>({version:DATA.version,gameId:DATA.gameId,source:DATA.source,dexSpecies:DATA.dexSpecies,pokemonCount:Object.keys(DATA.pokemon).length,missingSpecies:DATA.missingSpecies,exclusiveDirectSpecies:DATA.exclusiveDirectSpecies,offline:true,versionSpecific:true,provenance:true,indirectAcquisition:true,exclusiveTradeRoutes:true})};\n})();\n""" % json.dumps(data,ensure_ascii=False,separators=(',',':'))
     OUT.write_text(js,encoding='utf-8')
-    print(f'Sword/Shield acquisitions generated: {len(pokemon)}/{len(ids)} Pokémon; missing={len(missing)}; failures={len(failures)}')
+    print(f"Sword/Shield acquisitions generated: {len(pokemon)}/{len(ids)} Pokémon; missing={len(missing)}; exclusives={exclusives}; failures={len(failures)}")
     return 0
 
 if __name__=='__main__':raise SystemExit(main())
