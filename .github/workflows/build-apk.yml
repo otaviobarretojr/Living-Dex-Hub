@@ -52,7 +52,7 @@ jobs:
           node tools/journey_reliability_harness.js
           grep -q "versionName '7.22.8'" app/build.gradle
           grep -q 'versionCode 152' app/build.gradle
-          for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-data-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js pokemon-visual-quality-v8.js collection-reliability-v8.js product-ux-v8.js livingdex-global-v8.js letsgo-encounters-v8.js swsh-encounters-v8.js acquisition-provider-registry-v8.js livingdex-encounter-guide-v8.js; do node --check "app/src/main/assets/$F"; done
+          for F in game-context-v8.js game-selector-v8.js home-v8.js pokemon-offline-core-data-v8.js pokemon-offline-core-v8.js pokemon-detail-v8.js pokemon-evolution-v8.js pokemon-data-v8.js pokemon-about-v8.js pokemon-visual-quality-v8.js collection-reliability-v8.js product-ux-v8.js livingdex-global-v8.js letsgo-encounters-v8.js swsh-encounters-v8.js acquisition-provider-registry-v8.js livingdex-encounter-guide-v8.js swsh-dex-scope-ui-v8.js; do node --check "app/src/main/assets/$F"; done
           grep -q "version:'8.0-f5.7'" app/src/main/assets/pokemon-offline-core-v8.js
           grep -q 'window.__LD8_OFFLINE_DATA__=' app/src/main/assets/pokemon-offline-core-data-v8.js
           grep -q "version:'8.0-f5.8'" app/src/main/assets/pokemon-visual-quality-v8.js
@@ -64,18 +64,20 @@ jobs:
           grep -q 'collectionAwareRanking:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q 'verifiedSpecialRoutes:true' app/src/main/assets/livingdex-encounter-guide-v8.js
           grep -q 'selfMutationGuard:true' app/src/main/assets/livingdex-encounter-guide-v8.js
+          grep -q "version:'8.0-f7.4'" app/src/main/assets/swsh-dex-scope-ui-v8.js
+          grep -q 'dexScopeLabels:true' app/src/main/assets/swsh-dex-scope-ui-v8.js
+          test -f app/src/main/assets/swsh-dex-scope-ui-v8.css
           grep -q '"dexSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"coveredSpecies":153' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"missingSpecies":\[\]' app/src/main/assets/letsgo-encounters-v8.js
           grep -q '"gameId":"swsh"' app/src/main/assets/swsh-encounters-v8.js
-          grep -q '"version":"8.0-f7.3"' app/src/main/assets/swsh-encounters-v8.js
-          grep -q '"dexSpecies":400' app/src/main/assets/swsh-encounters-v8.js
-          grep -q '"verifiedSpecialRoutes":' app/src/main/assets/swsh-encounters-v8.js
-          grep -q 'verifiedSpecialAcquisition:true' app/src/main/assets/swsh-encounters-v8.js
-          grep -q 'choose-one-starter' app/src/main/assets/swsh-encounters-v8.js
-          grep -q 'fossil-revival' app/src/main/assets/swsh-encounters-v8.js
-          grep -q 'legendary-capture' app/src/main/assets/swsh-encounters-v8.js
-          grep -q 'story-capture' app/src/main/assets/swsh-encounters-v8.js
+          grep -q '"version":"8.0-f7.4"' app/src/main/assets/swsh-encounters-v8.js
+          grep -q '"galar":{"dexSpecies":400' app/src/main/assets/swsh-encounters-v8.js
+          grep -q '"isle-of-armor":{"dexSpecies":211' app/src/main/assets/swsh-encounters-v8.js
+          grep -q '"crown-tundra":{"dexSpecies":210' app/src/main/assets/swsh-encounters-v8.js
+          grep -q 'threeDexScopes:true' app/src/main/assets/swsh-encounters-v8.js
+          grep -q 'dlcDexScopes:true' app/src/main/assets/swsh-encounters-v8.js
+          grep -q '"dexScopes":' app/src/main/assets/swsh-encounters-v8.js
           test -f app/src/main/assets/livingdex-global-v8.css
           test -f app/src/main/assets/livingdex-encounters-v8.css
           ! grep -q 'ld842Search' app/src/main/assets/product-ux-v8.js
@@ -98,10 +100,13 @@ jobs:
             unzip -p "$APK" assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
             unzip -p "$APK" assets/pokemon-offline-core-data-v8.js|grep -q 'window.__LD8_OFFLINE_DATA__='
             unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f7.3'"
-            unzip -p "$APK" assets/livingdex-encounter-guide-v8.js|grep -q 'verifiedSpecialRoutes:true'
-            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.3"'
-            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"dexSpecies":400'
-            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'verifiedSpecialAcquisition:true'
+            unzip -p "$APK" assets/swsh-dex-scope-ui-v8.js|grep -q "version:'8.0-f7.4'"
+            zipinfo -1 "$APK"|grep -q '^assets/swsh-dex-scope-ui-v8.css$'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.4"'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"galar":{"dexSpecies":400'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"isle-of-armor":{"dexSpecies":211'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q '"crown-tundra":{"dexSpecies":210'
+            unzip -p "$APK" assets/swsh-encounters-v8.js|grep -q 'dlcDexScopes:true'
             unzip -p "$APK" assets/letsgo-encounters-v8.js|grep -q '"coveredSpecies":153'
             unzip -p "$APK" assets/pokemon-offline-core-v8.json|python3 -c "import sys,json;x=json.load(sys.stdin);assert x['count']==1025 and len(x['pokemon'])==1025 and '915' in x['pokemon']"
           done
@@ -124,10 +129,11 @@ jobs:
           "$A" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           test "$(zipinfo -1 app/build/outputs/apk/release/app-release.apk|grep -E '^assets/assets/pokemon/[0-9]+\.png$'|wc -l)" -eq 1025
           unzip -p app/build/outputs/apk/release/app-release.apk assets/index.html|grep -q 'BUILD_QA_VALIDATED=true'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/livingdex-encounter-guide-v8.js|grep -q "version:'8.0-f7.3'"
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.3"'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"dexSpecies":400'
-          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q 'verifiedSpecialAcquisition:true'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-dex-scope-ui-v8.js|grep -q "version:'8.0-f7.4'"
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"version":"8.0-f7.4"'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"galar":{"dexSpecies":400'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"isle-of-armor":{"dexSpecies":211'
+          unzip -p app/build/outputs/apk/release/app-release.apk assets/swsh-encounters-v8.js|grep -q '"crown-tundra":{"dexSpecies":210'
           unzip -p app/build/outputs/apk/release/app-release.apk assets/letsgo-encounters-v8.js|grep -q '"coveredSpecies":153'
           sha256sum app/build/outputs/apk/release/app-release.apk > app/build/outputs/apk/release/app-release.apk.sha256
 
